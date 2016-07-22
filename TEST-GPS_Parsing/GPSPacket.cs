@@ -15,7 +15,7 @@ namespace TEST_GPS_Parsing
         //from GPRMC
         public double latitude;
         public double longitude;
-        public char fixtype;
+        public string fixtype;
         public double grspd_k;
         public double trkangle;
         public string date;
@@ -40,7 +40,7 @@ namespace TEST_GPS_Parsing
             //from GPRMC
             latitude = 0.0;
             longitude = 0.0;
-            fixtype = ' ';
+            fixtype = "";
             grspd_k = 0.0;
             trkangle = 0.0;
             date = "1/1/2016";

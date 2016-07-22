@@ -71,6 +71,8 @@
             this.openLogDialog = new System.Windows.Forms.OpenFileDialog();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.rawLogFileTextBox = new System.Windows.Forms.TextBox();
+            this.stopButton = new System.Windows.Forms.Button();
+            this.label20 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -422,7 +424,7 @@
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(554, 280);
+            this.startButton.Location = new System.Drawing.Point(411, 278);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(113, 49);
             this.startButton.TabIndex = 6;
@@ -432,7 +434,7 @@
             // 
             // openFileButton
             // 
-            this.openFileButton.Location = new System.Drawing.Point(376, 280);
+            this.openFileButton.Location = new System.Drawing.Point(266, 278);
             this.openFileButton.Name = "openFileButton";
             this.openFileButton.Size = new System.Drawing.Size(113, 49);
             this.openFileButton.TabIndex = 7;
@@ -444,7 +446,7 @@
             // 
             this.label18.AutoSize = true;
             this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label18.Location = new System.Drawing.Point(344, 286);
+            this.label18.Location = new System.Drawing.Point(237, 287);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(26, 29);
             this.label18.TabIndex = 11;
@@ -454,7 +456,7 @@
             // 
             this.label19.AutoSize = true;
             this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.Location = new System.Drawing.Point(522, 286);
+            this.label19.Location = new System.Drawing.Point(385, 287);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(26, 29);
             this.label19.TabIndex = 12;
@@ -485,11 +487,33 @@
             this.rawLogFileTextBox.Size = new System.Drawing.Size(635, 138);
             this.rawLogFileTextBox.TabIndex = 0;
             // 
+            // stopButton
+            // 
+            this.stopButton.Location = new System.Drawing.Point(554, 278);
+            this.stopButton.Name = "stopButton";
+            this.stopButton.Size = new System.Drawing.Size(113, 49);
+            this.stopButton.TabIndex = 14;
+            this.stopButton.Text = "Stop Tracking";
+            this.stopButton.UseVisualStyleBackColor = true;
+            this.stopButton.Click += new System.EventHandler(this.stopButton_Click);
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label20.Location = new System.Drawing.Point(528, 287);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(26, 29);
+            this.label20.TabIndex = 15;
+            this.label20.Text = "2";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(687, 511);
+            this.Controls.Add(this.label20);
+            this.Controls.Add(this.stopButton);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.label19);
             this.Controls.Add(this.label18);
@@ -563,6 +587,8 @@
         private System.Windows.Forms.OpenFileDialog openLogDialog;
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.TextBox rawLogFileTextBox;
+        private System.Windows.Forms.Button stopButton;
+        private System.Windows.Forms.Label label20;
     }
 }
 
