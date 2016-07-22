@@ -29,46 +29,54 @@
         private void InitializeComponent()
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.latitudeTextBox = new System.Windows.Forms.TextBox();
-            this.longitudeTextBox = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.altitudeTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.longitudeTextBox = new System.Windows.Forms.TextBox();
+            this.latitudeTextBox = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.speedKnotsTextBox = new System.Windows.Forms.TextBox();
+            this.headCardTextBox = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.headDegTextBox = new System.Windows.Forms.TextBox();
             this.speedKphTextBox = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.headCardTextBox = new System.Windows.Forms.TextBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.speedKnotsTextBox = new System.Windows.Forms.TextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.fixvalTextBox = new System.Windows.Forms.TextBox();
-            this.satsViewTextBox = new System.Windows.Forms.TextBox();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.label14 = new System.Windows.Forms.Label();
+            this.timeTextBox = new System.Windows.Forms.TextBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.dateTextBox = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.fixqualTextBox = new System.Windows.Forms.TextBox();
             this.accuracyTextBox = new System.Windows.Forms.TextBox();
-            this.label12 = new System.Windows.Forms.Label();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.label13 = new System.Windows.Forms.Label();
-            this.dateTextBox = new System.Windows.Forms.TextBox();
-            this.label14 = new System.Windows.Forms.Label();
-            this.timeTextBox = new System.Windows.Forms.TextBox();
-            this.label15 = new System.Windows.Forms.Label();
-            this.altitudeTextBox = new System.Windows.Forms.TextBox();
-            this.label16 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.fixvalTextBox = new System.Windows.Forms.TextBox();
+            this.satsViewTextBox = new System.Windows.Forms.TextBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.label17 = new System.Windows.Forms.Label();
             this.packetIDTextBox = new System.Windows.Forms.TextBox();
+            this.startButton = new System.Windows.Forms.Button();
+            this.openFileButton = new System.Windows.Forms.Button();
+            this.label18 = new System.Windows.Forms.Label();
+            this.label19 = new System.Windows.Forms.Label();
+            this.openLogDialog = new System.Windows.Forms.OpenFileDialog();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.rawLogFileTextBox = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.panel1.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            this.groupBox5.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -87,21 +95,40 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "GPS Location Data";
             // 
-            // latitudeTextBox
+            // label16
             // 
-            this.latitudeTextBox.Location = new System.Drawing.Point(103, 24);
-            this.latitudeTextBox.Name = "latitudeTextBox";
-            this.latitudeTextBox.ReadOnly = true;
-            this.latitudeTextBox.Size = new System.Drawing.Size(144, 22);
-            this.latitudeTextBox.TabIndex = 0;
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(198, 102);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(49, 17);
+            this.label16.TabIndex = 11;
+            this.label16.Text = "m ASL";
             // 
-            // longitudeTextBox
+            // label15
             // 
-            this.longitudeTextBox.Location = new System.Drawing.Point(103, 58);
-            this.longitudeTextBox.Name = "longitudeTextBox";
-            this.longitudeTextBox.ReadOnly = true;
-            this.longitudeTextBox.Size = new System.Drawing.Size(144, 22);
-            this.longitudeTextBox.TabIndex = 1;
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(6, 102);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(55, 17);
+            this.label15.TabIndex = 5;
+            this.label15.Text = "Altitude";
+            // 
+            // altitudeTextBox
+            // 
+            this.altitudeTextBox.Location = new System.Drawing.Point(103, 99);
+            this.altitudeTextBox.Name = "altitudeTextBox";
+            this.altitudeTextBox.ReadOnly = true;
+            this.altitudeTextBox.Size = new System.Drawing.Size(89, 22);
+            this.altitudeTextBox.TabIndex = 4;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 61);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(71, 17);
+            this.label2.TabIndex = 3;
+            this.label2.Text = "Longitude";
             // 
             // label1
             // 
@@ -112,15 +139,21 @@
             this.label1.TabIndex = 2;
             this.label1.Text = "Latitude";
             // 
-            // label2
+            // longitudeTextBox
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 61);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(71, 17);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "Longitude";
-            this.label2.Click += new System.EventHandler(this.label2_Click);
+            this.longitudeTextBox.Location = new System.Drawing.Point(103, 58);
+            this.longitudeTextBox.Name = "longitudeTextBox";
+            this.longitudeTextBox.ReadOnly = true;
+            this.longitudeTextBox.Size = new System.Drawing.Size(144, 22);
+            this.longitudeTextBox.TabIndex = 1;
+            // 
+            // latitudeTextBox
+            // 
+            this.latitudeTextBox.Location = new System.Drawing.Point(103, 24);
+            this.latitudeTextBox.Name = "latitudeTextBox";
+            this.latitudeTextBox.ReadOnly = true;
+            this.latitudeTextBox.Size = new System.Drawing.Size(144, 22);
+            this.latitudeTextBox.TabIndex = 0;
             // 
             // groupBox2
             // 
@@ -139,6 +172,49 @@
             this.groupBox2.TabIndex = 4;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Vehicle Properties";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(298, 33);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(42, 17);
+            this.label7.TabIndex = 8;
+            this.label7.Text = "knots";
+            // 
+            // speedKnotsTextBox
+            // 
+            this.speedKnotsTextBox.Location = new System.Drawing.Point(227, 28);
+            this.speedKnotsTextBox.Name = "speedKnotsTextBox";
+            this.speedKnotsTextBox.ReadOnly = true;
+            this.speedKnotsTextBox.Size = new System.Drawing.Size(65, 22);
+            this.speedKnotsTextBox.TabIndex = 7;
+            // 
+            // headCardTextBox
+            // 
+            this.headCardTextBox.Location = new System.Drawing.Point(227, 62);
+            this.headCardTextBox.Name = "headCardTextBox";
+            this.headCardTextBox.ReadOnly = true;
+            this.headCardTextBox.Size = new System.Drawing.Size(65, 22);
+            this.headCardTextBox.TabIndex = 6;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(177, 65);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(44, 17);
+            this.label6.TabIndex = 5;
+            this.label6.Text = "deg / ";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(177, 33);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(38, 17);
+            this.label5.TabIndex = 4;
+            this.label5.Text = "km/h";
             // 
             // label3
             // 
@@ -174,50 +250,6 @@
             this.speedKphTextBox.Size = new System.Drawing.Size(65, 22);
             this.speedKphTextBox.TabIndex = 0;
             // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(177, 33);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(38, 17);
-            this.label5.TabIndex = 4;
-            this.label5.Text = "km/h";
-            this.label5.Click += new System.EventHandler(this.label5_Click);
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(177, 65);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(44, 17);
-            this.label6.TabIndex = 5;
-            this.label6.Text = "deg / ";
-            // 
-            // headCardTextBox
-            // 
-            this.headCardTextBox.Location = new System.Drawing.Point(227, 62);
-            this.headCardTextBox.Name = "headCardTextBox";
-            this.headCardTextBox.ReadOnly = true;
-            this.headCardTextBox.Size = new System.Drawing.Size(65, 22);
-            this.headCardTextBox.TabIndex = 6;
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(298, 33);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(42, 17);
-            this.label7.TabIndex = 8;
-            this.label7.Text = "knots";
-            // 
-            // speedKnotsTextBox
-            // 
-            this.speedKnotsTextBox.Location = new System.Drawing.Point(227, 28);
-            this.speedKnotsTextBox.Name = "speedKnotsTextBox";
-            this.speedKnotsTextBox.ReadOnly = true;
-            this.speedKnotsTextBox.Size = new System.Drawing.Size(65, 22);
-            this.speedKnotsTextBox.TabIndex = 7;
-            // 
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.panel1);
@@ -236,6 +268,95 @@
             this.groupBox3.TabIndex = 4;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "GPS Fix Information";
+            // 
+            // panel1
+            // 
+            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.label14);
+            this.panel1.Controls.Add(this.timeTextBox);
+            this.panel1.Controls.Add(this.label13);
+            this.panel1.Controls.Add(this.dateTextBox);
+            this.panel1.Location = new System.Drawing.Point(453, 13);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(195, 81);
+            this.panel1.TabIndex = 10;
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(3, 45);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(43, 17);
+            this.label14.TabIndex = 14;
+            this.label14.Text = "Time:";
+            // 
+            // timeTextBox
+            // 
+            this.timeTextBox.Location = new System.Drawing.Point(51, 42);
+            this.timeTextBox.Name = "timeTextBox";
+            this.timeTextBox.ReadOnly = true;
+            this.timeTextBox.Size = new System.Drawing.Size(137, 22);
+            this.timeTextBox.TabIndex = 13;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(3, 10);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(42, 17);
+            this.label13.TabIndex = 12;
+            this.label13.Text = "Date:";
+            // 
+            // dateTextBox
+            // 
+            this.dateTextBox.Location = new System.Drawing.Point(51, 7);
+            this.dateTextBox.Name = "dateTextBox";
+            this.dateTextBox.ReadOnly = true;
+            this.dateTextBox.Size = new System.Drawing.Size(137, 22);
+            this.dateTextBox.TabIndex = 11;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(360, 27);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(19, 17);
+            this.label12.TabIndex = 9;
+            this.label12.Text = "m";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(202, 61);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(85, 17);
+            this.label10.TabIndex = 7;
+            this.label10.Text = "Quality of fix";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(200, 27);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(99, 17);
+            this.label11.TabIndex = 6;
+            this.label11.Text = "Accuracy of fix";
+            // 
+            // fixqualTextBox
+            // 
+            this.fixqualTextBox.Location = new System.Drawing.Point(305, 58);
+            this.fixqualTextBox.Name = "fixqualTextBox";
+            this.fixqualTextBox.ReadOnly = true;
+            this.fixqualTextBox.Size = new System.Drawing.Size(121, 22);
+            this.fixqualTextBox.TabIndex = 5;
+            // 
+            // accuracyTextBox
+            // 
+            this.accuracyTextBox.Location = new System.Drawing.Point(305, 24);
+            this.accuracyTextBox.Name = "accuracyTextBox";
+            this.accuracyTextBox.ReadOnly = true;
+            this.accuracyTextBox.Size = new System.Drawing.Size(49, 22);
+            this.accuracyTextBox.TabIndex = 4;
             // 
             // label8
             // 
@@ -271,122 +392,6 @@
             this.satsViewTextBox.Size = new System.Drawing.Size(52, 22);
             this.satsViewTextBox.TabIndex = 0;
             // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(202, 61);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(85, 17);
-            this.label10.TabIndex = 7;
-            this.label10.Text = "Quality of fix";
-            this.label10.Click += new System.EventHandler(this.label10_Click);
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(200, 27);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(99, 17);
-            this.label11.TabIndex = 6;
-            this.label11.Text = "Accuracy of fix";
-            // 
-            // fixqualTextBox
-            // 
-            this.fixqualTextBox.Location = new System.Drawing.Point(305, 58);
-            this.fixqualTextBox.Name = "fixqualTextBox";
-            this.fixqualTextBox.ReadOnly = true;
-            this.fixqualTextBox.Size = new System.Drawing.Size(121, 22);
-            this.fixqualTextBox.TabIndex = 5;
-            // 
-            // accuracyTextBox
-            // 
-            this.accuracyTextBox.Location = new System.Drawing.Point(305, 24);
-            this.accuracyTextBox.Name = "accuracyTextBox";
-            this.accuracyTextBox.ReadOnly = true;
-            this.accuracyTextBox.Size = new System.Drawing.Size(49, 22);
-            this.accuracyTextBox.TabIndex = 4;
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(360, 27);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(19, 17);
-            this.label12.TabIndex = 9;
-            this.label12.Text = "m";
-            // 
-            // panel1
-            // 
-            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel1.Controls.Add(this.label14);
-            this.panel1.Controls.Add(this.timeTextBox);
-            this.panel1.Controls.Add(this.label13);
-            this.panel1.Controls.Add(this.dateTextBox);
-            this.panel1.Location = new System.Drawing.Point(453, 13);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(195, 81);
-            this.panel1.TabIndex = 10;
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(3, 10);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(42, 17);
-            this.label13.TabIndex = 12;
-            this.label13.Text = "Date:";
-            // 
-            // dateTextBox
-            // 
-            this.dateTextBox.Location = new System.Drawing.Point(51, 7);
-            this.dateTextBox.Name = "dateTextBox";
-            this.dateTextBox.ReadOnly = true;
-            this.dateTextBox.Size = new System.Drawing.Size(137, 22);
-            this.dateTextBox.TabIndex = 11;
-            // 
-            // label14
-            // 
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(3, 45);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(43, 17);
-            this.label14.TabIndex = 14;
-            this.label14.Text = "Time:";
-            // 
-            // timeTextBox
-            // 
-            this.timeTextBox.Location = new System.Drawing.Point(51, 42);
-            this.timeTextBox.Name = "timeTextBox";
-            this.timeTextBox.ReadOnly = true;
-            this.timeTextBox.Size = new System.Drawing.Size(137, 22);
-            this.timeTextBox.TabIndex = 13;
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(6, 102);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(55, 17);
-            this.label15.TabIndex = 5;
-            this.label15.Text = "Altitude";
-            // 
-            // altitudeTextBox
-            // 
-            this.altitudeTextBox.Location = new System.Drawing.Point(103, 99);
-            this.altitudeTextBox.Name = "altitudeTextBox";
-            this.altitudeTextBox.ReadOnly = true;
-            this.altitudeTextBox.Size = new System.Drawing.Size(89, 22);
-            this.altitudeTextBox.TabIndex = 4;
-            // 
-            // label16
-            // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(198, 102);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(49, 17);
-            this.label16.TabIndex = 11;
-            this.label16.Text = "m ASL";
-            // 
             // groupBox4
             // 
             this.groupBox4.Controls.Add(this.label17);
@@ -415,11 +420,81 @@
             this.packetIDTextBox.Size = new System.Drawing.Size(65, 22);
             this.packetIDTextBox.TabIndex = 9;
             // 
+            // startButton
+            // 
+            this.startButton.Location = new System.Drawing.Point(554, 280);
+            this.startButton.Name = "startButton";
+            this.startButton.Size = new System.Drawing.Size(113, 49);
+            this.startButton.TabIndex = 6;
+            this.startButton.Text = "Start Tracking";
+            this.startButton.UseVisualStyleBackColor = true;
+            this.startButton.Click += new System.EventHandler(this.startButton_Click);
+            // 
+            // openFileButton
+            // 
+            this.openFileButton.Location = new System.Drawing.Point(376, 280);
+            this.openFileButton.Name = "openFileButton";
+            this.openFileButton.Size = new System.Drawing.Size(113, 49);
+            this.openFileButton.TabIndex = 7;
+            this.openFileButton.Text = "Open NMEA Log";
+            this.openFileButton.UseVisualStyleBackColor = true;
+            this.openFileButton.Click += new System.EventHandler(this.openFileButton_Click);
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label18.Location = new System.Drawing.Point(344, 286);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(26, 29);
+            this.label18.TabIndex = 11;
+            this.label18.Text = "1";
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label19.Location = new System.Drawing.Point(522, 286);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(26, 29);
+            this.label19.TabIndex = 12;
+            this.label19.Text = "2";
+            // 
+            // openLogDialog
+            // 
+            this.openLogDialog.Filter = "Text files|*.txt|All files|*.*";
+            this.openLogDialog.FileOk += new System.ComponentModel.CancelEventHandler(this.openLogDialog_FileOk);
+            // 
+            // groupBox5
+            // 
+            this.groupBox5.Controls.Add(this.rawLogFileTextBox);
+            this.groupBox5.Location = new System.Drawing.Point(13, 333);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(654, 166);
+            this.groupBox5.TabIndex = 13;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Raw input logfile";
+            // 
+            // rawLogFileTextBox
+            // 
+            this.rawLogFileTextBox.Location = new System.Drawing.Point(9, 22);
+            this.rawLogFileTextBox.Multiline = true;
+            this.rawLogFileTextBox.Name = "rawLogFileTextBox";
+            this.rawLogFileTextBox.ReadOnly = true;
+            this.rawLogFileTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.rawLogFileTextBox.Size = new System.Drawing.Size(635, 138);
+            this.rawLogFileTextBox.TabIndex = 0;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(687, 511);
+            this.Controls.Add(this.groupBox5);
+            this.Controls.Add(this.label19);
+            this.Controls.Add(this.label18);
+            this.Controls.Add(this.openFileButton);
+            this.Controls.Add(this.startButton);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -436,7 +511,10 @@
             this.panel1.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -478,6 +556,13 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.TextBox packetIDTextBox;
+        private System.Windows.Forms.Button startButton;
+        private System.Windows.Forms.Button openFileButton;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.OpenFileDialog openLogDialog;
+        private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.TextBox rawLogFileTextBox;
     }
 }
 

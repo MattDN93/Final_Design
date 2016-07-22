@@ -12,6 +12,7 @@ namespace TEST_GPS_Parsing
 {
     public partial class Form1 : Form
     {
+        public string logFilename;
         public Form1()
         {
             InitializeComponent();
@@ -38,21 +39,52 @@ namespace TEST_GPS_Parsing
             dateTextBox.Text = gpsData.date;
             timeTextBox.Text = gpsData.time;
 
-        }
-
-        private void label2_Click(object sender, EventArgs e)
-        {
+            //prep the load box
+            initOpenLogDialog();
 
         }
 
-        private void label5_Click(object sender, EventArgs e)
+        private void initOpenLogDialog()
         {
-
+            //prep the load box
+            //openLogDialog = new OpenFileDialog();     //create new instance of the openFileDialog object
         }
 
-        private void label10_Click(object sender, EventArgs e)
+        private void openFileButton_Click(object sender, EventArgs e)
+        {
+                //open the dialog
+                openLogDialog.ShowDialog();   
+        }
+
+        private void openLogDialog_FileOk(object sender, CancelEventArgs e)
         {
 
+            MessageBox.Show("GPS NMEA log file ready. Click Start Tracking.");
+            logFilename = openLogDialog.FileName;       //save the filename of the logfile   
+        }
+
+        private void startButton_Click(object sender, EventArgs e)
+        {
+            GPSPacket gpsData = new GPSPacket();
+            gpsData.gpsLogfilename = logFilename;       //save filename to associated GPS class
+
+            //set up the IO stream reader
+            string sentenceBuffer;
+            System.IO.StreamReader inputFile = new System.IO.StreamReader(gpsData.gpsLogfilename);
+
+            //start reading the line
+            rawLogFileTextBox.Text = "";
+            while ((sentenceBuffer = inputFile.ReadLine()) != null)
+            {
+                rawLogFileTextBox.AppendText(sentenceBuffer);
+                sentenceBuffer = "";
+                //FOR SIMULATION ONLY
+                if (true)
+                {
+
+                }
+            }
+            MessageBox.Show("Done!");
         }
     }
 }

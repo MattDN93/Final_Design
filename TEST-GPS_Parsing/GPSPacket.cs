@@ -8,6 +8,7 @@ namespace TEST_GPS_Parsing
 {
     class GPSPacket
     {
+        public string gpsLogfilename;
         //vars for GPS data
         public int ID;
         //incoming GPS data

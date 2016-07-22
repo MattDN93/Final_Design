@@ -19,7 +19,6 @@ namespace TEST_GPS_Parsing
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
 
-
         }
 
 
