@@ -9,51 +9,52 @@ namespace TEST_GPS_Parsing
     class GPSPacket
     {
         //vars for GPS data
-public 
-        int ID;
+        public int ID;
         //incoming GPS data
         //from GPRMC
-        double latitutde;
-        double longitude;
-        char fixtype;
-        double grspd_k;
-        double trkangle;
-        string date;
+        public double latitude;
+        public double longitude;
+        public char fixtype;
+        public double grspd_k;
+        public double trkangle;
+        public string date;
+        public string time;
         //from GRGSV
-        int fixqual;
-        int numsats;
-        double accuracy;
+        public int fixqual;
+        public int numsats;
+        public double accuracy;
         //from GPVTG
-        double altitude;
-        double grspd_kph;
+        public double altitude;
+        public double grspd_kph;
 
         //friendly status flags return
-        string fixtype_f;
-        string fixqual_f;
+        public string fixtype_f;
+        public string fixqual_f;
 
         //Default constructor
         public GPSPacket()
         {
-            int ID = 0;
+            ID = 5;
             //incoming GPS data
             //from GPRMC
-            double latitutde = 0.0;
-            double longitude = 0.0;
-            char fixtype = ' ';
-            double grspd_k = 0.0;
-            double trkangle = 0.0;
-            string date = "1/1/2016";
+            latitude = 0.0;
+            longitude = 0.0;
+            fixtype = ' ';
+            grspd_k = 0.0;
+            trkangle = 0.0;
+            date = "1/1/2016";
+            time = "23:59.59";
             //from GRGSV
-            int fixqual = -1;
-            int numsats = -1;
-            double accuracy = 0.0;
+            fixqual = -1;
+            numsats = -1;
+            accuracy = 0.0;
             //from GPVTG
-            double altitude = 0.0;
-            double grspd_kph = 0.0;
+            altitude = 0.0;
+            grspd_kph = 0.0;
 
             //friendly status flags return
-            string fixtype_f = "";
-            string fixqual_f = "";
+            fixtype_f = "Not Set";
+            fixqual_f = "Not Set";
         }
 
         //function to return friendly string from flags
