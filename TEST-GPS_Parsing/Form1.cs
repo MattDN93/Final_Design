@@ -15,7 +15,6 @@ namespace TEST_GPS_Parsing
         //*********THIS VAR IS FOR TESTING FEATURES, set to false for debug features off
         bool debug = true;
         //*************************************
-
         public string logFilename;
         public Form1()
         {
@@ -87,12 +86,14 @@ namespace TEST_GPS_Parsing
             //For simulating NMEA behaviour
             int count = 0;
 
-            Thread.BeginCriticalRegion();
+            //Thread.BeginCriticalRegion();
             while ((sentenceBuffer = inputFile.ReadLine()) != null)
             {
                 //This function updates the UI elements with the parsed NMEA data
-                parseSelection(sentenceBuffer, gpsData);
-
+                gpsData = parseSelection(sentenceBuffer, gpsData);
+                //update the display
+                updateUI(gpsData);
+                //update the raw output textbox
                 rawLogFileTextBox.AppendText(sentenceBuffer);
                 sentenceBuffer = "";
                 //FOR SIMULATION ONLY
@@ -108,50 +109,91 @@ namespace TEST_GPS_Parsing
                 //**************************************
                 count++;
             }
-            Thread.EndCriticalRegion();
+            //Thread.EndCriticalRegion();
             MessageBox.Show("Done!");
             inputFile.Close();
         }
 
+        private void updateUI(GPSPacket gpsDataForUI)
+        {
+            //This takes the gpsData object and populates all the fields with updated values (if any)
+            //Monitoring
+            packetIDTextBox.Text = gpsDataForUI.ID.ToString();
+            //GPS Core Data
+            latitudeTextBox.Clear();
+            latitudeTextBox.AppendText(gpsDataForUI.latitude.ToString());
+            longitudeTextBox.Text = gpsDataForUI.longitude.ToString();
+            altitudeTextBox.Text = gpsDataForUI.altitude.ToString();
+            //Vehicle Properties
+            speedKnotsTextBox.Text = gpsDataForUI.grspd_k.ToString();
+            speedKphTextBox.Text = gpsDataForUI.grspd_kph.ToString();
+            headDegTextBox.Text = gpsDataForUI.trkangle.ToString();
+
+            //Fix Information
+            satsViewTextBox.Clear();
+            satsViewTextBox.AppendText(gpsDataForUI.numsats.ToString());
+            fixqualTextBox.Clear();
+            fixqualTextBox.AppendText(gpsDataForUI.fixqual_f);
+            fixvalTextBox.Clear();
+            fixvalTextBox.AppendText(gpsDataForUI.fixtype_f);
+            accuracyTextBox.Clear();
+            accuracyTextBox.AppendText(gpsDataForUI.accuracy.ToString());
+           
+            //Date and time
+            dateTextBox.Clear();
+            dateTextBox.AppendText(gpsDataForUI.date);
+
+            //do some formatting
+            timeTextBox.Clear();
+            timeTextBox.AppendText(gpsDataForUI.time);
+            
+        }
+
         //-------------------------PARSING SELECTION METHODS----------------------------
 
-        private void parseSelection(string sentenceBuffer, GPSPacket gpsData)
+        private GPSPacket parseSelection(string sentenceBuffer, GPSPacket gpsData)
         {
+            GPSPacket updatedGpsData = gpsData; //sets up a new object which methods return with updated values
             if (!(sentenceBuffer.StartsWith("$")))
             {
-                return;     //the sentence is invalid 
+                return updatedGpsData;     //the sentence is invalid 
             }
 
             if (sentenceBuffer.Contains("GPRMC"))
             {
-                parseGPRMC(sentenceBuffer, gpsData);
+                updatedGpsData = parseGPRMC(sentenceBuffer, gpsData);
+                return updatedGpsData;
             }
             else if (sentenceBuffer.Contains("GPGGA"))
             {
-                parseGPGGA(sentenceBuffer, gpsData);
+                updatedGpsData = parseGPGGA(sentenceBuffer, gpsData);
+                return updatedGpsData;
             }
             else if (sentenceBuffer.Contains("GPVTG"))
             {
-                parseGPVTG(sentenceBuffer, gpsData);
+                updatedGpsData = parseGPVTG(sentenceBuffer, gpsData);
+                return updatedGpsData;
             }
             else
             {
-                return;     //we don't consider all the other NMEA strings
+                return updatedGpsData;     //we don't consider all the other NMEA strings
             }
 
         }
 
-        private void parseGPVTG(string sentenceBuffer, GPSPacket gpsData)
+        private GPSPacket parseGPVTG(string sentenceBuffer, GPSPacket gpsData)
         {
             throw new NotImplementedException();
+            return gpsData;
         }
 
-        private void parseGPGGA(string sentenceBuffer, GPSPacket gpsData)
+        private GPSPacket parseGPGGA(string sentenceBuffer, GPSPacket gpsData)
         {
             throw new NotImplementedException();
+            return gpsData;
         }
 
-        private void parseGPRMC(string sentenceBuffer, GPSPacket gpsData)
+        private GPSPacket parseGPRMC(string sentenceBuffer, GPSPacket gpsData)
         {
             int sectionCount=0;                 //count for subsections of the GPRMC string
             string subField = ""; 
@@ -170,14 +212,30 @@ namespace TEST_GPS_Parsing
                         case 0: break;
                         //GPRMC section 1 = time in HHMMSS
                         case 1:
-                            subField += item;
-                            gpsData.time = subField;
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.time = subField;
+                            }
                             break;
+                        //GPRMC section 2 = fix, A or V
                         case 2:
-                            subField += item;
-                            gpsData.fixtype = subField;    //pick the 2nd char ",A" for example
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.fixtype = subField;    //pick the 2nd char ",A" for example
+                                gpsData.friendlyFlagString(gpsData.fixtype);   //get the friendly string for the fix
+                            }
                             break;
-                        default:
+                        //GPRMC section 3 = Latitude DDMMSS.SSS
+                        case 3:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                               gpsData.latitude = subField ; //parse double to a string for display
+                            }
+                            break;
+                                default:
                             break;
                     }
                 }
@@ -187,6 +245,9 @@ namespace TEST_GPS_Parsing
                 }
                 
             }
+
+            //return completed packet
+            return gpsData;
 
         }
 

@@ -13,7 +13,7 @@ namespace TEST_GPS_Parsing
         public int ID;
         //incoming GPS data
         //from GPRMC
-        public double latitude;
+        public string latitude;
         public double longitude;
         public string fixtype;
         public double grspd_k;
@@ -38,13 +38,13 @@ namespace TEST_GPS_Parsing
             ID = 5;
             //incoming GPS data
             //from GPRMC
-            latitude = 0.0;
+            latitude = "";
             longitude = 0.0;
             fixtype = "";
             grspd_k = 0.0;
             trkangle = 0.0;
-            date = "1/1/2016";
-            time = "23:59.59";
+            date = "";
+            time = "";
             //from GRGSV
             fixqual = -1;
             numsats = -1;
@@ -54,17 +54,17 @@ namespace TEST_GPS_Parsing
             grspd_kph = 0.0;
 
             //friendly status flags return
-            fixtype_f = "Not Set";
-            fixqual_f = "Not Set";
+            fixtype_f = "";
+            fixqual_f = "";
         }
 
         //function to return friendly string from flags
-        public void friendlyFlagString(char fixtype, int fixqual)
+        public void friendlyFlagString(string fixtype, int fixqual = 0)
         {
             switch (fixtype)
             {
-                case 'A': fixtype_f = "Active"; break;
-                case 'V': fixtype_f = "Void"; break;
+                case "A": fixtype_f = "Active"; break;
+                case "V": fixtype_f = "Void"; break;
                 default: fixtype_f = "Fix Error";
                     break;
             }
