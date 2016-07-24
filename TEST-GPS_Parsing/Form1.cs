@@ -137,7 +137,7 @@ namespace TEST_GPS_Parsing
 
             //Fix Information
             satsViewTextBox.Clear();
-            satsViewTextBox.AppendText(gpsDataForUI.numsats.ToString());
+            satsViewTextBox.AppendText(gpsDataForUI.numsats);
             fixqualTextBox.Clear();
             fixqualTextBox.AppendText(gpsDataForUI.fixqual_f);
             fixvalTextBox.Clear();
@@ -182,12 +182,17 @@ namespace TEST_GPS_Parsing
             }
             else if (sentenceBuffer.Contains("GPGGA"))
             {
-                //updatedGpsData = parseGPGGA(sentenceBuffer, gpsData);
+                updatedGpsData = parseGPGGA(sentenceBuffer, gpsData);
                 return updatedGpsData;
             }
             else if (sentenceBuffer.Contains("GPVTG"))
             {
-                //updatedGpsData = parseGPVTG(sentenceBuffer, gpsData);
+                updatedGpsData = parseGPVTG(sentenceBuffer, gpsData);
+                //trim off leading zeroes from the speed
+                if (updatedGpsData.grspd_kph.StartsWith("0"))
+                {
+                    updatedGpsData.grspd_kph = updatedGpsData.grspd_kph.TrimStart('0');
+                }
                 return updatedGpsData;
             }
             else
@@ -213,15 +218,74 @@ namespace TEST_GPS_Parsing
 
                     switch (sectionCount)       //store the fields based on the expected section
                     {
-                        case 0:
+                        //GPVTG section 7 is speed in KPH; we need the speed in KPH
+                        case 7:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.grspd_kph = subField; //parse double to a string for display
+                            }
                             break;
-                            throw new NotImplementedException();
+                        default: break;
+                    }
+                }
+            }
             return gpsData;
         }
 
         private GPSPacket parseGPGGA(string sentenceBuffer, GPSPacket gpsData)
         {
-            throw new NotImplementedException();
+            int sectionCount = 0;
+            string subField = "";
+            foreach (var item in sentenceBuffer)
+            {
+                if (item.ToString() != "*")      //the asterisk specifies the end of line
+                {
+                    if (item.ToString() == ",")  //increment counter for next segment
+                    {
+                        sectionCount++;
+                        subField = "";
+                    }
+
+                    switch (sectionCount)       //store the fields based on the expected section
+                    {
+                        //GPGGA section 5 is is the fix quality
+                        case 6:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.fixqual = subField; //add the cardinal heading to the latitude
+                                gpsData.friendlyFlagString(gpsData.fixtype, gpsData.fixqual); //get the friendly name of the fix quality
+                            }
+                            break;
+                        //GGA section 7 is the number of satellites in view
+                        case 7:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.numsats = subField;
+                            }
+                            break;
+                        //section 8 is the accuracy of the GPS fix
+                        case 8:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.accuracy = subField;
+                            }
+                            break;
+                        //section 9 is the altitude ASL
+                        case 9:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.altitude = subField;
+                            }
+                            break;
+                        default: break;
+                    }
+                }
+            }
             return gpsData;
         }
 
@@ -257,7 +321,7 @@ namespace TEST_GPS_Parsing
                             {
                                 subField += item;
                                 gpsData.fixtype = subField;    //pick the 2nd char ",A" for example
-                                gpsData.friendlyFlagString(gpsData.fixtype);   //get the friendly string for the fix
+                                gpsData.friendlyFlagString(gpsData.fixtype,gpsData.fixqual);   //get the friendly string for the fix
                             }
                             break;
                         //GPRMC section 3 = Latitude DDMMSS.SSS

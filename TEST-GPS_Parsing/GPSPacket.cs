@@ -21,9 +21,9 @@ namespace TEST_GPS_Parsing
         public string date;
         public string time;
         //from GRGSV
-        public int fixqual;
-        public int numsats;
-        public double accuracy;
+        public string fixqual;
+        public string numsats;
+        public string accuracy;
         //from GPVTG
         public string altitude;
         public string grspd_kph;
@@ -46,9 +46,9 @@ namespace TEST_GPS_Parsing
             date = "";
             time = "";
             //from GRGSV
-            fixqual = -1;
-            numsats = -1;
-            accuracy = 0.0;
+            fixqual = "";
+            numsats = "";
+            accuracy = "";
             //from GPVTG
             altitude = "";
             grspd_kph = "";
@@ -59,7 +59,7 @@ namespace TEST_GPS_Parsing
         }
 
         //function to return friendly string from flags
-        public void friendlyFlagString(string fixtype, int fixqual = 0)
+        public void friendlyFlagString(string fixtype, string fixqual)
         {
             switch (fixtype)
             {
@@ -71,14 +71,15 @@ namespace TEST_GPS_Parsing
 
             switch (fixqual)
             {
-                case 1: fixqual_f = "GPS fix"; break;
-                case 2: fixqual_f = "DGPS fix"; break;
-                case 3: fixqual_f = "PPS fix"; break;
-                case 4: fixqual_f = "Realtime Kinematic"; break;
-                case 5: fixqual_f = "Float Realtime Kinematic"; break;
-                case 6: fixqual_f = "Dead reckoning"; break;
-                case 7: fixqual_f = "Manual input"; break;
-                case 8: fixqual_f = "Simulation"; break;
+                case "0": fixqual_f = "Invalid fix"; break;
+                case "1": fixqual_f = "GPS fix"; break;
+                case "2": fixqual_f = "DGPS fix"; break;
+                case "3": fixqual_f = "PPS fix"; break;
+                case "4": fixqual_f = "Realtime Kinematic"; break;
+                case "5": fixqual_f = "Float Realtime Kinematic"; break;
+                case "6": fixqual_f = "Dead reckoning"; break;
+                case "7": fixqual_f = "Manual input"; break;
+                case "8": fixqual_f = "Simulation"; break;
                 default: fixqual_f = "Fix Quality Error";
                     break;
             }
