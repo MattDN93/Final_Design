@@ -13,7 +13,7 @@ namespace TEST_GPS_Parsing
     public partial class Form1 : Form
     {
         //*********THIS VAR IS FOR TESTING FEATURES, set to false for debug features off
-        bool debug = true;
+        bool debug = false;
         //*************************************
         public string logFilename;
         public Form1()
@@ -121,13 +121,19 @@ namespace TEST_GPS_Parsing
             packetIDTextBox.Text = gpsDataForUI.ID.ToString();
             //GPS Core Data
             latitudeTextBox.Clear();
-            latitudeTextBox.AppendText(gpsDataForUI.latitude.ToString());
-            longitudeTextBox.Text = gpsDataForUI.longitude.ToString();
-            altitudeTextBox.Text = gpsDataForUI.altitude.ToString();
+            latitudeTextBox.AppendText(gpsDataForUI.latitude);
+            longitudeTextBox.Clear();
+            longitudeTextBox.AppendText(gpsDataForUI.longitude);
+            altitudeTextBox.Clear();
+            altitudeTextBox.AppendText(gpsDataForUI.altitude);
+
             //Vehicle Properties
-            speedKnotsTextBox.Text = gpsDataForUI.grspd_k.ToString();
-            speedKphTextBox.Text = gpsDataForUI.grspd_kph.ToString();
-            headDegTextBox.Text = gpsDataForUI.trkangle.ToString();
+            speedKnotsTextBox.Clear();
+            speedKnotsTextBox.AppendText(gpsDataForUI.grspd_k);
+            speedKphTextBox.Clear();
+            speedKphTextBox.AppendText(gpsDataForUI.grspd_kph);
+            headDegTextBox.Clear();
+            headDegTextBox.AppendText( gpsDataForUI.trkangle);
 
             //Fix Information
             satsViewTextBox.Clear();
@@ -162,16 +168,26 @@ namespace TEST_GPS_Parsing
             if (sentenceBuffer.Contains("GPRMC"))
             {
                 updatedGpsData = parseGPRMC(sentenceBuffer, gpsData);
+
+                //do some last-minute formatting to the fields based on known issues
+                updatedGpsData.date = updatedGpsData.date.TrimEnd('/'); //remove trailing "/"
+                if (updatedGpsData.time.StartsWith("0") || updatedGpsData.longitude.StartsWith("0") || updatedGpsData.latitude.StartsWith("0"))
+                {
+                    updatedGpsData.time = updatedGpsData.time.TrimStart('0'); //remove leading zeroes
+                    updatedGpsData.latitude = updatedGpsData.latitude.TrimStart('0');
+                    updatedGpsData.longitude = updatedGpsData.longitude.TrimStart('0');
+                }  
+
                 return updatedGpsData;
             }
             else if (sentenceBuffer.Contains("GPGGA"))
             {
-                updatedGpsData = parseGPGGA(sentenceBuffer, gpsData);
+                //updatedGpsData = parseGPGGA(sentenceBuffer, gpsData);
                 return updatedGpsData;
             }
             else if (sentenceBuffer.Contains("GPVTG"))
             {
-                updatedGpsData = parseGPVTG(sentenceBuffer, gpsData);
+                //updatedGpsData = parseGPVTG(sentenceBuffer, gpsData);
                 return updatedGpsData;
             }
             else
@@ -183,7 +199,23 @@ namespace TEST_GPS_Parsing
 
         private GPSPacket parseGPVTG(string sentenceBuffer, GPSPacket gpsData)
         {
-            throw new NotImplementedException();
+            int sectionCount = 0;
+            string subField = "";
+            foreach (var item in sentenceBuffer)
+            {
+                if (item.ToString() != "*")      //the asterisk specifies the end of line
+                {
+                    if (item.ToString() == ",")  //increment counter for next segment
+                    {
+                        sectionCount++;
+                        subField = "";
+                    }
+
+                    switch (sectionCount)       //store the fields based on the expected section
+                    {
+                        case 0:
+                            break;
+                            throw new NotImplementedException();
             return gpsData;
         }
 
@@ -196,6 +228,7 @@ namespace TEST_GPS_Parsing
         private GPSPacket parseGPRMC(string sentenceBuffer, GPSPacket gpsData)
         {
             int sectionCount=0;                 //count for subsections of the GPRMC string
+            int dateCtr = 0;                    //for formatting the date nicely
             string subField = ""; 
             foreach (var item in sentenceBuffer)
             {
@@ -231,11 +264,71 @@ namespace TEST_GPS_Parsing
                         case 3:
                             if (item.ToString() != ",")  //make sure the comma isn't included
                             {
-                                subField += item;
+                               subField += item;
                                gpsData.latitude = subField ; //parse double to a string for display
                             }
                             break;
-                                default:
+                        //GPRMC section 4 = Latitude Cardinal Heading
+                        case 4:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.latitude += subField; //add the cardinal heading to the latitude
+                            }
+                            break;
+                        //GPRMC section 5 = Longitude DDMMSS.SSS
+                        case 5:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.longitude = subField; //parse double to a string for display
+                            }
+                            break;
+                        //GPRMC section 6 = Longitude Cardinal Heading
+                        case 6:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.longitude += subField; //add the cardinal heading to the longitude
+                            }
+                            break;
+                        //GPRMC section 7 = Ground speed in Knots
+                        case 7:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.grspd_k = subField; 
+                            }
+                            break;
+                        //GPRMC section 8 = Track angle in degrees true
+                        case 8:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.trkangle = subField; 
+                            }
+                            break;
+                        //GPRMC section 9 = Date ,DD/MM/YY
+                        case 9:
+                            
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                dateCtr++;
+                                if (dateCtr % 2 == 0)
+                                {
+                                    subField = item.ToString();
+                                    gpsData.date += subField;
+                                    gpsData.date += "/"; //format the date nicely 
+                                }
+                                else
+                                {
+                                    subField = item.ToString();
+                                    gpsData.date += subField;
+                                    
+                                }
+                            }
+                            break;
+                        default:
                             break;
                     }
                 }

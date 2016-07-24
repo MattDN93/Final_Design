@@ -14,10 +14,10 @@ namespace TEST_GPS_Parsing
         //incoming GPS data
         //from GPRMC
         public string latitude;
-        public double longitude;
+        public string longitude;
         public string fixtype;
-        public double grspd_k;
-        public double trkangle;
+        public string grspd_k;
+        public string trkangle;
         public string date;
         public string time;
         //from GRGSV
@@ -25,8 +25,8 @@ namespace TEST_GPS_Parsing
         public int numsats;
         public double accuracy;
         //from GPVTG
-        public double altitude;
-        public double grspd_kph;
+        public string altitude;
+        public string grspd_kph;
 
         //friendly status flags return
         public string fixtype_f;
@@ -39,10 +39,10 @@ namespace TEST_GPS_Parsing
             //incoming GPS data
             //from GPRMC
             latitude = "";
-            longitude = 0.0;
+            longitude = "";
             fixtype = "";
-            grspd_k = 0.0;
-            trkangle = 0.0;
+            grspd_k = "";
+            trkangle = "";
             date = "";
             time = "";
             //from GRGSV
@@ -50,8 +50,8 @@ namespace TEST_GPS_Parsing
             numsats = -1;
             accuracy = 0.0;
             //from GPVTG
-            altitude = 0.0;
-            grspd_kph = 0.0;
+            altitude = "";
+            grspd_kph = "";
 
             //friendly status flags return
             fixtype_f = "";
