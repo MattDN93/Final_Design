@@ -18,6 +18,7 @@ namespace TEST_GPS_Parsing
         public string fixtype;
         public string grspd_k;
         public string trkangle;
+        public string cardAngle;
         public string date;
         public string time;
         //from GRGSV

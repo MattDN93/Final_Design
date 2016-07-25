@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
+
 namespace TEST_GPS_Parsing
 {
     public partial class Form1 : Form
@@ -134,6 +135,8 @@ namespace TEST_GPS_Parsing
             speedKphTextBox.AppendText(gpsDataForUI.grspd_kph);
             headDegTextBox.Clear();
             headDegTextBox.AppendText( gpsDataForUI.trkangle);
+            headCardTextBox.Clear();
+            headCardTextBox.AppendText(gpsDataForUI.cardAngle);
 
             //Fix Information
             satsViewTextBox.Clear();
@@ -176,7 +179,10 @@ namespace TEST_GPS_Parsing
                     updatedGpsData.time = updatedGpsData.time.TrimStart('0'); //remove leading zeroes
                     updatedGpsData.latitude = updatedGpsData.latitude.TrimStart('0');
                     updatedGpsData.longitude = updatedGpsData.longitude.TrimStart('0');
-                }  
+                }
+
+                //convert the track angle in degrees true to a cardinal heading
+                trackToCardinal(updatedGpsData);
 
                 return updatedGpsData;
             }
@@ -200,6 +206,53 @@ namespace TEST_GPS_Parsing
                 return updatedGpsData;     //we don't consider all the other NMEA strings
             }
 
+        }
+
+        private GPSPacket trackToCardinal(GPSPacket updatedGpsData)
+        {
+            //each degree direction corresponds to some cardinal direction
+            //first convert trkangle to a double to evaluate it
+            double trkAngle_double;
+            bool result = Double.TryParse(updatedGpsData.trkangle, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out trkAngle_double);
+
+            if (result == true)
+            {
+                if ((348.75 >= trkAngle_double && trkAngle_double <= 360)||((0 >= trkAngle_double && trkAngle_double <= 33.75)))
+                {
+                    updatedGpsData.cardAngle = "N";
+                }
+                else if ((33.75 > trkAngle_double && trkAngle_double <= 78.75))
+                {
+                    updatedGpsData.cardAngle = "NE";
+                }
+                else if ((78.75 > trkAngle_double && trkAngle_double <= 101.25))
+                {
+                    updatedGpsData.cardAngle = "E";
+                }
+                else if ((101.25 > trkAngle_double && trkAngle_double <= 168.75))
+                {
+                    updatedGpsData.cardAngle = "SE";
+                }
+                else if ((168.75 > trkAngle_double && trkAngle_double <= 213.75))
+                {
+                    updatedGpsData.cardAngle = "S";
+                }
+                else if ((213.75 > trkAngle_double && trkAngle_double <= 258.75))
+                {
+                    updatedGpsData.cardAngle = "SW";
+                }
+                else if ((258.75 > trkAngle_double && trkAngle_double <= 303.75))
+                {
+                    updatedGpsData.cardAngle = "W";
+                }
+                else if ((303.75 > trkAngle_double && trkAngle_double < 348.75))
+                {
+                    updatedGpsData.cardAngle = "NW";
+                }
+
+            }
+
+            return updatedGpsData;
         }
 
         private GPSPacket parseGPVTG(string sentenceBuffer, GPSPacket gpsData)
@@ -293,6 +346,7 @@ namespace TEST_GPS_Parsing
         {
             int sectionCount=0;                 //count for subsections of the GPRMC string
             int dateCtr = 0;                    //for formatting the date nicely
+            gpsData.date = "";
             string subField = ""; 
             foreach (var item in sentenceBuffer)
             {
