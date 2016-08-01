@@ -70,11 +70,9 @@ namespace TEST_GPS_Parsing
             startButton.Enabled = true;   
         }
 
-        private void startButton_Click(object sender, EventArgs e)
+        //-------------------------THREAD FOR BACKGROUND WORK--------------------
+        private void recvRawDataWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            openFileButton.Enabled = false;
-            startButton.Enabled = false;
-            stopButton.Enabled = true;
             GPSPacket gpsData = new GPSPacket();
             gpsData.gpsLogfilename = logFilename;       //save filename to associated GPS class
 
@@ -87,7 +85,7 @@ namespace TEST_GPS_Parsing
             //For simulating NMEA behaviour
             int count = 0;
 
-            //Thread.BeginCriticalRegion();
+            
             while ((sentenceBuffer = inputFile.ReadLine()) != null)
             {
                 //This function updates the UI elements with the parsed NMEA data
@@ -97,22 +95,24 @@ namespace TEST_GPS_Parsing
                 //update the raw output textbox
                 rawLogFileTextBox.AppendText(sentenceBuffer);
                 sentenceBuffer = "";
-                //FOR SIMULATION ONLY
-                //Simulating 6 NMEA strings per second*******************
-                if (debug)
-                {
-                    if (count % 6 == 0)
-                    {
-                        Thread.Sleep(1000);
-                    }
-                    
-                }
-                //**************************************
                 count++;
             }
-            //Thread.EndCriticalRegion();
+            
             MessageBox.Show("Done!");
             inputFile.Close();
+        }
+        //END THREAD
+
+        private void startButton_Click(object sender, EventArgs e)
+        {
+            openFileButton.Enabled = false;
+            startButton.Enabled = false;
+            stopButton.Enabled = true;
+
+            //threading start!
+            recvRawDataWorker.RunWorkerAsync();         //starts the data receiving in the background
+
+           
         }
 
         private void updateUI(GPSPacket gpsDataForUI)
@@ -496,10 +496,11 @@ namespace TEST_GPS_Parsing
 
         private void stopButton_Click(object sender, EventArgs e)
         {
-            Thread.CurrentThread.Abort();
             stopButton.Enabled = false;
             startButton.Enabled = true;
             openFileButton.Enabled = true;
         }
+
+
     }
 }
