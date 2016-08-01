@@ -84,18 +84,32 @@ namespace TEST_GPS_Parsing
 
         private void startButton_Click(object sender, EventArgs e)
         {
-            openFileButton.Enabled = false;
-            startButton.Enabled = false;
-            stopButton.Enabled = true;
 
             //threading start!
-            recvRawDataWorker.RunWorkerAsync();         //starts the data receiving in the background
+            if (!recvRawDataWorker.CancellationPending)
+            {
+                openFileButton.Enabled = false;
+                startButton.Enabled = false;
+                stopButton.Enabled = true;
+                recvRawDataWorker.RunWorkerAsync();         //starts the data receiving in the background
+            }
+            else
+            {
+                recvRawDataWorker.CancelAsync();
+                statusTextBox.Clear();
+                statusTextBox.AppendText("Error: previous task not cancelled yet. Try again.");
+            }
+
 
         }
 
         private void updateUITimer_Tick(object sender, EventArgs e)
         {
-            //wait
+            if (recvRawDataWorker.IsBusy)
+            {
+                gpsData.timeElapsed++; //update the running timer only if parsing is active
+            }
+
 
         }
 
@@ -106,40 +120,46 @@ namespace TEST_GPS_Parsing
             System.IO.StreamReader inputFile = new System.IO.StreamReader(gpsData.gpsLogfilename);
 
             //start reading the line
-            rawLogFileTextBox.Text = "";
             //For simulating NMEA behaviour
             int count = 0;
 
             
-            while (inputFile.EndOfStream == false)      //check for thread cancel request from stop button (since it's only active here)
-            {
-                while (!recvRawDataWorker.CancellationPending)
+                while (inputFile.EndOfStream == false)
                 {
-                    sentenceBuffer = inputFile.ReadLine();
-                    //This function updates the UI elements with the parsed NMEA data
-                    gpsData = parseSelection(sentenceBuffer, gpsData);
-                    count++;
-                    //this allows for a thread-safe variable access
-                    recvRawDataWorker.ReportProgress(count, gpsData);
+                    if (!recvRawDataWorker.CancellationPending) //check for thread cancel request from stop button (since it's only active here)
+                    {
+                        sentenceBuffer = inputFile.ReadLine();
+                        //This function updates the UI elements with the parsed NMEA data
+                        gpsData = parseSelection(sentenceBuffer, gpsData);
+                        count++;
+                        //this allows for a thread-safe variable access
+                        recvRawDataWorker.ReportProgress(count, gpsData);
 
-                    //FOR SIMULATION ONLY
-                    Thread.Sleep(1000);
-                    //---------------
+                        //FOR SIMULATION ONLY
+                        Thread.Sleep(1000);
+                        //---------------
+                    }
+                    else
+                    {
+                    MessageBox.Show("File parsing cancelled.");
+                    inputFile.Close();
+                    //everything else is handled in the completion thread
+                    break;
+                    }
                 }
-                statusTextBox.Clear();
-                statusTextBox.AppendText("Stop requested, ending thread...");
-
-            }
-            statusTextBox.Clear();
-            statusTextBox.AppendText("Done! File parsed.");
             inputFile.Close();
+
+        
         }
+
+
 
         private void recvRawDataWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
+
                 statusTextBox.Clear();
                 statusTextBox.AppendText("Parsing in progress. No errors.");
-                updateUI(gpsData,sentenceBuffer);
+                updateUI(gpsData, sentenceBuffer);
 
         }
 
@@ -151,6 +171,7 @@ namespace TEST_GPS_Parsing
             sentenceBufferForUI = "";
             //Monitoring
             packetIDTextBox.Text = gpsDataForUI.ID.ToString();
+            timeElapsedTextBox.Text = gpsDataForUI.timeElapsed.ToString();
             //GPS Core Data
             latitudeTextBox.Clear();
             latitudeTextBox.AppendText(gpsDataForUI.latitude);
@@ -255,7 +276,7 @@ namespace TEST_GPS_Parsing
         {
             string newDateTime; //immutable string so make a new one to copy into
             string fixTime;     //new temp string for date
-            string format = "dd/MM/yyyy hh:mm:ss.fff"; //set date time format
+            string format = "dd/MM/yyyy HH:mm:ss.fff"; //set date time format
            
             System.Globalization.CultureInfo provider = System.Globalization.CultureInfo.InvariantCulture; //provider for display of date and time SA style
 
@@ -538,11 +559,18 @@ namespace TEST_GPS_Parsing
                 startButton.Enabled = true;
                 openFileButton.Enabled = true;
                 recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
+                statusTextBox.Clear();
+                statusTextBox.AppendText("Stop requested, ending thread...");
             }
 
             
         }
 
-
+        private void recvRawDataWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            statusTextBox.Clear();
+            statusTextBox.AppendText("GPS parsing complete or interrupted.");
+            rawLogFileTextBox.Text = "";
+        }
     }
 }

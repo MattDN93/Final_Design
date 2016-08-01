@@ -78,6 +78,9 @@
             this.updateUITimer = new System.Windows.Forms.Timer(this.components);
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.statusTextBox = new System.Windows.Forms.TextBox();
+            this.timeElapsedTextBox = new System.Windows.Forms.TextBox();
+            this.label21 = new System.Windows.Forms.Label();
+            this.label22 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -438,6 +441,9 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.label22);
+            this.groupBox4.Controls.Add(this.label21);
+            this.groupBox4.Controls.Add(this.timeElapsedTextBox);
             this.groupBox4.Controls.Add(this.label17);
             this.groupBox4.Controls.Add(this.packetIDTextBox);
             this.groupBox4.Location = new System.Drawing.Point(232, 11);
@@ -452,7 +458,7 @@
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(77, 16);
+            this.label17.Location = new System.Drawing.Point(7, 17);
             this.label17.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(55, 13);
@@ -461,7 +467,7 @@
             // 
             // packetIDTextBox
             // 
-            this.packetIDTextBox.Location = new System.Drawing.Point(133, 14);
+            this.packetIDTextBox.Location = new System.Drawing.Point(66, 14);
             this.packetIDTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.packetIDTextBox.Name = "packetIDTextBox";
             this.packetIDTextBox.ReadOnly = true;
@@ -470,18 +476,18 @@
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(308, 226);
+            this.startButton.Location = new System.Drawing.Point(389, 226);
             this.startButton.Margin = new System.Windows.Forms.Padding(2);
             this.startButton.Name = "startButton";
-            this.startButton.Size = new System.Drawing.Size(85, 40);
+            this.startButton.Size = new System.Drawing.Size(43, 40);
             this.startButton.TabIndex = 6;
-            this.startButton.Text = "Start Tracking";
+            this.startButton.Text = "Start";
             this.startButton.UseVisualStyleBackColor = true;
             this.startButton.Click += new System.EventHandler(this.startButton_Click);
             // 
             // openFileButton
             // 
-            this.openFileButton.Location = new System.Drawing.Point(200, 226);
+            this.openFileButton.Location = new System.Drawing.Point(283, 226);
             this.openFileButton.Margin = new System.Windows.Forms.Padding(2);
             this.openFileButton.Name = "openFileButton";
             this.openFileButton.Size = new System.Drawing.Size(85, 40);
@@ -494,7 +500,7 @@
             // 
             this.label18.AutoSize = true;
             this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label18.Location = new System.Drawing.Point(178, 233);
+            this.label18.Location = new System.Drawing.Point(258, 233);
             this.label18.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(20, 24);
@@ -505,7 +511,7 @@
             // 
             this.label19.AutoSize = true;
             this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.Location = new System.Drawing.Point(289, 233);
+            this.label19.Location = new System.Drawing.Point(369, 233);
             this.label19.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(20, 24);
@@ -542,12 +548,12 @@
             // 
             // stopButton
             // 
-            this.stopButton.Location = new System.Drawing.Point(416, 226);
+            this.stopButton.Location = new System.Drawing.Point(459, 226);
             this.stopButton.Margin = new System.Windows.Forms.Padding(2);
             this.stopButton.Name = "stopButton";
-            this.stopButton.Size = new System.Drawing.Size(85, 40);
+            this.stopButton.Size = new System.Drawing.Size(42, 40);
             this.stopButton.TabIndex = 14;
-            this.stopButton.Text = "Stop Tracking";
+            this.stopButton.Text = "Stop";
             this.stopButton.UseVisualStyleBackColor = true;
             this.stopButton.Click += new System.EventHandler(this.stopButton_Click);
             // 
@@ -555,7 +561,7 @@
             // 
             this.label20.AutoSize = true;
             this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label20.Location = new System.Drawing.Point(396, 233);
+            this.label20.Location = new System.Drawing.Point(435, 233);
             this.label20.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(20, 24);
@@ -568,6 +574,7 @@
             this.recvRawDataWorker.WorkerSupportsCancellation = true;
             this.recvRawDataWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.recvRawDataWorker_DoWork);
             this.recvRawDataWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.recvRawDataWorker_ProgressChanged);
+            this.recvRawDataWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.recvRawDataWorker_RunWorkerCompleted);
             // 
             // updateUITimer
             // 
@@ -580,7 +587,7 @@
             this.groupBox6.Controls.Add(this.statusTextBox);
             this.groupBox6.Location = new System.Drawing.Point(10, 217);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(163, 49);
+            this.groupBox6.Size = new System.Drawing.Size(243, 49);
             this.groupBox6.TabIndex = 16;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Status";
@@ -590,8 +597,36 @@
             this.statusTextBox.Location = new System.Drawing.Point(7, 20);
             this.statusTextBox.Name = "statusTextBox";
             this.statusTextBox.ReadOnly = true;
-            this.statusTextBox.Size = new System.Drawing.Size(150, 20);
+            this.statusTextBox.Size = new System.Drawing.Size(230, 20);
             this.statusTextBox.TabIndex = 0;
+            // 
+            // timeElapsedTextBox
+            // 
+            this.timeElapsedTextBox.Location = new System.Drawing.Point(171, 13);
+            this.timeElapsedTextBox.Name = "timeElapsedTextBox";
+            this.timeElapsedTextBox.ReadOnly = true;
+            this.timeElapsedTextBox.Size = new System.Drawing.Size(60, 20);
+            this.timeElapsedTextBox.TabIndex = 11;
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(125, 17);
+            this.label21.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(45, 13);
+            this.label21.TabIndex = 12;
+            this.label21.Text = "Elapsed";
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(236, 16);
+            this.label22.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(24, 13);
+            this.label22.TabIndex = 13;
+            this.label22.Text = "sec";
             // 
             // Form1
             // 
@@ -683,6 +718,9 @@
         private System.Windows.Forms.Timer updateUITimer;
         private System.Windows.Forms.GroupBox groupBox6;
         private System.Windows.Forms.TextBox statusTextBox;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.TextBox timeElapsedTextBox;
     }
 }
 

@@ -10,6 +10,7 @@ namespace TEST_GPS_Parsing
     {
         public string gpsLogfilename;
         //--these are all strings for UI display---
+        public int timeElapsed;
         //vars for GPS data
         public int ID;
         //incoming GPS data
