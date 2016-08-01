@@ -9,6 +9,7 @@ namespace TEST_GPS_Parsing
     class GPSPacket
     {
         public string gpsLogfilename;
+        //--these are all strings for UI display---
         //vars for GPS data
         public int ID;
         //incoming GPS data
@@ -21,6 +22,7 @@ namespace TEST_GPS_Parsing
         public string cardAngle;
         public string date;
         public string time;
+
         //from GRGSV
         public string fixqual;
         public string numsats;
@@ -28,6 +30,9 @@ namespace TEST_GPS_Parsing
         //from GPVTG
         public string altitude;
         public string grspd_kph;
+
+        //--these are specific format objects for calculation--
+        public DateTime dt;
 
         //friendly status flags return
         public string fixtype_f;

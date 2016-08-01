@@ -176,13 +176,16 @@ namespace TEST_GPS_Parsing
                 updatedGpsData.date = updatedGpsData.date.TrimEnd('/'); //remove trailing "/"
                 if (updatedGpsData.time.StartsWith("0") || updatedGpsData.longitude.StartsWith("0") || updatedGpsData.latitude.StartsWith("0"))
                 {
-                    updatedGpsData.time = updatedGpsData.time.TrimStart('0'); //remove leading zeroes
+                    //updatedGpsData.time = updatedGpsData.time.TrimStart('0'); //remove leading zeroes
                     updatedGpsData.latitude = updatedGpsData.latitude.TrimStart('0');
                     updatedGpsData.longitude = updatedGpsData.longitude.TrimStart('0');
                 }
 
                 //convert the track angle in degrees true to a cardinal heading
                 trackToCardinal(updatedGpsData);
+
+                //convert the time from a horrible string to something nice
+                timeNiceDisplay(updatedGpsData);
 
                 return updatedGpsData;
             }
@@ -206,6 +209,33 @@ namespace TEST_GPS_Parsing
                 return updatedGpsData;     //we don't consider all the other NMEA strings
             }
 
+        }
+
+        /*----------------Time and Date Parsing Method 
+         Input: GPSData object
+         Output: Time and date parsed correctly 
+         Objective: parse time and date from raw numbers and letters to a nice format & to computable values. Assumed time HHMMSS.SSS and date DD/MM/YY
+             */
+
+        private void timeNiceDisplay(GPSPacket updatedGpsData)
+        {
+            string newDateTime; //immutable string so make a new one to copy into
+            string fixTime;     //new temp string for date
+            string format = "dd/MM/yyyy hh:mm:ss.fff"; //set date time format
+           
+            System.Globalization.CultureInfo provider = System.Globalization.CultureInfo.InvariantCulture; //provider for display of date and time SA style
+
+            newDateTime = updatedGpsData.date.Insert(6, "20");  //assume 2 digit date >2000
+            //---for UI
+            updatedGpsData.date = newDateTime;
+            fixTime = updatedGpsData.time.Insert(2, ":").Insert(5, ":");
+            updatedGpsData.time = fixTime;
+            //--end UI formatting
+
+            //now format to a DateTime object for later calc
+            newDateTime += " " + fixTime;
+
+            updatedGpsData.dt =  DateTime.ParseExact(newDateTime,format,provider); //this will be used for computation
         }
 
         private GPSPacket trackToCardinal(GPSPacket updatedGpsData)
