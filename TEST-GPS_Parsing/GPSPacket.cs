@@ -42,7 +42,7 @@ namespace TEST_GPS_Parsing
         //Default constructor
         public GPSPacket()
         {
-            ID = 5;
+            ID = 0;
             //incoming GPS data
             //from GPRMC
             latitude = "";
@@ -50,6 +50,7 @@ namespace TEST_GPS_Parsing
             fixtype = "";
             grspd_k = "";
             trkangle = "";
+            cardAngle = "";
             date = "";
             time = "";
             //from GRGSV
