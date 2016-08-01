@@ -17,6 +17,11 @@ namespace TEST_GPS_Parsing
         bool debug = false;
         //*************************************
         public string logFilename;
+        GPSPacket gpsData = new GPSPacket();          //global GPS data packet for UI display
+        bool haveStarted = false;   //bool to indicate if logging is happening or not (for timer)
+        string sentenceBuffer;      //global buffer to read incoming data
+        int packetID = 0;               //session-based packet ID, one packet is equivalent to a set of NMEA strings starting with GPRMC
+
         public Form1()
         {
             InitializeComponent();
@@ -54,6 +59,7 @@ namespace TEST_GPS_Parsing
             //openLogDialog = new OpenFileDialog();     //create new instance of the openFileDialog object
             startButton.Enabled = false;
             stopButton.Enabled = false;
+            statusTextBox.AppendText("Ready. Click the button to open a file.");
         }
 
         private void openFileButton_Click(object sender, EventArgs e)
@@ -65,42 +71,15 @@ namespace TEST_GPS_Parsing
         private void openLogDialog_FileOk(object sender, CancelEventArgs e)
         {
 
-            MessageBox.Show("GPS NMEA log file ready. Click Start Tracking.");
+            //MessageBox.Show("GPS NMEA log file ready. Click Start Tracking.");
             logFilename = openLogDialog.FileName;       //save the filename of the logfile
-            startButton.Enabled = true;   
-        }
-
-        //-------------------------THREAD FOR BACKGROUND WORK--------------------
-        private void recvRawDataWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            GPSPacket gpsData = new GPSPacket();
             gpsData.gpsLogfilename = logFilename;       //save filename to associated GPS class
-
-            //set up the IO stream reader
-            string sentenceBuffer;
-            System.IO.StreamReader inputFile = new System.IO.StreamReader(gpsData.gpsLogfilename);
-
-            //start reading the line
-            rawLogFileTextBox.Text = "";
-            //For simulating NMEA behaviour
-            int count = 0;
-
-            
-            while ((sentenceBuffer = inputFile.ReadLine()) != null)
-            {
-                //This function updates the UI elements with the parsed NMEA data
-                gpsData = parseSelection(sentenceBuffer, gpsData);
-                //update the display
-                updateUI(gpsData);
-                //update the raw output textbox
-                rawLogFileTextBox.AppendText(sentenceBuffer);
-                sentenceBuffer = "";
-                count++;
-            }
-            
-            MessageBox.Show("Done!");
-            inputFile.Close();
+            startButton.Enabled = true;
+            statusTextBox.Clear();
+            statusTextBox.AppendText("File opened OK. Click start to start parsing.");
         }
+
+        //We update the UI 
         //END THREAD
 
         private void startButton_Click(object sender, EventArgs e)
@@ -112,12 +91,64 @@ namespace TEST_GPS_Parsing
             //threading start!
             recvRawDataWorker.RunWorkerAsync();         //starts the data receiving in the background
 
-           
         }
 
-        private void updateUI(GPSPacket gpsDataForUI)
+        private void updateUITimer_Tick(object sender, EventArgs e)
+        {
+            //wait
+
+        }
+
+        //-------------------------THREAD FOR BACKGROUND WORK--------------------
+        private void recvRawDataWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            //GPSPacket gpsData = new GPSPacket();
+            System.IO.StreamReader inputFile = new System.IO.StreamReader(gpsData.gpsLogfilename);
+
+            //start reading the line
+            rawLogFileTextBox.Text = "";
+            //For simulating NMEA behaviour
+            int count = 0;
+
+            
+            while (inputFile.EndOfStream == false)      //check for thread cancel request from stop button (since it's only active here)
+            {
+                while (!recvRawDataWorker.CancellationPending)
+                {
+                    sentenceBuffer = inputFile.ReadLine();
+                    //This function updates the UI elements with the parsed NMEA data
+                    gpsData = parseSelection(sentenceBuffer, gpsData);
+                    count++;
+                    //this allows for a thread-safe variable access
+                    recvRawDataWorker.ReportProgress(count, gpsData);
+
+                    //FOR SIMULATION ONLY
+                    Thread.Sleep(1000);
+                    //---------------
+                }
+                statusTextBox.Clear();
+                statusTextBox.AppendText("Stop requested, ending thread...");
+
+            }
+            statusTextBox.Clear();
+            statusTextBox.AppendText("Done! File parsed.");
+            inputFile.Close();
+        }
+
+        private void recvRawDataWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+                statusTextBox.Clear();
+                statusTextBox.AppendText("Parsing in progress. No errors.");
+                updateUI(gpsData,sentenceBuffer);
+
+        }
+
+        private void updateUI(GPSPacket gpsDataForUI, string sentenceBufferForUI)
         {
             //This takes the gpsData object and populates all the fields with updated values (if any)
+            //Show the buffer of the raw text file being read 
+            rawLogFileTextBox.AppendText(sentenceBufferForUI);
+            sentenceBufferForUI = "";
             //Monitoring
             packetIDTextBox.Text = gpsDataForUI.ID.ToString();
             //GPS Core Data
@@ -155,7 +186,8 @@ namespace TEST_GPS_Parsing
             //do some formatting
             timeTextBox.Clear();
             timeTextBox.AppendText(gpsDataForUI.time);
-            
+
+
         }
 
         //-------------------------PARSING SELECTION METHODS----------------------------
@@ -168,8 +200,10 @@ namespace TEST_GPS_Parsing
                 return updatedGpsData;     //the sentence is invalid 
             }
 
-            if (sentenceBuffer.Contains("GPRMC"))
+            if (sentenceBuffer.Contains("GPRMC")) //We assume that each "packet" of sentences begins with a GPRMC hence update the packet ID each time a GPRMC is found!
             {
+                updatedGpsData.ID = packetID;
+                packetID++;
                 updatedGpsData = parseGPRMC(sentenceBuffer, gpsData);
 
                 //do some last-minute formatting to the fields based on known issues
@@ -496,9 +530,17 @@ namespace TEST_GPS_Parsing
 
         private void stopButton_Click(object sender, EventArgs e)
         {
-            stopButton.Enabled = false;
-            startButton.Enabled = true;
-            openFileButton.Enabled = true;
+            //only stop after confirmation
+            DialogResult quitQuestion = MessageBox.Show("This will stop the GPS log. Stop logging now?", "Stop GPS logging?", MessageBoxButtons.YesNo);
+            if (quitQuestion == DialogResult.Yes)
+            {
+                stopButton.Enabled = false;
+                startButton.Enabled = true;
+                openFileButton.Enabled = true;
+                recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
+            }
+
+            
         }
 
 
