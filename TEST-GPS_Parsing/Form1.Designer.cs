@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label16 = new System.Windows.Forms.Label();
             this.label15 = new System.Windows.Forms.Label();
@@ -63,6 +64,9 @@
             this.fixvalTextBox = new System.Windows.Forms.TextBox();
             this.satsViewTextBox = new System.Windows.Forms.TextBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.label22 = new System.Windows.Forms.Label();
+            this.label21 = new System.Windows.Forms.Label();
+            this.timeElapsedTextBox = new System.Windows.Forms.TextBox();
             this.label17 = new System.Windows.Forms.Label();
             this.packetIDTextBox = new System.Windows.Forms.TextBox();
             this.startButton = new System.Windows.Forms.Button();
@@ -78,9 +82,9 @@
             this.updateUITimer = new System.Windows.Forms.Timer(this.components);
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.statusTextBox = new System.Windows.Forms.TextBox();
-            this.timeElapsedTextBox = new System.Windows.Forms.TextBox();
-            this.label21 = new System.Windows.Forms.Label();
-            this.label22 = new System.Windows.Forms.Label();
+            this.openPortButton = new System.Windows.Forms.Button();
+            this.status2TextBox = new System.Windows.Forms.TextBox();
+            this.trayIconParsing = new System.Windows.Forms.NotifyIcon(this.components);
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -455,6 +459,34 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Monitoring";
             // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(236, 16);
+            this.label22.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(24, 13);
+            this.label22.TabIndex = 13;
+            this.label22.Text = "sec";
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(125, 17);
+            this.label21.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(45, 13);
+            this.label21.TabIndex = 12;
+            this.label21.Text = "Elapsed";
+            // 
+            // timeElapsedTextBox
+            // 
+            this.timeElapsedTextBox.Location = new System.Drawing.Point(171, 13);
+            this.timeElapsedTextBox.Name = "timeElapsedTextBox";
+            this.timeElapsedTextBox.ReadOnly = true;
+            this.timeElapsedTextBox.Size = new System.Drawing.Size(60, 20);
+            this.timeElapsedTextBox.TabIndex = 11;
+            // 
             // label17
             // 
             this.label17.AutoSize = true;
@@ -476,7 +508,7 @@
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(389, 226);
+            this.startButton.Location = new System.Drawing.Point(389, 237);
             this.startButton.Margin = new System.Windows.Forms.Padding(2);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(43, 40);
@@ -487,10 +519,10 @@
             // 
             // openFileButton
             // 
-            this.openFileButton.Location = new System.Drawing.Point(283, 226);
+            this.openFileButton.Location = new System.Drawing.Point(283, 216);
             this.openFileButton.Margin = new System.Windows.Forms.Padding(2);
             this.openFileButton.Name = "openFileButton";
-            this.openFileButton.Size = new System.Drawing.Size(85, 40);
+            this.openFileButton.Size = new System.Drawing.Size(85, 41);
             this.openFileButton.TabIndex = 7;
             this.openFileButton.Text = "Open NMEA Log";
             this.openFileButton.UseVisualStyleBackColor = true;
@@ -500,7 +532,7 @@
             // 
             this.label18.AutoSize = true;
             this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label18.Location = new System.Drawing.Point(258, 233);
+            this.label18.Location = new System.Drawing.Point(260, 244);
             this.label18.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(20, 24);
@@ -511,7 +543,7 @@
             // 
             this.label19.AutoSize = true;
             this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.Location = new System.Drawing.Point(369, 233);
+            this.label19.Location = new System.Drawing.Point(368, 244);
             this.label19.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(20, 24);
@@ -526,11 +558,11 @@
             // groupBox5
             // 
             this.groupBox5.Controls.Add(this.rawLogFileTextBox);
-            this.groupBox5.Location = new System.Drawing.Point(10, 271);
+            this.groupBox5.Location = new System.Drawing.Point(10, 292);
             this.groupBox5.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox5.Size = new System.Drawing.Size(490, 135);
+            this.groupBox5.Size = new System.Drawing.Size(490, 141);
             this.groupBox5.TabIndex = 13;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Raw input logfile";
@@ -543,12 +575,12 @@
             this.rawLogFileTextBox.Name = "rawLogFileTextBox";
             this.rawLogFileTextBox.ReadOnly = true;
             this.rawLogFileTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.rawLogFileTextBox.Size = new System.Drawing.Size(477, 113);
+            this.rawLogFileTextBox.Size = new System.Drawing.Size(477, 119);
             this.rawLogFileTextBox.TabIndex = 0;
             // 
             // stopButton
             // 
-            this.stopButton.Location = new System.Drawing.Point(459, 226);
+            this.stopButton.Location = new System.Drawing.Point(459, 237);
             this.stopButton.Margin = new System.Windows.Forms.Padding(2);
             this.stopButton.Name = "stopButton";
             this.stopButton.Size = new System.Drawing.Size(42, 40);
@@ -561,7 +593,7 @@
             // 
             this.label20.AutoSize = true;
             this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label20.Location = new System.Drawing.Point(435, 233);
+            this.label20.Location = new System.Drawing.Point(436, 244);
             this.label20.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(20, 24);
@@ -584,10 +616,11 @@
             // 
             // groupBox6
             // 
+            this.groupBox6.Controls.Add(this.status2TextBox);
             this.groupBox6.Controls.Add(this.statusTextBox);
             this.groupBox6.Location = new System.Drawing.Point(10, 217);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(243, 49);
+            this.groupBox6.Size = new System.Drawing.Size(243, 70);
             this.groupBox6.TabIndex = 16;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Status";
@@ -600,39 +633,39 @@
             this.statusTextBox.Size = new System.Drawing.Size(230, 20);
             this.statusTextBox.TabIndex = 0;
             // 
-            // timeElapsedTextBox
+            // openPortButton
             // 
-            this.timeElapsedTextBox.Location = new System.Drawing.Point(171, 13);
-            this.timeElapsedTextBox.Name = "timeElapsedTextBox";
-            this.timeElapsedTextBox.ReadOnly = true;
-            this.timeElapsedTextBox.Size = new System.Drawing.Size(60, 20);
-            this.timeElapsedTextBox.TabIndex = 11;
+            this.openPortButton.Location = new System.Drawing.Point(283, 262);
+            this.openPortButton.Margin = new System.Windows.Forms.Padding(2);
+            this.openPortButton.Name = "openPortButton";
+            this.openPortButton.Size = new System.Drawing.Size(85, 29);
+            this.openPortButton.TabIndex = 17;
+            this.openPortButton.Text = "Open Port";
+            this.openPortButton.UseVisualStyleBackColor = true;
+            this.openPortButton.Click += new System.EventHandler(this.openPortButton_Click);
             // 
-            // label21
+            // status2TextBox
             // 
-            this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(125, 17);
-            this.label21.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(45, 13);
-            this.label21.TabIndex = 12;
-            this.label21.Text = "Elapsed";
+            this.status2TextBox.Location = new System.Drawing.Point(7, 44);
+            this.status2TextBox.Name = "status2TextBox";
+            this.status2TextBox.ReadOnly = true;
+            this.status2TextBox.Size = new System.Drawing.Size(230, 20);
+            this.status2TextBox.TabIndex = 1;
             // 
-            // label22
+            // trayIconParsing
             // 
-            this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(236, 16);
-            this.label22.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(24, 13);
-            this.label22.TabIndex = 13;
-            this.label22.Text = "sec";
+            this.trayIconParsing.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+            this.trayIconParsing.Icon = ((System.Drawing.Icon)(resources.GetObject("trayIconParsing.Icon")));
+            this.trayIconParsing.Text = "notifyIcon1";
+            this.trayIconParsing.Visible = true;
+            this.trayIconParsing.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.trayIconParsing_MouseDoubleClick);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(515, 415);
+            this.ClientSize = new System.Drawing.Size(515, 444);
+            this.Controls.Add(this.openPortButton);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.label20);
             this.Controls.Add(this.stopButton);
@@ -645,9 +678,10 @@
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "GPS Logging Application";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
@@ -721,6 +755,9 @@
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.TextBox timeElapsedTextBox;
+        private System.Windows.Forms.TextBox status2TextBox;
+        private System.Windows.Forms.Button openPortButton;
+        private System.Windows.Forms.NotifyIcon trayIconParsing;
     }
 }
 

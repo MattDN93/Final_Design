@@ -50,6 +50,7 @@ namespace TEST_GPS_Parsing
 
             //prep the load box
             initOpenLogDialog();
+            trayIconParsing.Visible = true;
 
         }
 
@@ -91,12 +92,16 @@ namespace TEST_GPS_Parsing
                 openFileButton.Enabled = false;
                 startButton.Enabled = false;
                 stopButton.Enabled = true;
+                trayIconParsing.Text = "GPS logging active...";
+                trayIconParsing.ShowBalloonTip(5, "Logging running...", "Logger will continue running here if main window closed.",ToolTipIcon.Info);
                 recvRawDataWorker.RunWorkerAsync();         //starts the data receiving in the background
             }
             else
             {
                 recvRawDataWorker.CancelAsync();
                 statusTextBox.Clear();
+                trayIconParsing.Text = "Parsing error! See main window.";
+                trayIconParsing.ShowBalloonTip(5, "GPS Logging error" ,"The last operation isn't finished yet. Please wait and try again.", ToolTipIcon.Error);
                 statusTextBox.AppendText("Error: previous task not cancelled yet. Try again.");
             }
 
@@ -571,6 +576,18 @@ namespace TEST_GPS_Parsing
             statusTextBox.Clear();
             statusTextBox.AppendText("GPS parsing complete or interrupted.");
             rawLogFileTextBox.Text = "";
+            trayIconParsing.Text = "Logging stopped.";
+            trayIconParsing.ShowBalloonTip(5, "GPS Logging stopped", "Logging stopped or interrupted. Open a new file to restart logging.", ToolTipIcon.Error);
+        }
+
+        private void openPortButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void trayIconParsing_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+
         }
     }
 }
