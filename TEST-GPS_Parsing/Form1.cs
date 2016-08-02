@@ -109,7 +109,7 @@ namespace TEST_GPS_Parsing
             {
                 gpsData.timeElapsed++; //update the running timer only if parsing is active
             }
-
+            
 
         }
 
@@ -248,5 +248,57 @@ namespace TEST_GPS_Parsing
         {
 
         }
+
+        //ToolStrip Methods - to enable or disable the database
+
+        
+
+        private void enabledToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (enabledToolStripMenuItem.Checked == true)
+            {
+                MessageBox.Show("Database logging is on by default.","Logging already on");
+                enabledToolStripMenuItem.Checked = true;
+                disabledToolStripMenuItem.Checked = false;
+            }
+            else
+            {
+                MessageBox.Show("Logging to the database has been enabled.","Logging turned on");
+                enabledToolStripMenuItem.Checked = true;
+                disabledToolStripMenuItem.Checked = false;
+            }
+            
+        }
+
+        private void disabledToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (disabledToolStripMenuItem.Checked == false && enabledToolStripMenuItem.Checked == true)
+            {
+                DialogResult quitDB = MessageBox.Show("This turns off logging to XML database, but keeps receiving incoming GPS data. Keep receiving data but stop logging to database?", "Stop database logging?", MessageBoxButtons.YesNo);
+                if (quitDB == DialogResult.Yes)
+                {
+                    MessageBox.Show("Logging to the database has been disabled.","Database logging off");
+                    disabledToolStripMenuItem.Checked = true;
+                    enabledToolStripMenuItem.Checked = false;
+                }
+            }
+            else if (disabledToolStripMenuItem.Checked == true && enabledToolStripMenuItem.Checked == false)
+            {
+                MessageBox.Show("Database logging is already disabled.","Database logging already off");
+            }
+
+        }
+
+        private void enabledToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void disabledToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+
     }
 }

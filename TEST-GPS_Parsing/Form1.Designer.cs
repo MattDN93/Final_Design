@@ -81,10 +81,18 @@
             this.recvRawDataWorker = new System.ComponentModel.BackgroundWorker();
             this.updateUITimer = new System.Windows.Forms.Timer(this.components);
             this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.status2TextBox = new System.Windows.Forms.TextBox();
             this.statusTextBox = new System.Windows.Forms.TextBox();
             this.openPortButton = new System.Windows.Forms.Button();
-            this.status2TextBox = new System.Windows.Forms.TextBox();
             this.trayIconParsing = new System.Windows.Forms.NotifyIcon(this.components);
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.databaseOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.databaseReadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openInappToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openXMLInSeparateViewerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.databaseWriteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.enabledToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.disabledToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -92,6 +100,7 @@
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.groupBox6.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -103,7 +112,7 @@
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.longitudeTextBox);
             this.groupBox1.Controls.Add(this.latitudeTextBox);
-            this.groupBox1.Location = new System.Drawing.Point(10, 11);
+            this.groupBox1.Location = new System.Drawing.Point(10, 24);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
@@ -190,7 +199,7 @@
             this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Controls.Add(this.headDegTextBox);
             this.groupBox2.Controls.Add(this.speedKphTextBox);
-            this.groupBox2.Location = new System.Drawing.Point(232, 47);
+            this.groupBox2.Location = new System.Drawing.Point(232, 61);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(2);
@@ -297,7 +306,7 @@
             this.groupBox3.Controls.Add(this.label9);
             this.groupBox3.Controls.Add(this.fixvalTextBox);
             this.groupBox3.Controls.Add(this.satsViewTextBox);
-            this.groupBox3.Location = new System.Drawing.Point(10, 130);
+            this.groupBox3.Location = new System.Drawing.Point(10, 148);
             this.groupBox3.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(2);
@@ -450,7 +459,7 @@
             this.groupBox4.Controls.Add(this.timeElapsedTextBox);
             this.groupBox4.Controls.Add(this.label17);
             this.groupBox4.Controls.Add(this.packetIDTextBox);
-            this.groupBox4.Location = new System.Drawing.Point(232, 11);
+            this.groupBox4.Location = new System.Drawing.Point(232, 20);
             this.groupBox4.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Padding = new System.Windows.Forms.Padding(2);
@@ -508,7 +517,7 @@
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(389, 237);
+            this.startButton.Location = new System.Drawing.Point(389, 250);
             this.startButton.Margin = new System.Windows.Forms.Padding(2);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(43, 40);
@@ -519,7 +528,7 @@
             // 
             // openFileButton
             // 
-            this.openFileButton.Location = new System.Drawing.Point(283, 216);
+            this.openFileButton.Location = new System.Drawing.Point(283, 233);
             this.openFileButton.Margin = new System.Windows.Forms.Padding(2);
             this.openFileButton.Name = "openFileButton";
             this.openFileButton.Size = new System.Drawing.Size(85, 41);
@@ -532,7 +541,7 @@
             // 
             this.label18.AutoSize = true;
             this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label18.Location = new System.Drawing.Point(260, 244);
+            this.label18.Location = new System.Drawing.Point(259, 257);
             this.label18.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(20, 24);
@@ -543,7 +552,7 @@
             // 
             this.label19.AutoSize = true;
             this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.Location = new System.Drawing.Point(368, 244);
+            this.label19.Location = new System.Drawing.Point(370, 257);
             this.label19.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(20, 24);
@@ -558,7 +567,7 @@
             // groupBox5
             // 
             this.groupBox5.Controls.Add(this.rawLogFileTextBox);
-            this.groupBox5.Location = new System.Drawing.Point(10, 292);
+            this.groupBox5.Location = new System.Drawing.Point(11, 315);
             this.groupBox5.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Padding = new System.Windows.Forms.Padding(2);
@@ -580,7 +589,7 @@
             // 
             // stopButton
             // 
-            this.stopButton.Location = new System.Drawing.Point(459, 237);
+            this.stopButton.Location = new System.Drawing.Point(459, 250);
             this.stopButton.Margin = new System.Windows.Forms.Padding(2);
             this.stopButton.Name = "stopButton";
             this.stopButton.Size = new System.Drawing.Size(42, 40);
@@ -593,7 +602,7 @@
             // 
             this.label20.AutoSize = true;
             this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label20.Location = new System.Drawing.Point(436, 244);
+            this.label20.Location = new System.Drawing.Point(436, 257);
             this.label20.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(20, 24);
@@ -618,12 +627,20 @@
             // 
             this.groupBox6.Controls.Add(this.status2TextBox);
             this.groupBox6.Controls.Add(this.statusTextBox);
-            this.groupBox6.Location = new System.Drawing.Point(10, 217);
+            this.groupBox6.Location = new System.Drawing.Point(10, 237);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(243, 70);
             this.groupBox6.TabIndex = 16;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Status";
+            // 
+            // status2TextBox
+            // 
+            this.status2TextBox.Location = new System.Drawing.Point(7, 44);
+            this.status2TextBox.Name = "status2TextBox";
+            this.status2TextBox.ReadOnly = true;
+            this.status2TextBox.Size = new System.Drawing.Size(230, 20);
+            this.status2TextBox.TabIndex = 1;
             // 
             // statusTextBox
             // 
@@ -635,7 +652,7 @@
             // 
             // openPortButton
             // 
-            this.openPortButton.Location = new System.Drawing.Point(283, 262);
+            this.openPortButton.Location = new System.Drawing.Point(283, 278);
             this.openPortButton.Margin = new System.Windows.Forms.Padding(2);
             this.openPortButton.Name = "openPortButton";
             this.openPortButton.Size = new System.Drawing.Size(85, 29);
@@ -643,14 +660,6 @@
             this.openPortButton.Text = "Open Port";
             this.openPortButton.UseVisualStyleBackColor = true;
             this.openPortButton.Click += new System.EventHandler(this.openPortButton_Click);
-            // 
-            // status2TextBox
-            // 
-            this.status2TextBox.Location = new System.Drawing.Point(7, 44);
-            this.status2TextBox.Name = "status2TextBox";
-            this.status2TextBox.ReadOnly = true;
-            this.status2TextBox.Size = new System.Drawing.Size(230, 20);
-            this.status2TextBox.TabIndex = 1;
             // 
             // trayIconParsing
             // 
@@ -660,11 +669,81 @@
             this.trayIconParsing.Visible = true;
             this.trayIconParsing.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.trayIconParsing_MouseDoubleClick);
             // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.menuStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Visible;
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.databaseOptionsToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 462);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
+            this.menuStrip1.Size = new System.Drawing.Size(514, 24);
+            this.menuStrip1.TabIndex = 18;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // databaseOptionsToolStripMenuItem
+            // 
+            this.databaseOptionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.databaseReadToolStripMenuItem,
+            this.databaseWriteToolStripMenuItem});
+            this.databaseOptionsToolStripMenuItem.Name = "databaseOptionsToolStripMenuItem";
+            this.databaseOptionsToolStripMenuItem.Size = new System.Drawing.Size(110, 20);
+            this.databaseOptionsToolStripMenuItem.Text = "Database options";
+            // 
+            // databaseReadToolStripMenuItem
+            // 
+            this.databaseReadToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openInappToolStripMenuItem,
+            this.openXMLInSeparateViewerToolStripMenuItem});
+            this.databaseReadToolStripMenuItem.Name = "databaseReadToolStripMenuItem";
+            this.databaseReadToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.databaseReadToolStripMenuItem.Text = "Database Read";
+            // 
+            // openInappToolStripMenuItem
+            // 
+            this.openInappToolStripMenuItem.Name = "openInappToolStripMenuItem";
+            this.openInappToolStripMenuItem.Size = new System.Drawing.Size(227, 22);
+            this.openInappToolStripMenuItem.Text = "Open in-app";
+            // 
+            // openXMLInSeparateViewerToolStripMenuItem
+            // 
+            this.openXMLInSeparateViewerToolStripMenuItem.Name = "openXMLInSeparateViewerToolStripMenuItem";
+            this.openXMLInSeparateViewerToolStripMenuItem.Size = new System.Drawing.Size(227, 22);
+            this.openXMLInSeparateViewerToolStripMenuItem.Text = "Open XML in separate viewer";
+            // 
+            // databaseWriteToolStripMenuItem
+            // 
+            this.databaseWriteToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.enabledToolStripMenuItem,
+            this.disabledToolStripMenuItem});
+            this.databaseWriteToolStripMenuItem.Name = "databaseWriteToolStripMenuItem";
+            this.databaseWriteToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.databaseWriteToolStripMenuItem.Text = "Database Write";
+            // 
+            // enabledToolStripMenuItem
+            // 
+            this.enabledToolStripMenuItem.Checked = true;
+            this.enabledToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.enabledToolStripMenuItem.Name = "enabledToolStripMenuItem";
+            this.enabledToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.enabledToolStripMenuItem.Text = "Enabled";
+            this.enabledToolStripMenuItem.CheckedChanged += new System.EventHandler(this.enabledToolStripMenuItem_CheckedChanged);
+            this.enabledToolStripMenuItem.Click += new System.EventHandler(this.enabledToolStripMenuItem_Click);
+            // 
+            // disabledToolStripMenuItem
+            // 
+            this.disabledToolStripMenuItem.Name = "disabledToolStripMenuItem";
+            this.disabledToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.disabledToolStripMenuItem.Text = "Disabled";
+            this.disabledToolStripMenuItem.CheckedChanged += new System.EventHandler(this.disabledToolStripMenuItem_CheckedChanged);
+            this.disabledToolStripMenuItem.Click += new System.EventHandler(this.disabledToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(515, 444);
+            this.ClientSize = new System.Drawing.Size(514, 486);
             this.Controls.Add(this.openPortButton);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.label20);
@@ -678,7 +757,9 @@
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
             this.Text = "GPS Logging Application";
@@ -696,6 +777,8 @@
             this.groupBox5.PerformLayout();
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -758,6 +841,14 @@
         private System.Windows.Forms.TextBox status2TextBox;
         private System.Windows.Forms.Button openPortButton;
         private System.Windows.Forms.NotifyIcon trayIconParsing;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem databaseOptionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem databaseReadToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openInappToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openXMLInSeparateViewerToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem databaseWriteToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem enabledToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem disabledToolStripMenuItem;
     }
 }
 
