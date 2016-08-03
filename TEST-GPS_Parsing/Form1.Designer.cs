@@ -97,6 +97,7 @@
             this.creationOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.oncePerSessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newFileAtEachStartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dbLoggingThread = new System.ComponentModel.BackgroundWorker();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -732,14 +733,14 @@
             this.enabledToolStripMenuItem.Checked = true;
             this.enabledToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.enabledToolStripMenuItem.Name = "enabledToolStripMenuItem";
-            this.enabledToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
+            this.enabledToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.enabledToolStripMenuItem.Text = "Enabled";
             this.enabledToolStripMenuItem.Click += new System.EventHandler(this.enabledToolStripMenuItem_Click);
             // 
             // disabledToolStripMenuItem
             // 
             this.disabledToolStripMenuItem.Name = "disabledToolStripMenuItem";
-            this.disabledToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
+            this.disabledToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.disabledToolStripMenuItem.Text = "Disabled";
             this.disabledToolStripMenuItem.Click += new System.EventHandler(this.disabledToolStripMenuItem_Click);
             // 
@@ -775,6 +776,12 @@
             this.newFileAtEachStartToolStripMenuItem.Text = "New file at each Start";
             this.newFileAtEachStartToolStripMenuItem.ToolTipText = "Creates a new database log file each time \"Start\" is selected per file";
             this.newFileAtEachStartToolStripMenuItem.Click += new System.EventHandler(this.newFileAtEachStartToolStripMenuItem_Click);
+            // 
+            // dbLoggingThread
+            // 
+            this.dbLoggingThread.WorkerSupportsCancellation = true;
+            this.dbLoggingThread.DoWork += new System.ComponentModel.DoWorkEventHandler(this.dbLoggingThread_DoWork);
+            this.dbLoggingThread.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.dbLoggingThread_ProgressChanged);
             // 
             // Form1
             // 
@@ -890,6 +897,7 @@
         private System.Windows.Forms.ToolStripMenuItem creationOptionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem oncePerSessionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newFileAtEachStartToolStripMenuItem;
+        private System.ComponentModel.BackgroundWorker dbLoggingThread;
     }
 }
 

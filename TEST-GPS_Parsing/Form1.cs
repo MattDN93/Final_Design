@@ -15,9 +15,10 @@ namespace TEST_GPS_Parsing
         //*************************************
         public string logFilename;
         bool dbLoggingActive = true;
-        bool newLogEveryStart = true;                     //TRUE = makes new file every time start is clicked; FALSE = once per session
+        bool newLogEveryStart = true;                 //TRUE = makes new file every time start is clicked; FALSE = once per session
         GPSPacket gpsData = new GPSPacket();          //global GPS data packet for UI display
-        string sentenceBuffer;      //global buffer to read incoming data
+        string sentenceBuffer;                        //global buffer to read incoming data used for parsing
+        string rawBuffer;                             //not used for parsing , but for display only
 
 
         public Form1()
@@ -98,7 +99,11 @@ namespace TEST_GPS_Parsing
                 trayIconParsing.Text = "GPS logging active...";
                 trayIconParsing.ShowBalloonTip(5, "Logging running...", "Logger will continue running here if main window closed.",ToolTipIcon.Info);
                 recvRawDataWorker.RunWorkerAsync();         //starts the thread to parse data and update UI
-                //SOME NEW THREAD HERE                      //starts thread to manage DB data if logging is on
+                if (dbLoggingActive == true)
+                {
+                    dbLoggingThread.RunWorkerAsync();       //starts thread to manage DB data if logging is on
+                }
+
             }
             else
             {
@@ -122,6 +127,7 @@ namespace TEST_GPS_Parsing
                 startButton.Enabled = true;
                 openFileButton.Enabled = true;
                 recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
+                dbLoggingThread.CancelAsync(); //requests cancellation of the database thread
                 statusTextBox.Clear();
                 statusTextBox.AppendText("Stop requested, ending thread...");
             }
@@ -144,40 +150,18 @@ namespace TEST_GPS_Parsing
             }
             else if (dbLoggingActive == false)
             {
+                dbLoggingThread.CancelAsync();      //end the logging thread
                 status2TextBox.Clear();
                 status2TextBox.AppendText("Database logging disabled.");
             }
 
         }
 
-        //-------------------------THREAD FOR BACKGROUND WORK--------------------
+        //-------------------------THREADING SECTION--------------------------------
+        //                          THREAD 1: FOR BACKGROUND WORK--------------------
         private void recvRawDataWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            //set up the XML database - if the user wants it of course! this is the initial check for database active or not
-            if (dbLoggingActive == true)    //initial check if user wants DB logging
-            {
-                if (newLogEveryStart == true) //if set, a new log is created every time "Start" is clicked 
-                {
-                    //create a basic document skeleton and save it
-                    //set up the root node
-                    XmlDocument databaseDoc = new XmlDocument();
-                    XmlNode rootNode = databaseDoc.CreateElement("GPSLog");
-                    databaseDoc.AppendChild(rootNode);
-
-                    //insert comment for info
-                    XmlComment docComment, docComment2;
-                    docComment = databaseDoc.CreateComment("GPS Data Logging Session Start");
-                    docComment2 = databaseDoc.CreateComment("Logging started at " + DateTime.Now.ToString());                                
-                    databaseDoc.InsertBefore(docComment, rootNode);
-                    databaseDoc.InsertBefore(docComment2, rootNode);
-
-
-                    databaseDoc.Save("GPSLogDB" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xml");
-                }
-                
-
-            }
-           
+       
 
             //create a new streamreader instance for the incoming file
             System.IO.StreamReader inputFile = new System.IO.StreamReader(gpsData.gpsLogfilename);
@@ -185,21 +169,29 @@ namespace TEST_GPS_Parsing
             //start reading the line
             //For simulating NMEA behaviour
             int count = 0;
-
+            
             
                 while (inputFile.EndOfStream == false)
                 {
                     if (!recvRawDataWorker.CancellationPending) //check for thread cancel request from stop button (since it's only active here)
-                    {
+                    {                    
                         sentenceBuffer = inputFile.ReadLine();
                         //This function updates the UI elements with the parsed NMEA data
+                        rawBuffer += sentenceBuffer;                         //aggregates the raw buffer to display it
                         gpsData = gpsData.parseSelection(sentenceBuffer, gpsData);
                         count++;
-                        //this allows for a thread-safe variable access
-                        recvRawDataWorker.ReportProgress(count, gpsData);
+                        
+                    //this allows for a thread-safe variable access
+                    if (gpsData.packetID > gpsData.deltaCount)
+                    {
+                        gpsData.deltaCount++;
+                        recvRawDataWorker.ReportProgress(count, gpsData); //only update the UI if a whole new packet has been read- saves calling every char
+                        //rawBuffer = "";
+                    }
+                    
 
-                        //FOR SIMULATION ONLY
-                        Thread.Sleep(100);
+                    //FOR SIMULATION ONLY
+                    Thread.Sleep(100);
                         //---------------
                     }
                     else
@@ -215,11 +207,95 @@ namespace TEST_GPS_Parsing
         
         }
 
+        //------------------------THREAD 2: FOR UPDATING THE DATABASE--------------------------------
+
+        private void dbLoggingThread_DoWork(object sender, DoWorkEventArgs e)
+        {
+            //set up the XML database - if the user wants it of course! this is the initial check for database active or not
+            if (dbLoggingActive == true)    //initial check if user wants DB logging
+            {
+                XmlDocument databaseDoc = new XmlDocument();
+                //if (newLogEveryStart == true) //if set, a new log is created every time "Start" is clicked 
+                //{
+                //create a basic document skeleton and save it
+                //set up the root node
+
+                XmlNode rootNode = databaseDoc.CreateElement("GPSLog");
+                databaseDoc.AppendChild(rootNode);
+
+                //insert comment for info
+                XmlComment docComment, docComment2;
+                docComment = databaseDoc.CreateComment("GPS Data Logging Session Start");
+                docComment2 = databaseDoc.CreateComment("Logging started at " + DateTime.Now.ToString());
+                databaseDoc.InsertBefore(docComment, rootNode);
+                databaseDoc.InsertBefore(docComment2, rootNode);
+
+                string dbFileName = "GPSLogDB" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xml";
+
+                databaseDoc.Save(dbFileName);
+                System.IO.StreamWriter dbOutputFile = new System.IO.StreamWriter(dbFileName);
+
+                int packetCount = 0;
+                //now enter the continuous logging loop for as long as the incoming data parser thread is running
+                while (recvRawDataWorker.IsBusy)
+                {
+                    packetCount++;          //increment number of packets processed
+                    if (!dbLoggingThread.CancellationPending)
+                    {
+                        //dbLoggingThread.ReportProgress(packetCount, databaseDoc);
+                        //write a new 
+                    }
+                    else
+                    {
+                        //a unusual cancel has been requested, try close XML file safely
+
+                        break;
+                    }
+                }
+
+            }
+        }
+        
+        
+
+        //----------------------Progress Changed on thread methods-------------------------------------
+
+        private void dbLoggingThread_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            
+        }
+
+        private void recvRawDataWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            //check the status of the system each time a new sentence received and inform the user
+            statusTextBox.Clear();
+            statusTextBox.AppendText("Parsing in progress. No errors.");
+          
+            //function called to get all the incoming data and refresh the UI
+            updateUI(gpsData, sentenceBuffer);
+            rawBuffer = "";             //since earlier call is asynchronous, only clear the raw buffer once 100% sure that its data has reached the UI - which is now.
+        }
+
+        
+        private void recvRawDataWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            statusTextBox.Clear();
+            statusTextBox.AppendText("GPS parsing complete or interrupted.");
+            rawLogFileTextBox.Text = "";
+            stopButton.Enabled = false;
+            startButton.Enabled = true;
+            openFileButton.Enabled = true;
+            trayIconParsing.Text = "Logging stopped.";
+            trayIconParsing.ShowBalloonTip(5, "GPS Logging stopped", "Logging stopped or interrupted. Open a new file to restart logging.", ToolTipIcon.Error);
+        }
+
+        //-------------------------UI update method------------------------------------------
+
         private void updateUI(GPSPacket gpsDataForUI, string sentenceBufferForUI)
         {
             //This takes the gpsData object and populates all the fields with updated values (if any)
             //Show the buffer of the raw text file being read 
-            rawLogFileTextBox.AppendText(sentenceBufferForUI);
+            rawLogFileTextBox.AppendText(rawBuffer);
             sentenceBufferForUI = "";
             //Monitoring
             packetIDTextBox.Text = gpsDataForUI.ID.ToString();
@@ -261,31 +337,6 @@ namespace TEST_GPS_Parsing
             timeTextBox.AppendText(gpsDataForUI.time);
 
 
-        }
-
-        private void recvRawDataWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            //check the status of the system each time a new sentence received and inform the user
-            statusTextBox.Clear();
-            statusTextBox.AppendText("Parsing in progress. No errors.");
-          
-            //function called to get all the incoming data and refresh the UI
-            updateUI(gpsData, sentenceBuffer);
-
-        }
-
-
-
-        private void recvRawDataWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            statusTextBox.Clear();
-            statusTextBox.AppendText("GPS parsing complete or interrupted.");
-            rawLogFileTextBox.Text = "";
-            stopButton.Enabled = false;
-            startButton.Enabled = true;
-            openFileButton.Enabled = true;
-            trayIconParsing.Text = "Logging stopped.";
-            trayIconParsing.ShowBalloonTip(5, "GPS Logging stopped", "Logging stopped or interrupted. Open a new file to restart logging.", ToolTipIcon.Error);
         }
 
         //-------------------------End threads---------------------------------------------
@@ -367,5 +418,7 @@ namespace TEST_GPS_Parsing
                 newLogEveryStart = true;
             }
         }
+
+
     }
 }

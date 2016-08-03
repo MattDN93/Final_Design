@@ -13,7 +13,8 @@ namespace TEST_GPS_Parsing
         public int timeElapsed;
         //vars for GPS data
         public int ID;
-        int packetID = 0;               //session-based packet ID, one packet is equivalent to a set of NMEA strings starting with GPRMC
+        public int packetID = 0;               //session-based packet ID, one packet is equivalent to a set of NMEA strings starting with GPRMC
+        public int deltaCount = 0;                    //checks the delta of packet ID so we can update only when ID has changed
         //incoming GPS data
         //from GPRMC
         public string latitude;
@@ -442,6 +443,7 @@ namespace TEST_GPS_Parsing
         }
 
         //------------------------------------------------------------------
+
 
 
 
