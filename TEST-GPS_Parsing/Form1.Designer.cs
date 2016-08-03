@@ -93,6 +93,10 @@
             this.databaseWriteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.enabledToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.disabledToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.creationOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.oncePerSessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newFileAtEachStartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -686,7 +690,9 @@
             // 
             this.databaseOptionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.databaseReadToolStripMenuItem,
-            this.databaseWriteToolStripMenuItem});
+            this.databaseWriteToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.creationOptionsToolStripMenuItem});
             this.databaseOptionsToolStripMenuItem.Name = "databaseOptionsToolStripMenuItem";
             this.databaseOptionsToolStripMenuItem.Size = new System.Drawing.Size(110, 20);
             this.databaseOptionsToolStripMenuItem.Text = "Database options";
@@ -697,7 +703,7 @@
             this.openInappToolStripMenuItem,
             this.openXMLInSeparateViewerToolStripMenuItem});
             this.databaseReadToolStripMenuItem.Name = "databaseReadToolStripMenuItem";
-            this.databaseReadToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.databaseReadToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
             this.databaseReadToolStripMenuItem.Text = "Database Read";
             // 
             // openInappToolStripMenuItem
@@ -718,7 +724,7 @@
             this.enabledToolStripMenuItem,
             this.disabledToolStripMenuItem});
             this.databaseWriteToolStripMenuItem.Name = "databaseWriteToolStripMenuItem";
-            this.databaseWriteToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.databaseWriteToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
             this.databaseWriteToolStripMenuItem.Text = "Database Write";
             // 
             // enabledToolStripMenuItem
@@ -726,18 +732,49 @@
             this.enabledToolStripMenuItem.Checked = true;
             this.enabledToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.enabledToolStripMenuItem.Name = "enabledToolStripMenuItem";
-            this.enabledToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.enabledToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
             this.enabledToolStripMenuItem.Text = "Enabled";
-            this.enabledToolStripMenuItem.CheckedChanged += new System.EventHandler(this.enabledToolStripMenuItem_CheckedChanged);
             this.enabledToolStripMenuItem.Click += new System.EventHandler(this.enabledToolStripMenuItem_Click);
             // 
             // disabledToolStripMenuItem
             // 
             this.disabledToolStripMenuItem.Name = "disabledToolStripMenuItem";
-            this.disabledToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.disabledToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
             this.disabledToolStripMenuItem.Text = "Disabled";
-            this.disabledToolStripMenuItem.CheckedChanged += new System.EventHandler(this.disabledToolStripMenuItem_CheckedChanged);
             this.disabledToolStripMenuItem.Click += new System.EventHandler(this.disabledToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(159, 6);
+            // 
+            // creationOptionsToolStripMenuItem
+            // 
+            this.creationOptionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.oncePerSessionToolStripMenuItem,
+            this.newFileAtEachStartToolStripMenuItem});
+            this.creationOptionsToolStripMenuItem.Name = "creationOptionsToolStripMenuItem";
+            this.creationOptionsToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.creationOptionsToolStripMenuItem.Text = "Creation options";
+            this.creationOptionsToolStripMenuItem.ToolTipText = "Options for database creation. Disabled if logging is off.";
+            // 
+            // oncePerSessionToolStripMenuItem
+            // 
+            this.oncePerSessionToolStripMenuItem.Name = "oncePerSessionToolStripMenuItem";
+            this.oncePerSessionToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.oncePerSessionToolStripMenuItem.Text = "Once per session";
+            this.oncePerSessionToolStripMenuItem.ToolTipText = "Creates a new database log file only when the program is opened.";
+            this.oncePerSessionToolStripMenuItem.Click += new System.EventHandler(this.oncePerSessionToolStripMenuItem_Click);
+            // 
+            // newFileAtEachStartToolStripMenuItem
+            // 
+            this.newFileAtEachStartToolStripMenuItem.Checked = true;
+            this.newFileAtEachStartToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.newFileAtEachStartToolStripMenuItem.Name = "newFileAtEachStartToolStripMenuItem";
+            this.newFileAtEachStartToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.newFileAtEachStartToolStripMenuItem.Text = "New file at each Start";
+            this.newFileAtEachStartToolStripMenuItem.ToolTipText = "Creates a new database log file each time \"Start\" is selected per file";
+            this.newFileAtEachStartToolStripMenuItem.Click += new System.EventHandler(this.newFileAtEachStartToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -849,6 +886,10 @@
         private System.Windows.Forms.ToolStripMenuItem databaseWriteToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem enabledToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem disabledToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem creationOptionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem oncePerSessionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem newFileAtEachStartToolStripMenuItem;
     }
 }
 

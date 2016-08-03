@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Serialization;
 
 
 namespace TEST_GPS_Parsing
@@ -12,10 +14,11 @@ namespace TEST_GPS_Parsing
         bool debug = false;
         //*************************************
         public string logFilename;
+        bool dbLoggingActive = true;
+        bool newLogEveryStart = true;                     //TRUE = makes new file every time start is clicked; FALSE = once per session
         GPSPacket gpsData = new GPSPacket();          //global GPS data packet for UI display
-        bool haveStarted = false;   //bool to indicate if logging is happening or not (for timer)
         string sentenceBuffer;      //global buffer to read incoming data
-        
+
 
         public Form1()
         {
@@ -75,9 +78,14 @@ namespace TEST_GPS_Parsing
             statusTextBox.AppendText("File opened OK. Click start to start parsing.");
         }
 
-        //We update the UI 
-        //END THREAD
+ 
 
+        /// <summary>
+        /// The "start"button click action.
+        /// Starts the appropriate thread for logging data or setting up the database if required
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void startButton_Click(object sender, EventArgs e)
         {
 
@@ -89,7 +97,8 @@ namespace TEST_GPS_Parsing
                 stopButton.Enabled = true;
                 trayIconParsing.Text = "GPS logging active...";
                 trayIconParsing.ShowBalloonTip(5, "Logging running...", "Logger will continue running here if main window closed.",ToolTipIcon.Info);
-                recvRawDataWorker.RunWorkerAsync();         //starts the data receiving in the background
+                recvRawDataWorker.RunWorkerAsync();         //starts the thread to parse data and update UI
+                //SOME NEW THREAD HERE                      //starts thread to manage DB data if logging is on
             }
             else
             {
@@ -103,20 +112,74 @@ namespace TEST_GPS_Parsing
 
         }
 
+        private void stopButton_Click(object sender, EventArgs e)
+        {
+            //only stop after confirmation
+            DialogResult quitQuestion = MessageBox.Show("This will stop the GPS log. Stop logging now?", "Stop GPS logging?", MessageBoxButtons.YesNo);
+            if (quitQuestion == DialogResult.Yes)
+            {
+                stopButton.Enabled = false;
+                startButton.Enabled = true;
+                openFileButton.Enabled = true;
+                recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
+                statusTextBox.Clear();
+                statusTextBox.AppendText("Stop requested, ending thread...");
+            }
+
+
+        }
+
         private void updateUITimer_Tick(object sender, EventArgs e)
         {
             if (recvRawDataWorker.IsBusy)
             {
                 gpsData.timeElapsed++; //update the running timer only if parsing is active
             }
-            
+
+            //also check on status of database logging requirement
+            if (dbLoggingActive == true)
+            {
+                status2TextBox.Clear();
+                status2TextBox.AppendText("Database logging enabled.");
+            }
+            else if (dbLoggingActive == false)
+            {
+                status2TextBox.Clear();
+                status2TextBox.AppendText("Database logging disabled.");
+            }
 
         }
 
         //-------------------------THREAD FOR BACKGROUND WORK--------------------
         private void recvRawDataWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            //GPSPacket gpsData = new GPSPacket();
+            //set up the XML database - if the user wants it of course! this is the initial check for database active or not
+            if (dbLoggingActive == true)    //initial check if user wants DB logging
+            {
+                if (newLogEveryStart == true) //if set, a new log is created every time "Start" is clicked 
+                {
+                    //create a basic document skeleton and save it
+                    //set up the root node
+                    XmlDocument databaseDoc = new XmlDocument();
+                    XmlNode rootNode = databaseDoc.CreateElement("GPSLog");
+                    databaseDoc.AppendChild(rootNode);
+
+                    //insert comment for info
+                    XmlComment docComment, docComment2;
+                    docComment = databaseDoc.CreateComment("GPS Data Logging Session Start");
+                    docComment2 = databaseDoc.CreateComment("Logging started at " + DateTime.Now.ToString());                                
+                    databaseDoc.InsertBefore(docComment, rootNode);
+                    databaseDoc.InsertBefore(docComment2, rootNode);
+
+
+                    databaseDoc.Save("GPSLogDB" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xml");
+                }
+                
+
+            }
+           
+
+            //create a new streamreader instance for the incoming file
             System.IO.StreamReader inputFile = new System.IO.StreamReader(gpsData.gpsLogfilename);
 
             //start reading the line
@@ -202,30 +265,16 @@ namespace TEST_GPS_Parsing
 
         private void recvRawDataWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-
-                statusTextBox.Clear();
-                statusTextBox.AppendText("Parsing in progress. No errors.");
-                updateUI(gpsData, sentenceBuffer);
+            //check the status of the system each time a new sentence received and inform the user
+            statusTextBox.Clear();
+            statusTextBox.AppendText("Parsing in progress. No errors.");
+          
+            //function called to get all the incoming data and refresh the UI
+            updateUI(gpsData, sentenceBuffer);
 
         }
 
 
-        private void stopButton_Click(object sender, EventArgs e)
-        {
-            //only stop after confirmation
-            DialogResult quitQuestion = MessageBox.Show("This will stop the GPS log. Stop logging now?", "Stop GPS logging?", MessageBoxButtons.YesNo);
-            if (quitQuestion == DialogResult.Yes)
-            {
-                stopButton.Enabled = false;
-                startButton.Enabled = true;
-                openFileButton.Enabled = true;
-                recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
-                statusTextBox.Clear();
-                statusTextBox.AppendText("Stop requested, ending thread...");
-            }
-
-            
-        }
 
         private void recvRawDataWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
@@ -239,6 +288,8 @@ namespace TEST_GPS_Parsing
             trayIconParsing.ShowBalloonTip(5, "GPS Logging stopped", "Logging stopped or interrupted. Open a new file to restart logging.", ToolTipIcon.Error);
         }
 
+        //-------------------------End threads---------------------------------------------
+
         private void openPortButton_Click(object sender, EventArgs e)
         {
 
@@ -249,21 +300,23 @@ namespace TEST_GPS_Parsing
 
         }
 
-        //ToolStrip Methods - to enable or disable the database
-
-        
+        //ToolStrip Methods - to enable or disable the database or other settings---------------------------------
 
         private void enabledToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (enabledToolStripMenuItem.Checked == true)
             {
                 MessageBox.Show("Database logging is on by default.","Logging already on");
+                dbLoggingActive = true;
+                creationOptionsToolStripMenuItem.Enabled = true;
                 enabledToolStripMenuItem.Checked = true;
                 disabledToolStripMenuItem.Checked = false;
             }
             else
             {
                 MessageBox.Show("Logging to the database has been enabled.","Logging turned on");
+                dbLoggingActive = true;
+                creationOptionsToolStripMenuItem.Enabled = true;
                 enabledToolStripMenuItem.Checked = true;
                 disabledToolStripMenuItem.Checked = false;
             }
@@ -278,27 +331,41 @@ namespace TEST_GPS_Parsing
                 if (quitDB == DialogResult.Yes)
                 {
                     MessageBox.Show("Logging to the database has been disabled.","Database logging off");
+                    dbLoggingActive = false;
                     disabledToolStripMenuItem.Checked = true;
                     enabledToolStripMenuItem.Checked = false;
+                    creationOptionsToolStripMenuItem.Enabled = false;
                 }
             }
             else if (disabledToolStripMenuItem.Checked == true && enabledToolStripMenuItem.Checked == false)
             {
                 MessageBox.Show("Database logging is already disabled.","Database logging already off");
+                creationOptionsToolStripMenuItem.Enabled = false;   //disable options for file creation
+                dbLoggingActive = false;
             }
 
         }
 
-        private void enabledToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        private void oncePerSessionToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            //the default option is creating a new db logfile every time the start button is clicked
+            if (oncePerSessionToolStripMenuItem.Checked == false && newFileAtEachStartToolStripMenuItem.Checked == true)
+            {
+                oncePerSessionToolStripMenuItem.Checked = true;
+                newFileAtEachStartToolStripMenuItem.Checked = false;
+                newLogEveryStart = false;
 
+            }
         }
 
-        private void disabledToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        private void newFileAtEachStartToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            if (oncePerSessionToolStripMenuItem.Checked == true && newFileAtEachStartToolStripMenuItem.Checked == false)
+            {
+                oncePerSessionToolStripMenuItem.Checked = false;
+                newFileAtEachStartToolStripMenuItem.Checked = true;
+                newLogEveryStart = true;
+            }
         }
-
-
     }
 }
