@@ -16,9 +16,13 @@ namespace TEST_GPS_Parsing
         public string logFilename;
         bool dbLoggingActive = true;
         bool newLogEveryStart = true;                 //TRUE = makes new file every time start is clicked; FALSE = once per session
+        private static int resourceInUse= 0;          //Flag to manage threads and resource locks  
+
         GPSPacket gpsData = new GPSPacket();          //global GPS data packet for UI display
         string sentenceBuffer;                        //global buffer to read incoming data used for parsing
         string rawBuffer;                             //not used for parsing , but for display only
+
+
 
 
         public Form1()
@@ -158,10 +162,46 @@ namespace TEST_GPS_Parsing
         }
 
         //-------------------------THREADING SECTION--------------------------------
-        //                          THREAD 1: FOR BACKGROUND WORK--------------------
+        //-------------------------RESOURCE LOCK MANAGER----------------------------
+        //-------------------------RESOURCE LOCKING METHOD------------------------------
+        public bool resourceUse(XmlDocument dbFile = null, XmlNode root = null, System.IO.StreamWriter dbOutputFile = null)
+        {
+            //0 indicates that the method is not in use.
+            if (0 == Interlocked.Exchange(ref resourceInUse, 1))
+            {
+                Console.WriteLine("{0} acquired the lock", Thread.CurrentThread.Name);
+
+                //Code to access a resource that is not thread safe would go here.
+                if (Thread.CurrentThread.Name == "GPS Logging Thread")
+                {
+                    gpsData = gpsData.parseSelection(sentenceBuffer, gpsData);
+                }
+                else if (Thread.CurrentThread.Name == "Database Write Thread")
+                {
+                    writeToDatabase(dbFile,gpsData,root,dbOutputFile);        //write gpsData to the XML database
+                }
+               
+                Console.WriteLine("{0} exiting lock", Thread.CurrentThread.Name);
+
+                //Release the lock
+                Interlocked.Exchange(ref resourceInUse, 0);
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("   {0} was denied the lock", Thread.CurrentThread.Name);
+                return false;
+            }
+
+        }
+
+
+        //-------------------------THREAD 1: FOR BACKGROUND WORK--------------------
         private void recvRawDataWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-       
+            //Set thread parameters
+            Thread.CurrentThread.Name = "GPS Logging Thread";
+            Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
 
             //create a new streamreader instance for the incoming file
             System.IO.StreamReader inputFile = new System.IO.StreamReader(gpsData.gpsLogfilename);
@@ -169,7 +209,7 @@ namespace TEST_GPS_Parsing
             //start reading the line
             //For simulating NMEA behaviour
             int count = 0;
-            
+            bool lockResult;
             
                 while (inputFile.EndOfStream == false)
                 {
@@ -178,9 +218,12 @@ namespace TEST_GPS_Parsing
                         sentenceBuffer = inputFile.ReadLine();
                         //This function updates the UI elements with the parsed NMEA data
                         rawBuffer += sentenceBuffer;                         //aggregates the raw buffer to display it
-                        gpsData = gpsData.parseSelection(sentenceBuffer, gpsData);
-                        count++;
-                        
+
+
+                    //Checks if the resource is available 
+                    lockResult = resourceUse();
+                    count++;
+
                     //this allows for a thread-safe variable access
                     if (gpsData.packetID > gpsData.deltaCount)
                     {
@@ -211,6 +254,9 @@ namespace TEST_GPS_Parsing
 
         private void dbLoggingThread_DoWork(object sender, DoWorkEventArgs e)
         {
+            Thread.CurrentThread.Name = "Database Write Thread";
+            Thread.CurrentThread.Priority = ThreadPriority.BelowNormal;
+
             //set up the XML database - if the user wants it of course! this is the initial check for database active or not
             if (dbLoggingActive == true)    //initial check if user wants DB logging
             {
@@ -236,12 +282,22 @@ namespace TEST_GPS_Parsing
                 System.IO.StreamWriter dbOutputFile = new System.IO.StreamWriter(dbFileName);
 
                 int packetCount = 0;
+                bool dataUnlocked = false;
                 //now enter the continuous logging loop for as long as the incoming data parser thread is running
                 while (recvRawDataWorker.IsBusy)
                 {
                     packetCount++;          //increment number of packets processed
                     if (!dbLoggingThread.CancellationPending)
                     {
+                        //HACKJOB
+                        Thread.Sleep(800);
+                        dataUnlocked = resourceUse(databaseDoc,rootNode,dbOutputFile);        //pass the XML file to use and its root node
+
+                        if (dataUnlocked == false)
+                        {
+                            
+                            Console.Write("DB thread locked out - sleeping");
+                        }   
                         //dbLoggingThread.ReportProgress(packetCount, databaseDoc);
                         //write a new 
                     }
@@ -337,6 +393,20 @@ namespace TEST_GPS_Parsing
             timeTextBox.AppendText(gpsDataForUI.time);
 
 
+        }
+
+        //-------------------------DB update method
+
+        private void writeToDatabase(XmlDocument dbFile, GPSPacket gpsDataForDB,XmlNode rootNode,System.IO.StreamWriter dbOutputFileStream)
+        {
+            XmlNode newElem = dbFile.CreateNode("element", "Packet", "");
+            XmlAttribute packetID = dbFile.CreateAttribute("ID");
+            packetID.Value = gpsDataForDB.ID.ToString();
+            newElem.Attributes.Append(packetID);
+
+            //append the Packet ID element as a sub-tag from the root
+            rootNode.AppendChild(newElem);
+            dbFile.Save(dbOutputFileStream);        //save the newly created node to the XML stream and release the lock
         }
 
         //-------------------------End threads---------------------------------------------

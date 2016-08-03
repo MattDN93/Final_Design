@@ -105,8 +105,7 @@ namespace TEST_GPS_Parsing
             return fixqual_f;
         }
 
-
-        //-------------------------PARSING MEMBER METHODS----------------------------
+                //-------------------------PARSING MEMBER METHODS----------------------------
 
         public GPSPacket parseSelection(string sentenceBuffer, GPSPacket gpsData)
         {
