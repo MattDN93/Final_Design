@@ -18,6 +18,9 @@ namespace TEST_GPS_Parsing
         bool newLogEveryStart = true;                 //TRUE = makes new file every time start is clicked; FALSE = once per session
         private static int resourceInUse= 0;          //Flag to manage threads and resource locks  
 
+        static EventWaitHandle _waitHandleParser = new AutoResetEvent(false);
+        static EventWaitHandle _waitHandleDatabase = new AutoResetEvent(false);
+
         GPSPacket gpsData = new GPSPacket();          //global GPS data packet for UI display
         string sentenceBuffer;                        //global buffer to read incoming data used for parsing
         string rawBuffer;                             //not used for parsing , but for display only
@@ -221,14 +224,32 @@ namespace TEST_GPS_Parsing
 
 
                     //Checks if the resource is available 
-                    lockResult = resourceUse();
+                    //Locks the resource to be able to parse the data
+                    //Interlocked.Exchange(ref resourceInUse, 1);
+                    Console.WriteLine("Parser has data-lock");
+                    gpsData = gpsData.parseSelection(sentenceBuffer, gpsData);
+                    //lockResult = resourceUse();
                     count++;
 
                     //this allows for a thread-safe variable access
                     if (gpsData.packetID > gpsData.deltaCount)
                     {
                         gpsData.deltaCount++;
+                        //Interlocked.Exchange(ref resourceInUse, 0);       //unlock the data to write to the DB 
+                        _waitHandleParser.Set();
+                        Console.WriteLine("Parser released lock");
+                        //while (resourceInUse == 1)
+                        //{
+                        Console.WriteLine("Waiting for DB write to finish");
+                        _waitHandleDatabase.WaitOne();
+                           // Thread.Sleep(0);
+                        //}
+                        //Interlocked.Exchange(ref resourceInUse, 1);
+                        Console.WriteLine("Parser obtained UI write lock");
                         recvRawDataWorker.ReportProgress(count, gpsData); //only update the UI if a whole new packet has been read- saves calling every char
+                                                                          //Interlocked.Exchange(ref resourceInUse, 0);
+                        _waitHandleParser.Set();
+                        Console.WriteLine("Parser released UI lock");
                         //rawBuffer = "";
                     }
                     
@@ -290,9 +311,20 @@ namespace TEST_GPS_Parsing
                     if (!dbLoggingThread.CancellationPending)
                     {
                         //HACKJOB
-                        Thread.Sleep(800);
-                        dataUnlocked = resourceUse(databaseDoc,rootNode,dbOutputFile);        //pass the XML file to use and its root node
+                        //Thread.Sleep(800);
+                        //dataUnlocked = resourceUse(databaseDoc,rootNode,dbOutputFile);        //pass the XML file to use and its root node
 
+                       // while (resourceInUse == 1)
+                        //{
+                            Console.WriteLine("Waiting for parser to release lock");
+                        //}
+                        _waitHandleParser.WaitOne();
+                        //Interlocked.Exchange(ref resourceInUse, 1);
+                        Console.WriteLine("DB thread obtained write lock");
+                        writeToDatabase(databaseDoc, gpsData, rootNode, dbOutputFile);
+                        _waitHandleDatabase.Set();
+                        //Interlocked.Exchange(ref resourceInUse, 0);
+                        Console.WriteLine("Write done - DB releasing lock");
                         if (dataUnlocked == false)
                         {
                             
