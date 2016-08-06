@@ -27,7 +27,7 @@ namespace TEST_GPS_Parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
         int duplicatePacketCounter = 0;                     //used to ensure duplicate packets aren't saved into the DB
-
+        private XmlWriter fileStream;
 
         public Form1()
         {
@@ -188,7 +188,7 @@ namespace TEST_GPS_Parsing
                 }
                 else if (Thread.CurrentThread.Name == "Database Write Thread")
                 {
-                    writeToDatabase(dbFile,gpsData,root,dbOutputFile);        //write gpsData to the XML database
+                    //writeToDatabase(dbFile,gpsData,root,dbOutputFile);        //write gpsData to the XML database
                 }
                
                 Console.WriteLine("{0} exiting lock", Thread.CurrentThread.Name);
@@ -285,29 +285,13 @@ namespace TEST_GPS_Parsing
             Thread.CurrentThread.Name = "Database Write Thread";
             Thread.CurrentThread.Priority = ThreadPriority.BelowNormal;
 
+            //creates XMLNode object - only call the create method if logging is needed
+            XMLNodes myXmlDb = new XMLNodes();
+            
             //set up the XML database - if the user wants it of course! this is the initial check for database active or not
             if (dbLoggingActive == true)    //initial check if user wants DB logging
             {
-                XmlDocument databaseDoc = new XmlDocument();
-                //if (newLogEveryStart == true) //if set, a new log is created every time "Start" is clicked 
-                //{
-                //create a basic document skeleton and save it
-                //set up the root node
-
-                XmlNode rootNode = databaseDoc.CreateElement("GPSLog");
-                databaseDoc.AppendChild(rootNode);
-
-                //insert comment for info
-                XmlComment docComment, docComment2;
-                docComment = databaseDoc.CreateComment("GPS Data Logging Session Start");
-                docComment2 = databaseDoc.CreateComment("Logging started at " + DateTime.Now.ToString());
-                databaseDoc.InsertBefore(docComment, rootNode);
-                databaseDoc.InsertBefore(docComment2, rootNode);
-
-                string dbFileName = "GPSLogDB" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xml";
-
-                databaseDoc.Save(dbFileName);
-                System.IO.StreamWriter dbOutputFile = new System.IO.StreamWriter(dbFileName);
+                myXmlDb.createXmlDbFile();  //calls the method to set the DB up
 
                 int packetCount = 0;
                 bool dataUnlocked = false;
@@ -328,11 +312,12 @@ namespace TEST_GPS_Parsing
                         _waitHandleParser.WaitOne();
                         //Interlocked.Exchange(ref resourceInUse, 1);
                         Console.WriteLine("DB thread obtained write lock");
-                        bool writeComplete = writeToDatabase(databaseDoc, gpsData, rootNode, dbOutputFile);
+                        bool writeComplete = writeToDatabase(myXmlDb, gpsData);
                         while (!writeComplete)
                         {
                             Console.WriteLine("Writing to DB...");
                         }
+
                         _waitHandleDatabase.Set();
                         //Interlocked.Exchange(ref resourceInUse, 0);
                         Console.WriteLine("Write done - DB releasing lock");
@@ -434,77 +419,15 @@ namespace TEST_GPS_Parsing
 
         }
 
-        //-------------------------DB update method
+        //-------------------------DB update method---------------
 
-        private bool writeToDatabase(XmlDocument dbFile, GPSPacket gpsDataForDB,XmlNode rootNode,System.IO.StreamWriter dbOutputFileStream)
+        private bool writeToDatabase(XMLNodes myXmlDb, GPSPacket gpsDataForDB)
         {
             //don't write semi-filled packets to the DB
             if (duplicatePacketCounter != gpsDataForDB.packetID)
             {
+                myXmlDb.populateDbFields(gpsDataForDB);
                 
-                duplicatePacketCounter++;
-                //Setting up XML Nodes
-                XmlNode newElem = dbFile.CreateNode("element", "Packet", "");
-
-                XmlNode latitude = dbFile.CreateNode("element", "Latitude", "");
-                XmlNode longitude = dbFile.CreateNode("element", "Longitude", "");
-                XmlNode fixtype = dbFile.CreateNode("element", "TypeofFix", "");
-                XmlNode grspd = dbFile.CreateNode("element", "GroundSpeed", "");
-                XmlNode angle = dbFile.CreateNode("element", "Heading", "");
-                XmlNode date = dbFile.CreateNode("element", "Date", "");
-                XmlNode time = dbFile.CreateNode("element", "Time", "");
-                XmlNode fixqual = dbFile.CreateNode("element", "FixQuality", "");
-                XmlNode numsats = dbFile.CreateNode("element", "NumOfSats", "");
-                XmlNode accuracy = dbFile.CreateNode("element", "Accuracy", "");
-                XmlNode altitude = dbFile.CreateNode("element", "Altitude", "");
-
-
-                //Assign nodes' attrivutes
-                XmlAttribute packetID = dbFile.CreateAttribute("ID");
-                XmlAttribute grspdType = dbFile.CreateAttribute("Type");
-                XmlAttribute angleType = dbFile.CreateAttribute("Type");
-
-                //Appending attribute values to elements
-                newElem.Attributes.Append(packetID);
-                grspd.Attributes.Append(grspdType);
-                angle.Attributes.Append(angleType);
-
-                //Assigning attribute values
-                packetID.Value = gpsDataForDB.ID.ToString();
-                grspdType.Value = "KPH";
-                angleType.Value = "Cardinal";
-
-                //Populating the actual values into the XML
-                latitude.InnerText = gpsDataForDB.latitude;
-                longitude.InnerText = gpsDataForDB.longitude;
-                fixtype.InnerText = gpsDataForDB.fixtype_f;
-                grspd.InnerText = gpsDataForDB.grspd_k;
-                angle.InnerText = gpsDataForDB.cardAngle;
-                date.InnerText = gpsDataForDB.date;
-                time.InnerText = gpsDataForDB.time;
-                fixqual.InnerText = gpsDataForDB.fixqual_f;
-                numsats.InnerText = gpsDataForDB.numsats;
-                accuracy.InnerText = gpsDataForDB.accuracy;
-                altitude.InnerText = gpsDataForDB.altitude;
-
-                //append <packet> to root
-                rootNode.AppendChild(newElem);
-
-                //append the data as children to the <packet> tag
-                newElem.AppendChild(date);
-                newElem.AppendChild(time);
-                newElem.AppendChild(latitude);
-                newElem.AppendChild(longitude);
-                newElem.AppendChild(grspd);
-                newElem.AppendChild(altitude);
-                newElem.AppendChild(angle);
-                newElem.AppendChild(accuracy);
-                newElem.AppendChild(fixtype);
-                newElem.AppendChild(fixqual);
-                newElem.AppendChild(numsats);
-
-                dbFile.Save(dbOutputFileStream);        //save the newly created node to the XML stream and release the lock
-
                 return true;              
             }
             return true;

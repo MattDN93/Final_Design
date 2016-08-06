@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -57,15 +58,20 @@ namespace TEST_GPS_Parsing
             
             dbOutputFile = new System.IO.StreamWriter(dbFileName);
 
-            databaseDoc = createXmlDbStructure(databaseDoc);
-            databaseDoc = saveXmlDbFile(databaseDoc, dbFileName);
+            //databaseDoc = createXmlDbStructure(databaseDoc);
+            saveXmlDbFile();
+        }
+
+        public void saveXmlDbFile()
+        {
+            databaseDoc.Save(dbOutputFile);
 
         }
 
-        public XmlDocument saveXmlDbFile(XmlDocument dbToSave, string fileName)
+        public void appendXmlDbFile(XmlDocumentFragment docFrag)
         {
-            dbToSave.Save(fileName);
-            return dbToSave;
+            databaseDoc.AppendChild(docFrag);
+
         }
 
         public XmlDocument createXmlDbStructure(XmlDocument dbFile)
@@ -99,45 +105,69 @@ namespace TEST_GPS_Parsing
             return dbFile;
         }
 
-        public bool populateDbFields(GPSPacket gpsDataForDB)
+        public void populateDbFields(GPSPacket gpsDataForDB)
         {
-            //Assigning attribute values
-            packetID.Value = gpsDataForDB.ID.ToString();
-            grspdType.Value = "KPH";
-            angleType.Value = "Cardinal";
+            //create a document fragment that will be appended to the existing XML
+            XmlWriterSettings writerSetting = new XmlWriterSettings();
+            writerSetting.ConformanceLevel = ConformanceLevel.Fragment;
+            writerSetting.Indent = true;
+            //writerSetting.NewLineOnAttributes = true;
 
-            //Populating the actual values into the XML
-            latitude.InnerText = gpsDataForDB.latitude;
-            longitude.InnerText = gpsDataForDB.longitude;
-            fixtype.InnerText = gpsDataForDB.fixtype_f;
-            grspd.InnerText = gpsDataForDB.grspd_k;
-            angle.InnerText = gpsDataForDB.cardAngle;
-            date.InnerText = gpsDataForDB.date;
-            time.InnerText = gpsDataForDB.time;
-            fixqual.InnerText = gpsDataForDB.fixqual_f;
-            numsats.InnerText = gpsDataForDB.numsats;
-            accuracy.InnerText = gpsDataForDB.accuracy;
-            altitude.InnerText = gpsDataForDB.altitude;
+            XmlWriter addToDb = null;
 
-            //append <packet> to root
-            rootNode.AppendChild(newElem);
+            StreamWriter fileWriter = dbOutputFile;
+            
+                addToDb = XmlWriter.Create(fileWriter, writerSetting);
+                addToDb.WriteStartElement("Packet");    //start packet
+                addToDb.WriteAttributeString("ID", gpsDataForDB.packetID.ToString());
 
-            //append the data as children to the <packet> tag
-            newElem.AppendChild(date);
-            newElem.AppendChild(time);
-            newElem.AppendChild(latitude);
-            newElem.AppendChild(longitude);
-            newElem.AppendChild(grspd);
-            newElem.AppendChild(altitude);
-            newElem.AppendChild(angle);
-            newElem.AppendChild(accuracy);
-            newElem.AppendChild(fixtype);
-            newElem.AppendChild(fixqual);
-            newElem.AppendChild(numsats);
+                addToDb.WriteElementString("Date", gpsDataForDB.date);
+                addToDb.WriteElementString("Time", gpsDataForDB.time);
+                addToDb.WriteEndElement();              //end Packet
+            addToDb.Flush();
+                
 
-            databaseDoc = saveXmlDbFile(databaseDoc,dbFileName);        //save the newly created node to the XML stream and release the lock
+            
 
-            return true;
+            
+
+            ////Assigning attribute values
+            //packetID.Value = gpsDataForDB.ID.ToString();
+            //grspdType.Value = "KPH";
+            //angleType.Value = "Cardinal";
+
+            ////Populating the actual values into the XML
+            //latitude.InnerText = gpsDataForDB.latitude;
+            //longitude.InnerText = gpsDataForDB.longitude;
+            //fixtype.InnerText = gpsDataForDB.fixtype_f;
+            //grspd.InnerText = gpsDataForDB.grspd_k;
+            //angle.InnerText = gpsDataForDB.cardAngle;
+            //date.InnerText = gpsDataForDB.date;
+            //time.InnerText = gpsDataForDB.time;
+            //fixqual.InnerText = gpsDataForDB.fixqual_f;
+            //numsats.InnerText = gpsDataForDB.numsats;
+            //accuracy.InnerText = gpsDataForDB.accuracy;
+            //altitude.InnerText = gpsDataForDB.altitude;
+
+            ////append <packet> to root
+            //rootNode.AppendChild(newElem);
+
+            ////append the data as children to the <packet> tag
+            //newElem.AppendChild(date);
+            //newElem.AppendChild(time);
+            //newElem.AppendChild(latitude);
+            //newElem.AppendChild(longitude);
+            //newElem.AppendChild(grspd);
+            //newElem.AppendChild(altitude);
+            //newElem.AppendChild(angle);
+            //newElem.AppendChild(accuracy);
+            //newElem.AppendChild(fixtype);
+            //newElem.AppendChild(fixqual);
+            //newElem.AppendChild(numsats);
+
+            //appendXmlDbFile(appendDoc);        //save the newly created node to the XML stream and release the lock
+
+            
         }
 
 
