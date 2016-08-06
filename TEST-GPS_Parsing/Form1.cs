@@ -105,6 +105,7 @@ namespace TEST_GPS_Parsing
                 stopButton.Enabled = true;
                 trayIconParsing.Text = "GPS logging active...";
                 trayIconParsing.ShowBalloonTip(5, "Logging running...", "Logger will continue running here if main window closed.",ToolTipIcon.Info);
+
                 recvRawDataWorker.RunWorkerAsync();         //starts the thread to parse data and update UI
                 if (dbLoggingActive == true)
                 {
@@ -321,7 +322,11 @@ namespace TEST_GPS_Parsing
                         _waitHandleParser.WaitOne();
                         //Interlocked.Exchange(ref resourceInUse, 1);
                         Console.WriteLine("DB thread obtained write lock");
-                        writeToDatabase(databaseDoc, gpsData, rootNode, dbOutputFile);
+                        bool writeComplete = writeToDatabase(databaseDoc, gpsData, rootNode, dbOutputFile);
+                        while (!writeComplete)
+                        {
+                            Console.WriteLine("Writing to DB...");
+                        }
                         _waitHandleDatabase.Set();
                         //Interlocked.Exchange(ref resourceInUse, 0);
                         Console.WriteLine("Write done - DB releasing lock");
@@ -429,16 +434,71 @@ namespace TEST_GPS_Parsing
 
         //-------------------------DB update method
 
-        private void writeToDatabase(XmlDocument dbFile, GPSPacket gpsDataForDB,XmlNode rootNode,System.IO.StreamWriter dbOutputFileStream)
+        private bool writeToDatabase(XmlDocument dbFile, GPSPacket gpsDataForDB,XmlNode rootNode,System.IO.StreamWriter dbOutputFileStream)
         {
+            //Setting up XML Nodes
             XmlNode newElem = dbFile.CreateNode("element", "Packet", "");
-            XmlAttribute packetID = dbFile.CreateAttribute("ID");
-            packetID.Value = gpsDataForDB.ID.ToString();
-            newElem.Attributes.Append(packetID);
 
-            //append the Packet ID element as a sub-tag from the root
+            XmlNode latitude = dbFile.CreateNode("element", "Latitude", "");
+            XmlNode longitude = dbFile.CreateNode("element", "Longitude", "");
+            XmlNode fixtype = dbFile.CreateNode("element", "TypeofFix", "");
+            XmlNode grspd = dbFile.CreateNode("element", "GroundSpeed", "");
+            XmlNode angle = dbFile.CreateNode("element", "Heading", "");
+            XmlNode date = dbFile.CreateNode("element", "Date", "");
+            XmlNode time = dbFile.CreateNode("element", "Time", "");
+            XmlNode fixqual = dbFile.CreateNode("element", "FixQuality", "");
+            XmlNode numsats = dbFile.CreateNode("element", "NumOfSats", "");
+            XmlNode accuracy = dbFile.CreateNode("element", "Accuracy", "");
+            XmlNode altitude = dbFile.CreateNode("element", "Altitude", "");
+
+
+            //Assign nodes' attrivutes
+            XmlAttribute packetID = dbFile.CreateAttribute("ID");
+            XmlAttribute grspdType = dbFile.CreateAttribute("Type");
+            XmlAttribute angleType = dbFile.CreateAttribute("Type");
+           
+            //Appending attribute values to elements
+            newElem.Attributes.Append(packetID);
+            grspd.Attributes.Append(grspdType);
+            angle.Attributes.Append(angleType);
+
+            //Assigning attribute values
+            packetID.Value = gpsDataForDB.ID.ToString();
+            grspdType.Value = "KPH";
+            angleType.Value = "Cardinal";
+
+            //Populating the actual values into the XML
+            latitude.InnerText = gpsDataForDB.latitude;
+            longitude.InnerText = gpsDataForDB.longitude;
+            fixtype.InnerText = gpsDataForDB.fixtype_f;
+            grspd.InnerText = gpsDataForDB.grspd_k;
+            angle.InnerText = gpsDataForDB.cardAngle;
+            date.InnerText = gpsDataForDB.date;
+            time.InnerText = gpsDataForDB.time;
+            fixqual.InnerText = gpsDataForDB.fixqual_f;
+            numsats.InnerText = gpsDataForDB.numsats;
+            accuracy.InnerText = gpsDataForDB.accuracy;
+            altitude.InnerText = gpsDataForDB.altitude;
+
+            //append <packet> to root
             rootNode.AppendChild(newElem);
+
+            //append the data as children to the <packet> tag
+            newElem.AppendChild(date);
+            newElem.AppendChild(time);
+            newElem.AppendChild(latitude);
+            newElem.AppendChild(longitude);
+            newElem.AppendChild(grspd);
+            newElem.AppendChild(altitude);
+            newElem.AppendChild(angle);
+            newElem.AppendChild(accuracy);
+            newElem.AppendChild(fixtype);
+            newElem.AppendChild(fixqual);
+            newElem.AppendChild(numsats);
+
+
             dbFile.Save(dbOutputFileStream);        //save the newly created node to the XML stream and release the lock
+            return true;
         }
 
         //-------------------------End threads---------------------------------------------
