@@ -16,6 +16,7 @@ namespace TEST_GPS_Parsing
         public string logFilename;
         bool dbLoggingActive = true;
         bool newLogEveryStart = true;                 //TRUE = makes new file every time start is clicked; FALSE = once per session
+        bool parseIsRunning = false;                  //bool to denote whether the parser is in progress or not.
         private static int resourceInUse= 0;          //Flag to manage threads and resource locks  
 
         static EventWaitHandle _waitHandleParser = new AutoResetEvent(false);
@@ -25,7 +26,7 @@ namespace TEST_GPS_Parsing
         string sentenceBuffer;                        //global buffer to read incoming data used for parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
-
+        int duplicatePacketCounter = 0;                     //used to ensure duplicate packets aren't saved into the DB
 
 
         public Form1()
@@ -103,6 +104,7 @@ namespace TEST_GPS_Parsing
                 openFileButton.Enabled = false;
                 startButton.Enabled = false;
                 stopButton.Enabled = true;
+                parseIsRunning = true;
                 trayIconParsing.Text = "GPS logging active...";
                 trayIconParsing.ShowBalloonTip(5, "Logging running...", "Logger will continue running here if main window closed.",ToolTipIcon.Info);
 
@@ -135,10 +137,14 @@ namespace TEST_GPS_Parsing
                 startButton.Enabled = true;
                 openFileButton.Enabled = true;
                 recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
+                _waitHandleDatabase.Set();      //pings the parser thread to release the lock
                 dbLoggingThread.CancelAsync(); //requests cancellation of the database thread
+                _waitHandleParser.Set();
                 statusTextBox.Clear();
                 statusTextBox.AppendText("Stop requested, ending thread...");
+                
             }
+
 
 
         }
@@ -306,7 +312,7 @@ namespace TEST_GPS_Parsing
                 int packetCount = 0;
                 bool dataUnlocked = false;
                 //now enter the continuous logging loop for as long as the incoming data parser thread is running
-                while (recvRawDataWorker.IsBusy)
+                while (parseIsRunning)      //stay in this loop as long as the parser is active
                 {
                     packetCount++;          //increment number of packets processed
                     if (!dbLoggingThread.CancellationPending)
@@ -330,12 +336,7 @@ namespace TEST_GPS_Parsing
                         _waitHandleDatabase.Set();
                         //Interlocked.Exchange(ref resourceInUse, 0);
                         Console.WriteLine("Write done - DB releasing lock");
-                        if (dataUnlocked == false)
-                        {
-                            
-                            Console.Write("DB thread locked out - sleeping");
-                        }   
-                        //dbLoggingThread.ReportProgress(packetCount, databaseDoc);
+
                         //write a new 
                     }
                     else
@@ -372,6 +373,7 @@ namespace TEST_GPS_Parsing
         
         private void recvRawDataWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            parseIsRunning = false;
             statusTextBox.Clear();
             statusTextBox.AppendText("GPS parsing complete or interrupted.");
             rawLogFileTextBox.Text = "";
@@ -436,68 +438,75 @@ namespace TEST_GPS_Parsing
 
         private bool writeToDatabase(XmlDocument dbFile, GPSPacket gpsDataForDB,XmlNode rootNode,System.IO.StreamWriter dbOutputFileStream)
         {
-            //Setting up XML Nodes
-            XmlNode newElem = dbFile.CreateNode("element", "Packet", "");
+            //don't write semi-filled packets to the DB
+            if (duplicatePacketCounter != gpsDataForDB.packetID)
+            {
+                
+                duplicatePacketCounter++;
+                //Setting up XML Nodes
+                XmlNode newElem = dbFile.CreateNode("element", "Packet", "");
 
-            XmlNode latitude = dbFile.CreateNode("element", "Latitude", "");
-            XmlNode longitude = dbFile.CreateNode("element", "Longitude", "");
-            XmlNode fixtype = dbFile.CreateNode("element", "TypeofFix", "");
-            XmlNode grspd = dbFile.CreateNode("element", "GroundSpeed", "");
-            XmlNode angle = dbFile.CreateNode("element", "Heading", "");
-            XmlNode date = dbFile.CreateNode("element", "Date", "");
-            XmlNode time = dbFile.CreateNode("element", "Time", "");
-            XmlNode fixqual = dbFile.CreateNode("element", "FixQuality", "");
-            XmlNode numsats = dbFile.CreateNode("element", "NumOfSats", "");
-            XmlNode accuracy = dbFile.CreateNode("element", "Accuracy", "");
-            XmlNode altitude = dbFile.CreateNode("element", "Altitude", "");
-
-
-            //Assign nodes' attrivutes
-            XmlAttribute packetID = dbFile.CreateAttribute("ID");
-            XmlAttribute grspdType = dbFile.CreateAttribute("Type");
-            XmlAttribute angleType = dbFile.CreateAttribute("Type");
-           
-            //Appending attribute values to elements
-            newElem.Attributes.Append(packetID);
-            grspd.Attributes.Append(grspdType);
-            angle.Attributes.Append(angleType);
-
-            //Assigning attribute values
-            packetID.Value = gpsDataForDB.ID.ToString();
-            grspdType.Value = "KPH";
-            angleType.Value = "Cardinal";
-
-            //Populating the actual values into the XML
-            latitude.InnerText = gpsDataForDB.latitude;
-            longitude.InnerText = gpsDataForDB.longitude;
-            fixtype.InnerText = gpsDataForDB.fixtype_f;
-            grspd.InnerText = gpsDataForDB.grspd_k;
-            angle.InnerText = gpsDataForDB.cardAngle;
-            date.InnerText = gpsDataForDB.date;
-            time.InnerText = gpsDataForDB.time;
-            fixqual.InnerText = gpsDataForDB.fixqual_f;
-            numsats.InnerText = gpsDataForDB.numsats;
-            accuracy.InnerText = gpsDataForDB.accuracy;
-            altitude.InnerText = gpsDataForDB.altitude;
-
-            //append <packet> to root
-            rootNode.AppendChild(newElem);
-
-            //append the data as children to the <packet> tag
-            newElem.AppendChild(date);
-            newElem.AppendChild(time);
-            newElem.AppendChild(latitude);
-            newElem.AppendChild(longitude);
-            newElem.AppendChild(grspd);
-            newElem.AppendChild(altitude);
-            newElem.AppendChild(angle);
-            newElem.AppendChild(accuracy);
-            newElem.AppendChild(fixtype);
-            newElem.AppendChild(fixqual);
-            newElem.AppendChild(numsats);
+                XmlNode latitude = dbFile.CreateNode("element", "Latitude", "");
+                XmlNode longitude = dbFile.CreateNode("element", "Longitude", "");
+                XmlNode fixtype = dbFile.CreateNode("element", "TypeofFix", "");
+                XmlNode grspd = dbFile.CreateNode("element", "GroundSpeed", "");
+                XmlNode angle = dbFile.CreateNode("element", "Heading", "");
+                XmlNode date = dbFile.CreateNode("element", "Date", "");
+                XmlNode time = dbFile.CreateNode("element", "Time", "");
+                XmlNode fixqual = dbFile.CreateNode("element", "FixQuality", "");
+                XmlNode numsats = dbFile.CreateNode("element", "NumOfSats", "");
+                XmlNode accuracy = dbFile.CreateNode("element", "Accuracy", "");
+                XmlNode altitude = dbFile.CreateNode("element", "Altitude", "");
 
 
-            dbFile.Save(dbOutputFileStream);        //save the newly created node to the XML stream and release the lock
+                //Assign nodes' attrivutes
+                XmlAttribute packetID = dbFile.CreateAttribute("ID");
+                XmlAttribute grspdType = dbFile.CreateAttribute("Type");
+                XmlAttribute angleType = dbFile.CreateAttribute("Type");
+
+                //Appending attribute values to elements
+                newElem.Attributes.Append(packetID);
+                grspd.Attributes.Append(grspdType);
+                angle.Attributes.Append(angleType);
+
+                //Assigning attribute values
+                packetID.Value = gpsDataForDB.ID.ToString();
+                grspdType.Value = "KPH";
+                angleType.Value = "Cardinal";
+
+                //Populating the actual values into the XML
+                latitude.InnerText = gpsDataForDB.latitude;
+                longitude.InnerText = gpsDataForDB.longitude;
+                fixtype.InnerText = gpsDataForDB.fixtype_f;
+                grspd.InnerText = gpsDataForDB.grspd_k;
+                angle.InnerText = gpsDataForDB.cardAngle;
+                date.InnerText = gpsDataForDB.date;
+                time.InnerText = gpsDataForDB.time;
+                fixqual.InnerText = gpsDataForDB.fixqual_f;
+                numsats.InnerText = gpsDataForDB.numsats;
+                accuracy.InnerText = gpsDataForDB.accuracy;
+                altitude.InnerText = gpsDataForDB.altitude;
+
+                //append <packet> to root
+                rootNode.AppendChild(newElem);
+
+                //append the data as children to the <packet> tag
+                newElem.AppendChild(date);
+                newElem.AppendChild(time);
+                newElem.AppendChild(latitude);
+                newElem.AppendChild(longitude);
+                newElem.AppendChild(grspd);
+                newElem.AppendChild(altitude);
+                newElem.AppendChild(angle);
+                newElem.AppendChild(accuracy);
+                newElem.AppendChild(fixtype);
+                newElem.AppendChild(fixqual);
+                newElem.AppendChild(numsats);
+
+                dbFile.Save(dbOutputFileStream);        //save the newly created node to the XML stream and release the lock
+
+                return true;              
+            }
             return true;
         }
 
