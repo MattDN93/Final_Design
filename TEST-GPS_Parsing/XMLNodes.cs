@@ -68,105 +68,58 @@ namespace TEST_GPS_Parsing
 
         }
 
-        public void appendXmlDbFile(XmlDocumentFragment docFrag)
+        public void closeXmlDbFile()
         {
-            databaseDoc.AppendChild(docFrag);
-
+            XmlWriter finalDbAppend = createXmlDbStructure();
+            finalDbAppend.WriteEndDocument();
+            finalDbAppend.Flush();
+            finalDbAppend.Close();
         }
 
-        public XmlDocument createXmlDbStructure(XmlDocument dbFile)
+        public XmlWriter createXmlDbStructure()
         {
             //Setting up XML Nodes
-            newElem = dbFile.CreateNode("element", "Packet", "");
+            XmlWriterSettings writerSetting = new XmlWriterSettings();
+            writerSetting.ConformanceLevel = ConformanceLevel.Auto;
+            writerSetting.Indent = true;
+            //writerSetting.NewLineOnAttributes = true;
+            XmlWriter addToDb = null;
+            StreamWriter fileWriter = dbOutputFile;
+            addToDb = XmlWriter.Create(fileWriter, writerSetting);
 
-            latitude = dbFile.CreateNode("element", "Latitude", "");
-            longitude = dbFile.CreateNode("element", "Longitude", "");
-            fixtype = dbFile.CreateNode("element", "TypeofFix", "");
-            grspd = dbFile.CreateNode("element", "GroundSpeed", "");
-            angle = dbFile.CreateNode("element", "Heading", "");
-            date = dbFile.CreateNode("element", "Date", "");
-            time = dbFile.CreateNode("element", "Time", "");
-            fixqual = dbFile.CreateNode("element", "FixQuality", "");
-            numsats = dbFile.CreateNode("element", "NumOfSats", "");
-            accuracy = dbFile.CreateNode("element", "Accuracy", "");
-            altitude = dbFile.CreateNode("element", "Altitude", "");
-
-
-            //Assign nodes' attrivutes
-            packetID = dbFile.CreateAttribute("ID");
-            grspdType = dbFile.CreateAttribute("Type");
-            angleType = dbFile.CreateAttribute("Type");
-
-            //Appending attribute values to elements
-            newElem.Attributes.Append(packetID);
-            grspd.Attributes.Append(grspdType);
-            angle.Attributes.Append(angleType);
-
-            return dbFile;
+            return addToDb;
         }
 
         public void populateDbFields(GPSPacket gpsDataForDB)
         {
             //create a document fragment that will be appended to the existing XML
-            XmlWriterSettings writerSetting = new XmlWriterSettings();
-            writerSetting.ConformanceLevel = ConformanceLevel.Fragment;
-            writerSetting.Indent = true;
-            //writerSetting.NewLineOnAttributes = true;
+            XmlWriter addToDb = createXmlDbStructure();
 
-            XmlWriter addToDb = null;
+            addToDb.WriteStartElement("Packet");    //start packet
 
-            StreamWriter fileWriter = dbOutputFile;
-            
-                addToDb = XmlWriter.Create(fileWriter, writerSetting);
-                addToDb.WriteStartElement("Packet");    //start packet
-                addToDb.WriteAttributeString("ID", gpsDataForDB.packetID.ToString());
+            addToDb.WriteAttributeString("ID", gpsDataForDB.packetID.ToString());
+            addToDb.WriteElementString("Date", gpsDataForDB.date);
+            addToDb.WriteElementString("Time", gpsDataForDB.time);
+            addToDb.WriteElementString("Latitude",gpsDataForDB.latitude);
+            addToDb.WriteElementString("Longitude", gpsDataForDB.longitude);
+            addToDb.WriteElementString("GroundSpeed", gpsDataForDB.grspd_k);
+            //addToDb.WriteAttributeString("Type", "knots");
+            addToDb.WriteElementString("GroundSpeed", gpsDataForDB.grspd_kph);
+            //addToDb.WriteAttributeString("Type", "kph");
+            addToDb.WriteElementString("Altitude", gpsDataForDB.altitude);
+            addToDb.WriteElementString("Angle", gpsDataForDB.cardAngle);
+            //addToDb.WriteAttributeString("Type", "Cardinal");
+            addToDb.WriteElementString("Angle", gpsDataForDB.trkangle);
+            //addToDb.WriteAttributeString("Type", "Degrees");
+            addToDb.WriteElementString("Accuracy", gpsDataForDB.accuracy);
+            addToDb.WriteElementString("FixType", gpsDataForDB.fixtype_f);
+            addToDb.WriteElementString("FixQuality", gpsDataForDB.fixqual_f);
+            addToDb.WriteElementString("NumSats", gpsDataForDB.numsats);
 
-                addToDb.WriteElementString("Date", gpsDataForDB.date);
-                addToDb.WriteElementString("Time", gpsDataForDB.time);
-                addToDb.WriteEndElement();              //end Packet
+            addToDb.WriteEndElement();              //end Packet
             addToDb.Flush();
-                
 
-            
-
-            
-
-            ////Assigning attribute values
-            //packetID.Value = gpsDataForDB.ID.ToString();
-            //grspdType.Value = "KPH";
-            //angleType.Value = "Cardinal";
-
-            ////Populating the actual values into the XML
-            //latitude.InnerText = gpsDataForDB.latitude;
-            //longitude.InnerText = gpsDataForDB.longitude;
-            //fixtype.InnerText = gpsDataForDB.fixtype_f;
-            //grspd.InnerText = gpsDataForDB.grspd_k;
-            //angle.InnerText = gpsDataForDB.cardAngle;
-            //date.InnerText = gpsDataForDB.date;
-            //time.InnerText = gpsDataForDB.time;
-            //fixqual.InnerText = gpsDataForDB.fixqual_f;
-            //numsats.InnerText = gpsDataForDB.numsats;
-            //accuracy.InnerText = gpsDataForDB.accuracy;
-            //altitude.InnerText = gpsDataForDB.altitude;
-
-            ////append <packet> to root
-            //rootNode.AppendChild(newElem);
-
-            ////append the data as children to the <packet> tag
-            //newElem.AppendChild(date);
-            //newElem.AppendChild(time);
-            //newElem.AppendChild(latitude);
-            //newElem.AppendChild(longitude);
-            //newElem.AppendChild(grspd);
-            //newElem.AppendChild(altitude);
-            //newElem.AppendChild(angle);
-            //newElem.AppendChild(accuracy);
-            //newElem.AppendChild(fixtype);
-            //newElem.AppendChild(fixqual);
-            //newElem.AppendChild(numsats);
-
-            //appendXmlDbFile(appendDoc);        //save the newly created node to the XML stream and release the lock
-
+    
             
         }
 

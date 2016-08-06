@@ -26,7 +26,7 @@ namespace TEST_GPS_Parsing
         string sentenceBuffer;                        //global buffer to read incoming data used for parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
-        int duplicatePacketCounter = 0;                     //used to ensure duplicate packets aren't saved into the DB
+        int duplicatePacketCounter = 1;                     //used to ensure duplicate packets aren't saved into the DB
         private XmlWriter fileStream;
 
         public Form1()
@@ -327,7 +327,7 @@ namespace TEST_GPS_Parsing
                     else
                     {
                         //a unusual cancel has been requested, try close XML file safely
-
+                        myXmlDb.closeXmlDbFile();                        
                         break;
                     }
                 }
@@ -355,6 +355,7 @@ namespace TEST_GPS_Parsing
             rawBuffer = "";             //since earlier call is asynchronous, only clear the raw buffer once 100% sure that its data has reached the UI - which is now.
         }
 
+        //----------------------------Thread completion methods---------------------------
         
         private void recvRawDataWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
@@ -367,6 +368,12 @@ namespace TEST_GPS_Parsing
             openFileButton.Enabled = true;
             trayIconParsing.Text = "Logging stopped.";
             trayIconParsing.ShowBalloonTip(5, "GPS Logging stopped", "Logging stopped or interrupted. Open a new file to restart logging.", ToolTipIcon.Error);
+        }
+
+        private void dbLoggingThread_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            XMLNodes temp = new XMLNodes();
+            temp.closeXmlDbFile();
         }
 
         //-------------------------UI update method------------------------------------------
@@ -426,6 +433,7 @@ namespace TEST_GPS_Parsing
             //don't write semi-filled packets to the DB
             if (duplicatePacketCounter != gpsDataForDB.packetID)
             {
+                duplicatePacketCounter++;
                 myXmlDb.populateDbFields(gpsDataForDB);
                 
                 return true;              
