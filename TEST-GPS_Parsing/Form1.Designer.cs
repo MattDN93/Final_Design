@@ -478,7 +478,7 @@
             // timeElapsedTextBox
             // 
             this.timeElapsedTextBox.Location = new System.Drawing.Point(228, 16);
-            this.timeElapsedTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.timeElapsedTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.timeElapsedTextBox.Name = "timeElapsedTextBox";
             this.timeElapsedTextBox.ReadOnly = true;
             this.timeElapsedTextBox.Size = new System.Drawing.Size(79, 22);
@@ -612,9 +612,9 @@
             this.groupBox6.Controls.Add(this.status2TextBox);
             this.groupBox6.Controls.Add(this.statusTextBox);
             this.groupBox6.Location = new System.Drawing.Point(13, 292);
-            this.groupBox6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox6.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox6.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox6.Size = new System.Drawing.Size(324, 86);
             this.groupBox6.TabIndex = 16;
             this.groupBox6.TabStop = false;
@@ -623,7 +623,7 @@
             // status2TextBox
             // 
             this.status2TextBox.Location = new System.Drawing.Point(9, 54);
-            this.status2TextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.status2TextBox.Margin = new System.Windows.Forms.Padding(4);
             this.status2TextBox.Name = "status2TextBox";
             this.status2TextBox.ReadOnly = true;
             this.status2TextBox.Size = new System.Drawing.Size(305, 22);
@@ -632,7 +632,7 @@
             // statusTextBox
             // 
             this.statusTextBox.Location = new System.Drawing.Point(9, 25);
-            this.statusTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.statusTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.statusTextBox.Name = "statusTextBox";
             this.statusTextBox.ReadOnly = true;
             this.statusTextBox.Size = new System.Drawing.Size(305, 22);
@@ -703,6 +703,7 @@
             this.openXMLInSeparateViewerToolStripMenuItem.Name = "openXMLInSeparateViewerToolStripMenuItem";
             this.openXMLInSeparateViewerToolStripMenuItem.Size = new System.Drawing.Size(277, 26);
             this.openXMLInSeparateViewerToolStripMenuItem.Text = "Open XML in separate viewer";
+            this.openXMLInSeparateViewerToolStripMenuItem.Click += new System.EventHandler(this.openXMLInSeparateViewerToolStripMenuItem_Click);
             // 
             // databaseWriteToolStripMenuItem
             // 

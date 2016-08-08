@@ -13,6 +13,7 @@ namespace TEST_GPS_Parsing
         public XmlNode rootNode;
         public XmlComment docComment, docComment2;
         public string dbFileName;
+        public static string dbFileToOpenName;
         System.IO.StreamWriter dbOutputFile;
 
         //GPS specific elements
@@ -57,6 +58,7 @@ namespace TEST_GPS_Parsing
 
             //create filename and set up stream for XmlWriter to use
             dbFileName = "GPSLogDB" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xml";
+            getDbFilePath(dbFileName);
             dbOutputFile = new System.IO.StreamWriter(dbFileName);
 
             //Create the Xml Doc
@@ -70,6 +72,12 @@ namespace TEST_GPS_Parsing
             dbWriter.Flush();
             //databaseDoc = createXmlDbStructure(databaseDoc);
             saveXmlDbFile();
+        }
+
+        public static string getDbFilePath(string dbFN)
+        {
+            dbFileToOpenName = dbFN;
+            return dbFileToOpenName;
         }
 
         public void saveXmlDbFile()
@@ -91,13 +99,13 @@ namespace TEST_GPS_Parsing
             }
             catch (InvalidOperationException e)
             {
-                MessageBox.Show("An error occured while closing the database. The file may be corrupt. Details: " + e.ToString(), "An error has occurred", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("An error occured while closing the database. The file may be corrupt. Details: " + e.Message, "An error has occurred", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
             catch (NullReferenceException n)
             {
                 
-                MessageBox.Show("An error occured whilst writing to the database. The file may be corrupt. Details: " + n.ToString(),"An error has occurred",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("An error occured whilst writing to the database. The file may be corrupt. Details: " + n.Message,"An error has occurred",MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
              

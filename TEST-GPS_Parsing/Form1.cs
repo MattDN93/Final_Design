@@ -13,7 +13,7 @@ namespace TEST_GPS_Parsing
         //*********THIS VAR IS FOR TESTING FEATURES, set to false for debug features off
         bool debug = false;
         //*************************************
-        public string logFilename;
+        public string inputLogFilename;
         bool dbLoggingActive = true;
         bool newLogEveryStart = true;                 //TRUE = makes new file every time start is clicked; FALSE = once per session
         bool parseIsRunning = false;                  //bool to denote whether the parser is in progress or not.
@@ -80,8 +80,8 @@ namespace TEST_GPS_Parsing
         {
 
             //MessageBox.Show("GPS NMEA log file ready. Click Start Tracking.");
-            logFilename = openLogDialog.FileName;       //save the filename of the logfile
-            gpsData.gpsLogfilename = logFilename;       //save filename to associated GPS class
+            inputLogFilename = openLogDialog.FileName;       //save the filename of the logfile
+            gpsData.gpsLogfilename = inputLogFilename;       //save filename to associated GPS class
             startButton.Enabled = true;
             statusTextBox.Clear();
             statusTextBox.AppendText("File opened OK. Click start to start parsing.");
@@ -517,7 +517,7 @@ namespace TEST_GPS_Parsing
             }
             else
             {
-                MessageBox.Show("This change cannot be made whilst the parser is running. Stop it first, then try again.", "Cannot change setting now", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("this change cannot be made whilst the parser is running. stop it first, then try again.", "cannot change setting now", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 
         }
@@ -544,6 +544,45 @@ namespace TEST_GPS_Parsing
             }
         }
 
+        private void openXMLInSeparateViewerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DialogResult userChoice;
+            //warn user that opening the database whilst parsing could damage the XML file
+            if (parseIsRunning == false)
+            {
+                openXmlInSystemViewer();
+            }
+            else
+            {
+                userChoice = MessageBox.Show("Warning: Opening the current database file whilst logging could corrupt the file. Continue opening the file?", "Be careful!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (userChoice == DialogResult.No)
+                {
+                    return;
+                }
+                else if (userChoice == DialogResult.Yes)
+                {
+                    openXmlInSystemViewer();
+                }
+            }
+        }
 
+        private void openXmlInSystemViewer()
+        {
+            try
+            {
+                //try open the file with the system viewer by pulling the name generated for this current session
+                System.Diagnostics.Process.Start(XMLNodes.dbFileToOpenName);
+            }
+            catch (System.IO.FileNotFoundException f)
+            {
+                //if the file has been moved throw an exception
+                MessageBox.Show("Failed to find the database file. Details: " + f.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (InvalidOperationException i)
+            {
+                //if the filename is null - occurs if the user tries to open the log when they havent logged anything yet
+                MessageBox.Show("Cannot open file - have you actually logged anything yet? Details: " + i.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }
