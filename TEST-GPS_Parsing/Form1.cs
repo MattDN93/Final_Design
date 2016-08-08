@@ -130,7 +130,7 @@ namespace TEST_GPS_Parsing
         private void stopButton_Click(object sender, EventArgs e)
         {
             //only stop after confirmation
-            DialogResult quitQuestion = MessageBox.Show("This will stop the GPS log. Stop logging now?", "Stop GPS logging?", MessageBoxButtons.YesNo);
+            DialogResult quitQuestion = MessageBox.Show("This will stop the GPS log. Stop logging now?", "Stop GPS logging?", MessageBoxButtons.YesNo,MessageBoxIcon.Question);
             if (quitQuestion == DialogResult.Yes)
             {
                 stopButton.Enabled = false;
@@ -219,7 +219,6 @@ namespace TEST_GPS_Parsing
             //start reading the line
             //For simulating NMEA behaviour
             int count = 0;
-            bool lockResult;
             
                 while (inputFile.EndOfStream == false)
                 {
@@ -231,11 +230,8 @@ namespace TEST_GPS_Parsing
 
 
                     //Checks if the resource is available 
-                    //Locks the resource to be able to parse the data
-                    //Interlocked.Exchange(ref resourceInUse, 1);
                     Console.WriteLine("Parser has data-lock");
                     gpsData = gpsData.parseSelection(sentenceBuffer, gpsData);
-                    //lockResult = resourceUse();
                     count++;
 
                     //this allows for a thread-safe variable access
@@ -248,14 +244,21 @@ namespace TEST_GPS_Parsing
                         //while (resourceInUse == 1)
                         //{
                         Console.WriteLine("Waiting for DB write to finish");
-                        _waitHandleDatabase.WaitOne();
+                        if (dbLoggingActive == true)
+                        {
+                            _waitHandleDatabase.WaitOne();                  //only wait for write if there's actually a write happening
+                        }
+                        
                            // Thread.Sleep(0);
                         //}
                         //Interlocked.Exchange(ref resourceInUse, 1);
                         Console.WriteLine("Parser obtained UI write lock");
-                        recvRawDataWorker.ReportProgress(count, gpsData); //only update the UI if a whole new packet has been read- saves calling every char
-                                                                          //Interlocked.Exchange(ref resourceInUse, 0);
-                        _waitHandleParser.Set();
+                        recvRawDataWorker.ReportProgress(count, gpsData); //only update the UI if a whole new packet has been read- saves calling every char                                                
+                        if (dbLoggingActive == true)
+                        {
+                            _waitHandleParser.Set(); //inform the db thread that the lock has been released
+                        }
+                        
                         Console.WriteLine("Parser released UI lock");
                         //rawBuffer = "";
                     }
@@ -267,7 +270,6 @@ namespace TEST_GPS_Parsing
                     }
                     else
                     {
-                    MessageBox.Show("File parsing cancelled.");
                     inputFile.Close();
                     //everything else is handled in the completion thread
                     break;
@@ -327,12 +329,24 @@ namespace TEST_GPS_Parsing
                     else
                     {
                         //a unusual cancel has been requested, try close XML file safely
-                        myXmlDb.closeXmlDbFile();                        
-                        break;
+                        bool quitResult;
+                        quitResult = myXmlDb.closeXmlDbFile();
+                        if (quitResult == false)
+                        {
+                            status2TextBox.Clear();
+                            status2TextBox.AppendText("Error closing DB. Corruption possible.");
+                            break;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        
                     }
                 }
 
             }
+            _waitHandleDatabase.Set();  //ping the main thread to keep logging since database logging is off
         }
         
         
@@ -372,8 +386,9 @@ namespace TEST_GPS_Parsing
 
         private void dbLoggingThread_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            XMLNodes temp = new XMLNodes();
-            temp.closeXmlDbFile();
+           XMLNodes temp = new XMLNodes();
+
+           //temp.closeXmlDbFile();
         }
 
         //-------------------------UI update method------------------------------------------
@@ -459,7 +474,15 @@ namespace TEST_GPS_Parsing
         {
             if (enabledToolStripMenuItem.Checked == true)
             {
-                MessageBox.Show("Database logging is on by default.","Logging already on");
+                MessageBox.Show("Database logging is on by default.","Logging already on",MessageBoxButtons.OK,MessageBoxIcon.Information);
+                dbLoggingActive = true;
+                creationOptionsToolStripMenuItem.Enabled = true;
+                enabledToolStripMenuItem.Checked = true;
+                disabledToolStripMenuItem.Checked = false;
+            }
+            else if (enabledToolStripMenuItem.Checked == false && disabledToolStripMenuItem.Checked == true && parseIsRunning == false)
+            {
+                MessageBox.Show("Logging to the database has been enabled.", "Logging turned on", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 dbLoggingActive = true;
                 creationOptionsToolStripMenuItem.Enabled = true;
                 enabledToolStripMenuItem.Checked = true;
@@ -467,23 +490,19 @@ namespace TEST_GPS_Parsing
             }
             else
             {
-                MessageBox.Show("Logging to the database has been enabled.","Logging turned on");
-                dbLoggingActive = true;
-                creationOptionsToolStripMenuItem.Enabled = true;
-                enabledToolStripMenuItem.Checked = true;
-                disabledToolStripMenuItem.Checked = false;
+                MessageBox.Show("This change cannot be made whilst the parser is running. Stop it first, then try again.", "Cannot change setting now", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-            
+
         }
 
         private void disabledToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (disabledToolStripMenuItem.Checked == false && enabledToolStripMenuItem.Checked == true)
+            if (disabledToolStripMenuItem.Checked == false && enabledToolStripMenuItem.Checked == true && parseIsRunning == false)
             {
-                DialogResult quitDB = MessageBox.Show("This turns off logging to XML database, but keeps receiving incoming GPS data. Keep receiving data but stop logging to database?", "Stop database logging?", MessageBoxButtons.YesNo);
+                DialogResult quitDB = MessageBox.Show("This turns off logging to XML database, but keeps receiving incoming GPS data. Keep receiving data but stop logging to database?", "Stop database logging?", MessageBoxButtons.YesNo,MessageBoxIcon.Question);
                 if (quitDB == DialogResult.Yes)
                 {
-                    MessageBox.Show("Logging to the database has been disabled.","Database logging off");
+                    MessageBox.Show("Logging to the database has been disabled.","Database logging off",MessageBoxButtons.OK,MessageBoxIcon.Information);
                     dbLoggingActive = false;
                     disabledToolStripMenuItem.Checked = true;
                     enabledToolStripMenuItem.Checked = false;
@@ -492,9 +511,13 @@ namespace TEST_GPS_Parsing
             }
             else if (disabledToolStripMenuItem.Checked == true && enabledToolStripMenuItem.Checked == false)
             {
-                MessageBox.Show("Database logging is already disabled.","Database logging already off");
+                MessageBox.Show("Database logging is already disabled.","Database logging already off",MessageBoxButtons.OK,MessageBoxIcon.Information);
                 creationOptionsToolStripMenuItem.Enabled = false;   //disable options for file creation
                 dbLoggingActive = false;
+            }
+            else
+            {
+                MessageBox.Show("This change cannot be made whilst the parser is running. Stop it first, then try again.", "Cannot change setting now", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 
         }

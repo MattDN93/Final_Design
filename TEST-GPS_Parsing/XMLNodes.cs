@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Xml;
-using System.Xml.Serialization;
 
 namespace TEST_GPS_Parsing
 {
@@ -13,6 +9,7 @@ namespace TEST_GPS_Parsing
     {
         //top-end XML document components
         public XmlDocument databaseDoc;
+        public XmlWriter dbWriter;
         public XmlNode rootNode;
         public XmlComment docComment, docComment2;
         public string dbFileName;
@@ -42,38 +39,70 @@ namespace TEST_GPS_Parsing
 
 
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void createXmlDbFile()
         {
-            databaseDoc = new XmlDocument();
-            rootNode = databaseDoc.CreateElement("GPSLog");
-
-            databaseDoc.AppendChild(rootNode);
-         
-            docComment = databaseDoc.CreateComment("GPS Data Logging Session Start");
-            docComment2 = databaseDoc.CreateComment("Logging started at " + DateTime.Now.ToString());
-            databaseDoc.InsertBefore(docComment, rootNode);
-            databaseDoc.InsertBefore(docComment2, rootNode);
-
-            dbFileName = "GPSLogDB" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xml";
             
+            //databaseDoc = new XmlDocument();
+            //rootNode = databaseDoc.CreateElement("GPSLog");
+
+            //databaseDoc.AppendChild(rootNode);
+         
+            //docComment = databaseDoc.CreateComment("GPS Data Logging Session Start");
+            //docComment2 = databaseDoc.CreateComment("Logging started at " + DateTime.Now.ToString());
+            //databaseDoc.InsertBefore(docComment, rootNode);
+            //databaseDoc.InsertBefore(docComment2, rootNode);
+
+            //create filename and set up stream for XmlWriter to use
+            dbFileName = "GPSLogDB" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xml";
             dbOutputFile = new System.IO.StreamWriter(dbFileName);
 
+            //Create the Xml Doc
+            dbWriter = XmlWriter.Create(dbOutputFile);
+            dbWriter.WriteStartDocument();
+            dbWriter.WriteComment("GPS Data Logging Session Start");
+            dbWriter.WriteComment("Logging started at " + DateTime.Now.ToString());
+            dbWriter.WriteRaw("<GPSLog>");
+            //dbWriter.WriteEndElement();
+            //dbWriter.WriteEndDocument();
+            dbWriter.Flush();
             //databaseDoc = createXmlDbStructure(databaseDoc);
             saveXmlDbFile();
         }
 
         public void saveXmlDbFile()
         {
-            databaseDoc.Save(dbOutputFile);
+            //databaseDoc.Save(dbOutputFile);
 
         }
 
-        public void closeXmlDbFile()
+        public bool closeXmlDbFile()
         {
-            XmlWriter finalDbAppend = createXmlDbStructure();
-            finalDbAppend.WriteEndDocument();
-            finalDbAppend.Flush();
-            finalDbAppend.Close();
+
+            //dbWriter.WriteEndElement();
+            //dbWriter.WriteEndDocument();
+            try
+            {
+                dbWriter.Flush();
+                dbWriter.WriteRaw("</GPSLog>");
+                dbWriter.Close();
+            }
+            catch (InvalidOperationException e)
+            {
+                MessageBox.Show("An error occured while closing the database. The file may be corrupt. Details: " + e.ToString(), "An error has occurred", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            catch (NullReferenceException n)
+            {
+                
+                MessageBox.Show("An error occured whilst writing to the database. The file may be corrupt. Details: " + n.ToString(),"An error has occurred",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+             
+
+            return true;
         }
 
         public XmlWriter createXmlDbStructure()
@@ -81,6 +110,7 @@ namespace TEST_GPS_Parsing
             //Setting up XML Nodes
             XmlWriterSettings writerSetting = new XmlWriterSettings();
             writerSetting.ConformanceLevel = ConformanceLevel.Auto;
+            writerSetting.WriteEndDocumentOnClose = true;
             writerSetting.Indent = true;
             //writerSetting.NewLineOnAttributes = true;
             XmlWriter addToDb = null;
