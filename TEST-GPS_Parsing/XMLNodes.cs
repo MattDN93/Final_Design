@@ -45,16 +45,6 @@ namespace TEST_GPS_Parsing
         /// </summary>
         public void createXmlDbFile()
         {
-            
-            //databaseDoc = new XmlDocument();
-            //rootNode = databaseDoc.CreateElement("GPSLog");
-
-            //databaseDoc.AppendChild(rootNode);
-         
-            //docComment = databaseDoc.CreateComment("GPS Data Logging Session Start");
-            //docComment2 = databaseDoc.CreateComment("Logging started at " + DateTime.Now.ToString());
-            //databaseDoc.InsertBefore(docComment, rootNode);
-            //databaseDoc.InsertBefore(docComment2, rootNode);
 
             //create filename and set up stream for XmlWriter to use
             dbFileName = "GPSLogDB" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xml";
@@ -76,6 +66,7 @@ namespace TEST_GPS_Parsing
 
         public static string getDbFilePath(string dbFN)
         {
+            //This method returns the filename to the UI thread to open the XML database from the app.
             dbFileToOpenName = dbFN;
             return dbFileToOpenName;
         }

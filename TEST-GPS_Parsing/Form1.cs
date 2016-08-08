@@ -19,6 +19,13 @@ namespace TEST_GPS_Parsing
         bool parseIsRunning = false;                  //bool to denote whether the parser is in progress or not.
         private static int resourceInUse= 0;          //Flag to manage threads and resource locks  
 
+        /*IMPORTANT: These wait handles are for the mutex locks on the multithreading
+            waitHandleParser:   FALSE = parser has lock, other threads must wait till release
+                                TRUE = if the dbthread is waiting with WaitOne(), setting this with .Set() unlocks and hands to the db thread
+            waitHandleDatabase: FALSE = database writer has lock,parser thread must wait till release
+                                TRUE = use .set() to relinquish lock back to the parser thread
+             
+             */
         static EventWaitHandle _waitHandleParser = new AutoResetEvent(false);
         static EventWaitHandle _waitHandleDatabase = new AutoResetEvent(false);
 
@@ -373,13 +380,20 @@ namespace TEST_GPS_Parsing
         
         private void recvRawDataWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            parseIsRunning = false;
+            if (dbLoggingActive == true)
+            {
+                _waitHandleDatabase.Set();      //pings the parser thread to release the lock
+                dbLoggingThread.CancelAsync(); //requests cancellation of the database thread
+                _waitHandleParser.Set();        //parser informs the waiting db thread lock is released so it can close the file
+            }
+
             statusTextBox.Clear();
             statusTextBox.AppendText("GPS parsing complete or interrupted.");
             rawLogFileTextBox.Text = "";
             stopButton.Enabled = false;
             startButton.Enabled = true;
             openFileButton.Enabled = true;
+            parseIsRunning = false;
             trayIconParsing.Text = "Logging stopped.";
             trayIconParsing.ShowBalloonTip(5, "GPS Logging stopped", "Logging stopped or interrupted. Open a new file to restart logging.", ToolTipIcon.Error);
         }
