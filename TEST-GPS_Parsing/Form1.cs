@@ -68,6 +68,44 @@ namespace TEST_GPS_Parsing
 
         }
 
+        //Warns the user before shutting down the app if a process is running
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult userQuit;
+            if (parseIsRunning == true)
+            {
+                userQuit = MessageBox.Show("Quitting while parsing is running could corrupt the database; reccommend stopping the process first. Do you still want to force quit and risk losing data?", "Be careful! Forcefully quit?", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+                if (userQuit == DialogResult.Yes)
+                {
+                    statusTextBox.Clear();
+                    statusTextBox.AppendText("Stop requested, ending thread...");
+                    recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
+                    _waitHandleDatabase.Set();      //pings the parser thread to release the lock
+                    dbLoggingThread.CancelAsync(); //requests cancellation of the database thread
+                    _waitHandleParser.Set();
+                    e.Cancel = false;               //event shouldn't be cancelled i.e. we want to close the app
+                }
+                else
+                {
+                    //DO NOT close the app, return to caller
+                    e.Cancel = true;
+                    return;
+                }
+            }
+            else
+            {
+                userQuit = MessageBox.Show("Close the program?", "Are you sure?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (userQuit != DialogResult.Yes)
+                {
+                    //tells the form caller we DO NOT want to close the app
+                    e.Cancel = true;
+                    return;
+                }
+            }
+            
+
+        }
+
         private void initOpenLogDialog()
         {
             //prep the load box
@@ -272,7 +310,7 @@ namespace TEST_GPS_Parsing
                     
 
                     //FOR SIMULATION ONLY
-                    Thread.Sleep(100);
+                    //Thread.Sleep(100);
                         //---------------
                     }
                     else
@@ -598,5 +636,7 @@ namespace TEST_GPS_Parsing
                 MessageBox.Show("Cannot open file - have you actually logged anything yet? Details: " + i.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+
     }
 }
