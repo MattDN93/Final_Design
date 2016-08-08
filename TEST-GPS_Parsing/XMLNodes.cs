@@ -117,6 +117,8 @@ namespace TEST_GPS_Parsing
             StreamWriter fileWriter = dbOutputFile;
             addToDb = XmlWriter.Create(fileWriter, writerSetting);
 
+            //XmlNode date = databaseDoc.FirstChild;
+
             return addToDb;
         }
 
@@ -132,15 +134,29 @@ namespace TEST_GPS_Parsing
             addToDb.WriteElementString("Time", gpsDataForDB.time);
             addToDb.WriteElementString("Latitude",gpsDataForDB.latitude);
             addToDb.WriteElementString("Longitude", gpsDataForDB.longitude);
-            addToDb.WriteElementString("GroundSpeed", gpsDataForDB.grspd_k);
-            //addToDb.WriteAttributeString("Type", "knots");
-            addToDb.WriteElementString("GroundSpeed", gpsDataForDB.grspd_kph);
-            //addToDb.WriteAttributeString("Type", "kph");
+
+            addToDb.WriteStartElement("GroundSpeed");
+            addToDb.WriteAttributeString("Type", "knots");
+            addToDb.WriteValue(gpsDataForDB.grspd_k);
+            addToDb.WriteEndElement();
+
+            addToDb.WriteStartElement("GroundSpeed");
+            addToDb.WriteAttributeString("Type", "kph");
+            addToDb.WriteValue(gpsDataForDB.grspd_kph);
+            addToDb.WriteEndElement();
+
             addToDb.WriteElementString("Altitude", gpsDataForDB.altitude);
-            addToDb.WriteElementString("Angle", gpsDataForDB.cardAngle);
-            //addToDb.WriteAttributeString("Type", "Cardinal");
-            addToDb.WriteElementString("Angle", gpsDataForDB.trkangle);
-            //addToDb.WriteAttributeString("Type", "Degrees");
+
+            addToDb.WriteStartElement("Angle");
+            addToDb.WriteAttributeString("Type", "Cardinal");
+            addToDb.WriteValue(gpsDataForDB.cardAngle);
+            addToDb.WriteEndElement();
+
+            addToDb.WriteStartElement("Angle");
+            addToDb.WriteAttributeString("Type", "Degrees");
+            addToDb.WriteValue(gpsDataForDB.trkangle);
+            addToDb.WriteEndElement();
+
             addToDb.WriteElementString("Accuracy", gpsDataForDB.accuracy);
             addToDb.WriteElementString("FixType", gpsDataForDB.fixtype_f);
             addToDb.WriteElementString("FixQuality", gpsDataForDB.fixqual_f);
