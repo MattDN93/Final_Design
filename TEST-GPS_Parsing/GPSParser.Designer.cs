@@ -1,6 +1,6 @@
 ﻿namespace TEST_GPS_Parsing
 {
-    partial class Form1
+    partial class GPSParser
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GPSParser));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label16 = new System.Windows.Forms.Label();
             this.label15 = new System.Windows.Forms.Label();
@@ -100,8 +100,8 @@
             this.dbLoggingThread = new System.ComponentModel.BackgroundWorker();
             this.label23 = new System.Windows.Forms.Label();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
-            this.mapPane = new GMap.NET.WindowsForms.GMapControl();
             this.label24 = new System.Windows.Forms.Label();
+            this.mapPane = new GMap.NET.WindowsForms.GMapControl();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -795,6 +795,15 @@
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Map Location";
             // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(6, 23);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(282, 17);
+            this.label24.TabIndex = 14;
+            this.label24.Text = "Use mouse scroll-wheel to zoom in and out.";
+            // 
             // mapPane
             // 
             this.mapPane.Bearing = 0F;
@@ -807,7 +816,7 @@
             this.mapPane.MarkersEnabled = true;
             this.mapPane.MaxZoom = 18;
             this.mapPane.MinZoom = 0;
-            this.mapPane.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.ViewCenter;
+            this.mapPane.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionWithoutCenter;
             this.mapPane.Name = "mapPane";
             this.mapPane.NegativeMode = false;
             this.mapPane.PolygonsEnabled = true;
@@ -820,16 +829,7 @@
             this.mapPane.TabIndex = 0;
             this.mapPane.Zoom = 10D;
             // 
-            // label24
-            // 
-            this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(6, 23);
-            this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(282, 17);
-            this.label24.TabIndex = 14;
-            this.label24.Text = "Use mouse scroll-wheel to zoom in and out.";
-            // 
-            // Form1
+            // GPSParser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -853,7 +853,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Name = "Form1";
+            this.Name = "GPSParser";
             this.Text = "GPS Logging Application";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.groupBox1.ResumeLayout(false);

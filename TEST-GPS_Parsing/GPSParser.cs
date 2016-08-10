@@ -5,14 +5,17 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
 using GMap.NET;
+using GMap.NET.WindowsForms;
+using GMap.NET.WindowsForms.Markers;
+using GMap.NET.WindowsForms.ToolTips;
 
 
 namespace TEST_GPS_Parsing
 {
-    public partial class Form1 : Form
+    public partial class GPSParser : Form
     {
         //*********THIS VAR IS FOR TESTING FEATURES, set to false for debug features off
-        bool debug = false;
+        bool debug = true;
         //*************************************
         public string inputLogFilename;
         bool dbLoggingActive = true;
@@ -30,14 +33,16 @@ namespace TEST_GPS_Parsing
         static EventWaitHandle _waitHandleParser = new AutoResetEvent(false);
         static EventWaitHandle _waitHandleDatabase = new AutoResetEvent(false);
 
-        GPSPacket gpsData = new GPSPacket();          //global GPS data packet for UI display
+        GPSPacket gpsData = new GPSPacket();          //global GPS data packet for UI display                                                     
+        Mapping mapData = new Mapping();              //set up a new mapping object for mapping function access
+        GMapOverlay locationMarkersOverlay;           //overlay for the location markers
         string sentenceBuffer;                        //global buffer to read incoming data used for parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
         int duplicatePacketCounter = 1;                     //used to ensure duplicate packets aren't saved into the DB
         private XmlWriter fileStream;
 
-        public Form1()
+        public GPSParser()
         {
             InitializeComponent();
             //set all the values in the UI to default
@@ -78,11 +83,22 @@ namespace TEST_GPS_Parsing
         private bool initMappingPane()
         {
             //Set up the Mapping provider to show the maps in the pane
-            //Using OpenStreetMaps for now because of Google's licencing issues (Need to use their API otherwise)            
-            mapPane.MapProvider = GMap.NET.MapProviders.OpenStreetMapProvider.Instance;
-            GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerAndCache;      //we want to cache data locally so network doesn't suffer
-            mapPane.SetPositionByKeywords("Durban, South Africa");                  //init the map before logging starts
-            //mapPane.Position = new PointLatLng(-25.971684, 32.589759);
+            //Using OpenStreetMaps for now because of Google's licencing issues (Need to use their API otherwise)     
+            try
+            {
+                mapPane.MapProvider = GMap.NET.MapProviders.OpenStreetMapProvider.Instance;
+                GMaps.Instance.Mode = AccessMode.ServerAndCache;      //we want to cache data locally so network doesn't suffer
+                mapPane.SetPositionByKeywords("Durban, South Africa");                  //init the map before logging starts
+
+                //set up the overlay on which to display the markers of user location
+                locationMarkersOverlay = new GMapOverlay("locationMarker");
+
+            }
+            catch (SystemException e)
+            {
+                return false;
+
+            }
             return true;
         }
 
@@ -256,29 +272,31 @@ namespace TEST_GPS_Parsing
 
                     //Checks if the resource is available 
                     Console.WriteLine("Parser has data-lock");
-                    gpsData = gpsData.parseSelection(sentenceBuffer, gpsData);
+                    gpsData = gpsData.parseSelection(sentenceBuffer, gpsData);  //perform the parsing operation
+
+                    mapData.parseLatLong(gpsData.latitude, gpsData.longitude);  //pass the data to the mapping method
+
                     count++;
 
                     //this allows for a thread-safe variable access
                     if (gpsData.packetID > gpsData.deltaCount)
                     {
                         gpsData.deltaCount++;
-                        //Interlocked.Exchange(ref resourceInUse, 0);       //unlock the data to write to the DB 
+                        //locationMarkersOverlay = mapData.plotOnMap(locationMarkersOverlay);          //passes the initialised overlay to be populated
+                                                                            
+                        //unlock the data to write to the DB 
                         _waitHandleParser.Set();
                         Console.WriteLine("Parser released lock");
-                        //while (resourceInUse == 1)
-                        //{
+
                         Console.WriteLine("Waiting for DB write to finish");
                         if (dbLoggingActive == true)
                         {
                             _waitHandleDatabase.WaitOne();                  //only wait for write if there's actually a write happening
                         }
                         
-                           // Thread.Sleep(0);
-                        //}
-                        //Interlocked.Exchange(ref resourceInUse, 1);
                         Console.WriteLine("Parser obtained UI write lock");
                         recvRawDataWorker.ReportProgress(count, gpsData); //only update the UI if a whole new packet has been read- saves calling every char                                                
+
                         if (dbLoggingActive == true)
                         {
                             _waitHandleParser.Set(); //inform the db thread that the lock has been released
@@ -287,10 +305,14 @@ namespace TEST_GPS_Parsing
                         Console.WriteLine("Parser released UI lock");
                         //rawBuffer = "";
                     }
-                    
+
 
                     //FOR SIMULATION ONLY
-                    //Thread.Sleep(100);
+                    if (debug)
+                    {
+                        Thread.Sleep(500);
+                    }
+                    
                         //---------------
                     }
                     else
@@ -328,25 +350,20 @@ namespace TEST_GPS_Parsing
                     packetCount++;          //increment number of packets processed
                     if (!dbLoggingThread.CancellationPending)
                     {
-                        //HACKJOB
-                        //Thread.Sleep(800);
-                        //dataUnlocked = resourceUse(databaseDoc,rootNode,dbOutputFile);        //pass the XML file to use and its root node
-
-                       // while (resourceInUse == 1)
-                        //{
-                            Console.WriteLine("Waiting for parser to release lock");
-                        //}
+                        Console.WriteLine("Waiting for parser to release lock");
+                        /*  tells the db logger thread to block until it receives a Set() signal from the parser thread 
+                            to indicate that the parser has released the lock */
                         _waitHandleParser.WaitOne();
-                        //Interlocked.Exchange(ref resourceInUse, 1);
+
+                        //Once this line is passed we assume the lock was released so the db thread has lock on the data
                         Console.WriteLine("DB thread obtained write lock");
                         bool writeComplete = writeToDatabase(myXmlDb, gpsData);
                         while (!writeComplete)
                         {
                             Console.WriteLine("Writing to DB...");
                         }
-
+                        //now the blocking parser thread gets sent a signal that the db thread is releasing the resources
                         _waitHandleDatabase.Set();
-                        //Interlocked.Exchange(ref resourceInUse, 0);
                         Console.WriteLine("Write done - DB releasing lock");
 
                         //write a new 
@@ -432,6 +449,11 @@ namespace TEST_GPS_Parsing
         private void updateUI(GPSPacket gpsDataForUI, string sentenceBufferForUI)
         {
             //This takes the gpsData object and populates all the fields with updated values (if any)
+
+            //updates the map pane overlay with location
+            locationMarkersOverlay = mapData.plotOnMap(locationMarkersOverlay);          //passes the initialised overlay to be populated
+            mapPane.Overlays.Add(locationMarkersOverlay);
+
             //Show the buffer of the raw text file being read 
             rawLogFileTextBox.AppendText(rawBuffer);
             sentenceBufferForUI = "";
