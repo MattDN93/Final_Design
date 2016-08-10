@@ -47,6 +47,12 @@
       <HintPath>..\packages\BruTile.Desktop.0.18.2\lib\net40\BruTile.MbTiles.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="GMap.NET.Core">
+      <HintPath>..\..\Release-NETv4.0\GMap.NET.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="GMap.NET.WindowsForms">
+      <HintPath>..\..\Release-NETv4.0\GMap.NET.WindowsForms.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="SQLite.Net, Version=3.1.0.0, Culture=neutral, processorArchitecture=MSIL">

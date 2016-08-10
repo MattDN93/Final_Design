@@ -4,6 +4,7 @@ using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
+using GMap.NET;
 
 
 namespace TEST_GPS_Parsing
@@ -65,46 +66,24 @@ namespace TEST_GPS_Parsing
             //prep the load box
             initOpenLogDialog();
             trayIconParsing.Visible = true;
+            bool initSuccess = initMappingPane();
+            if (initSuccess == false)
+            {
+                status2TextBox.Clear();
+                status2TextBox.AppendText("Mapping control load failed.");
+            }
 
         }
 
-        //Warns the user before shutting down the app if a process is running
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private bool initMappingPane()
         {
-            DialogResult userQuit;
-            if (parseIsRunning == true)
-            {
-                userQuit = MessageBox.Show("Quitting while parsing is running could corrupt the database; reccommend stopping the process first. Do you still want to force quit and risk losing data?", "Be careful! Forcefully quit?", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
-                if (userQuit == DialogResult.Yes)
-                {
-                    parseIsRunning = false;
-                    statusTextBox.Clear();
-                    statusTextBox.AppendText("Stop requested, ending thread...");
-                    recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
-                    _waitHandleDatabase.Set();      //pings the parser thread to release the lock
-                    dbLoggingThread.CancelAsync(); //requests cancellation of the database thread
-                    _waitHandleParser.Set();
-                    e.Cancel = false;               //event shouldn't be cancelled i.e. we want to close the app
-                }
-                else
-                {
-                    //DO NOT close the app, return to caller
-                    e.Cancel = true;
-                    return;
-                }
-            }
-            else
-            {
-                userQuit = MessageBox.Show("Close the program?", "Are you sure?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (userQuit != DialogResult.Yes)
-                {
-                    //tells the form caller we DO NOT want to close the app
-                    e.Cancel = true;
-                    return;
-                }
-            }
-            
-
+            //Set up the Mapping provider to show the maps in the pane
+            //Using OpenStreetMaps for now because of Google's licencing issues (Need to use their API otherwise)            
+            mapPane.MapProvider = GMap.NET.MapProviders.OpenStreetMapProvider.Instance;
+            GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerAndCache;      //we want to cache data locally so network doesn't suffer
+            mapPane.SetPositionByKeywords("Durban, South Africa");                  //init the map before logging starts
+            //mapPane.Position = new PointLatLng(-25.971684, 32.589759);
+            return true;
         }
 
         private void initOpenLogDialog()
@@ -498,6 +477,46 @@ namespace TEST_GPS_Parsing
 
         }
 
+        //-------------------------Form shutdown method-----------
+        //Warns the user before shutting down the app if a process is running
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult userQuit;
+            if (parseIsRunning == true)
+            {
+                userQuit = MessageBox.Show("Quitting while parsing is running could corrupt the database; reccommend stopping the process first. Do you still want to force quit and risk losing data?", "Be careful! Forcefully quit?", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+                if (userQuit == DialogResult.Yes)
+                {
+                    parseIsRunning = false;
+                    statusTextBox.Clear();
+                    statusTextBox.AppendText("Stop requested, ending thread...");
+                    recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
+                    _waitHandleDatabase.Set();      //pings the parser thread to release the lock
+                    dbLoggingThread.CancelAsync(); //requests cancellation of the database thread
+                    _waitHandleParser.Set();
+                    e.Cancel = false;               //event shouldn't be cancelled i.e. we want to close the app
+                }
+                else
+                {
+                    //DO NOT close the app, return to caller
+                    e.Cancel = true;
+                    return;
+                }
+            }
+            else
+            {
+                userQuit = MessageBox.Show("Close the program?", "Are you sure?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (userQuit != DialogResult.Yes)
+                {
+                    //tells the form caller we DO NOT want to close the app
+                    e.Cancel = true;
+                    return;
+                }
+            }
+
+
+        }
+
         //-------------------------DB update method---------------
 
         private bool writeToDatabase(XMLNodes myXmlDb, GPSPacket gpsDataForDB)
@@ -642,6 +661,9 @@ namespace TEST_GPS_Parsing
             }
         }
 
+        private void mapDisplayBrowserWindow_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
 
+        }
     }
 }

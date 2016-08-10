@@ -99,6 +99,9 @@
             this.newFileAtEachStartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dbLoggingThread = new System.ComponentModel.BackgroundWorker();
             this.label23 = new System.Windows.Forms.Label();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.mapPane = new GMap.NET.WindowsForms.GMapControl();
+            this.label24 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -107,6 +110,7 @@
             this.groupBox5.SuspendLayout();
             this.groupBox6.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            this.groupBox7.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -780,11 +784,57 @@
             this.label23.TabIndex = 19;
             this.label23.Text = "v0.9-alpha Build 09-08-2016";
             // 
+            // groupBox7
+            // 
+            this.groupBox7.Controls.Add(this.label24);
+            this.groupBox7.Controls.Add(this.mapPane);
+            this.groupBox7.Location = new System.Drawing.Point(680, 12);
+            this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Size = new System.Drawing.Size(626, 550);
+            this.groupBox7.TabIndex = 20;
+            this.groupBox7.TabStop = false;
+            this.groupBox7.Text = "Map Location";
+            // 
+            // mapPane
+            // 
+            this.mapPane.Bearing = 0F;
+            this.mapPane.CanDragMap = true;
+            this.mapPane.EmptyTileColor = System.Drawing.Color.Navy;
+            this.mapPane.GrayScaleMode = false;
+            this.mapPane.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow;
+            this.mapPane.LevelsKeepInMemmory = 5;
+            this.mapPane.Location = new System.Drawing.Point(6, 43);
+            this.mapPane.MarkersEnabled = true;
+            this.mapPane.MaxZoom = 18;
+            this.mapPane.MinZoom = 0;
+            this.mapPane.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.ViewCenter;
+            this.mapPane.Name = "mapPane";
+            this.mapPane.NegativeMode = false;
+            this.mapPane.PolygonsEnabled = true;
+            this.mapPane.RetryLoadTile = 0;
+            this.mapPane.RoutesEnabled = true;
+            this.mapPane.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
+            this.mapPane.SelectedAreaFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(65)))), ((int)(((byte)(105)))), ((int)(((byte)(225)))));
+            this.mapPane.ShowTileGridLines = false;
+            this.mapPane.Size = new System.Drawing.Size(614, 488);
+            this.mapPane.TabIndex = 0;
+            this.mapPane.Zoom = 10D;
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(6, 23);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(282, 17);
+            this.label24.TabIndex = 14;
+            this.label24.Text = "Use mouse scroll-wheel to zoom in and out.";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1318, 598);
+            this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.label23);
             this.Controls.Add(this.openPortButton);
             this.Controls.Add(this.groupBox6);
@@ -822,6 +872,8 @@
             this.groupBox6.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.groupBox7.ResumeLayout(false);
+            this.groupBox7.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -898,6 +950,9 @@
         private System.Windows.Forms.ToolStripMenuItem newFileAtEachStartToolStripMenuItem;
         private System.ComponentModel.BackgroundWorker dbLoggingThread;
         private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.GroupBox groupBox7;
+        private GMap.NET.WindowsForms.GMapControl mapPane;
+        private System.Windows.Forms.Label label24;
     }
 }
 
