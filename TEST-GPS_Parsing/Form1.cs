@@ -77,6 +77,7 @@ namespace TEST_GPS_Parsing
                 userQuit = MessageBox.Show("Quitting while parsing is running could corrupt the database; reccommend stopping the process first. Do you still want to force quit and risk losing data?", "Be careful! Forcefully quit?", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
                 if (userQuit == DialogResult.Yes)
                 {
+                    parseIsRunning = false;
                     statusTextBox.Clear();
                     statusTextBox.AppendText("Stop requested, ending thread...");
                     recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
@@ -405,13 +406,17 @@ namespace TEST_GPS_Parsing
 
         private void recvRawDataWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            //check the status of the system each time a new sentence received and inform the user
-            statusTextBox.Clear();
-            statusTextBox.AppendText("Parsing in progress. No errors.");
-          
-            //function called to get all the incoming data and refresh the UI
-            updateUI(gpsData, sentenceBuffer);
-            rawBuffer = "";             //since earlier call is asynchronous, only clear the raw buffer once 100% sure that its data has reached the UI - which is now.
+            if (!recvRawDataWorker.CancellationPending)
+            {
+                //check the status of the system each time a new sentence received and inform the user
+                statusTextBox.Clear();
+                statusTextBox.AppendText("Parsing in progress. No errors.");
+
+                //function called to get all the incoming data and refresh the UI
+                updateUI(gpsData, sentenceBuffer);
+                rawBuffer = "";             //since earlier call is asynchronous, only clear the raw buffer once 100% sure that its data has reached the UI - which is now.
+            }
+            
         }
 
         //----------------------------Thread completion methods---------------------------

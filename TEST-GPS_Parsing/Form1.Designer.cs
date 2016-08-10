@@ -98,6 +98,7 @@
             this.oncePerSessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newFileAtEachStartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dbLoggingThread = new System.ComponentModel.BackgroundWorker();
+            this.label23 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -668,7 +669,7 @@
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
             this.menuStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-            this.menuStrip1.Size = new System.Drawing.Size(685, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(1318, 28);
             this.menuStrip1.TabIndex = 18;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -770,11 +771,21 @@
             this.dbLoggingThread.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.dbLoggingThread_ProgressChanged);
             this.dbLoggingThread.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.dbLoggingThread_RunWorkerCompleted);
             // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(485, 6);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(188, 17);
+            this.label23.TabIndex = 19;
+            this.label23.Text = "v0.9-alpha Build 09-08-2016";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(685, 598);
+            this.ClientSize = new System.Drawing.Size(1318, 598);
+            this.Controls.Add(this.label23);
             this.Controls.Add(this.openPortButton);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.label20);
@@ -886,6 +897,7 @@
         private System.Windows.Forms.ToolStripMenuItem oncePerSessionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newFileAtEachStartToolStripMenuItem;
         private System.ComponentModel.BackgroundWorker dbLoggingThread;
+        private System.Windows.Forms.Label label23;
     }
 }
 
