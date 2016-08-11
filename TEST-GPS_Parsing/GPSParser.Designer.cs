@@ -101,17 +101,17 @@
             this.loadModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.offlineCacheOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.onlineCacheToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.dbLoggingThread = new System.ComponentModel.BackgroundWorker();
-            this.label23 = new System.Windows.Forms.Label();
-            this.groupBox7 = new System.Windows.Forms.GroupBox();
-            this.label24 = new System.Windows.Forms.Label();
-            this.mapPane = new GMap.NET.WindowsForms.GMapControl();
             this.mapProviderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.googleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openStreetMapsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mapPaneStatusTectBox = new System.Windows.Forms.TextBox();
+            this.dbLoggingThread = new System.ComponentModel.BackgroundWorker();
+            this.label23 = new System.Windows.Forms.Label();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.label25 = new System.Windows.Forms.Label();
+            this.mapPaneStatusTectBox = new System.Windows.Forms.TextBox();
+            this.label24 = new System.Windows.Forms.Label();
+            this.mapPane = new GMap.NET.WindowsForms.GMapControl();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -350,7 +350,7 @@
             // 
             // timeTextBox
             // 
-            this.timeTextBox.Location = new System.Drawing.Point(51, 42);
+            this.timeTextBox.Location = new System.Drawing.Point(51, 44);
             this.timeTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.timeTextBox.Name = "timeTextBox";
             this.timeTextBox.ReadOnly = true;
@@ -360,7 +360,7 @@
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(3, 10);
+            this.label13.Location = new System.Drawing.Point(3, 12);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(42, 17);
             this.label13.TabIndex = 12;
@@ -368,7 +368,7 @@
             // 
             // dateTextBox
             // 
-            this.dateTextBox.Location = new System.Drawing.Point(51, 7);
+            this.dateTextBox.Location = new System.Drawing.Point(51, 11);
             this.dateTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dateTextBox.Name = "dateTextBox";
             this.dateTextBox.ReadOnly = true;
@@ -794,7 +794,7 @@
             this.offlineCacheOnlyToolStripMenuItem,
             this.onlineCacheToolStripMenuItem});
             this.loadModeToolStripMenuItem.Name = "loadModeToolStripMenuItem";
-            this.loadModeToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.loadModeToolStripMenuItem.Size = new System.Drawing.Size(174, 26);
             this.loadModeToolStripMenuItem.Text = "Load mode";
             // 
             // offlineCacheOnlyToolStripMenuItem
@@ -814,6 +814,37 @@
             this.onlineCacheToolStripMenuItem.Text = "Online and cache";
             this.onlineCacheToolStripMenuItem.Click += new System.EventHandler(this.onlineCacheToolStripMenuItem_Click);
             // 
+            // mapProviderToolStripMenuItem
+            // 
+            this.mapProviderToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.googleToolStripMenuItem,
+            this.bingToolStripMenuItem,
+            this.openStreetMapsToolStripMenuItem});
+            this.mapProviderToolStripMenuItem.Name = "mapProviderToolStripMenuItem";
+            this.mapProviderToolStripMenuItem.Size = new System.Drawing.Size(174, 26);
+            this.mapProviderToolStripMenuItem.Text = "Map provider";
+            // 
+            // googleToolStripMenuItem
+            // 
+            this.googleToolStripMenuItem.Name = "googleToolStripMenuItem";
+            this.googleToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
+            this.googleToolStripMenuItem.Text = "Google*";
+            this.googleToolStripMenuItem.Click += new System.EventHandler(this.googleToolStripMenuItem_Click);
+            // 
+            // bingToolStripMenuItem
+            // 
+            this.bingToolStripMenuItem.Name = "bingToolStripMenuItem";
+            this.bingToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
+            this.bingToolStripMenuItem.Text = "Bing";
+            this.bingToolStripMenuItem.Click += new System.EventHandler(this.bingToolStripMenuItem_Click);
+            // 
+            // openStreetMapsToolStripMenuItem
+            // 
+            this.openStreetMapsToolStripMenuItem.Name = "openStreetMapsToolStripMenuItem";
+            this.openStreetMapsToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
+            this.openStreetMapsToolStripMenuItem.Text = "OpenStreetMaps";
+            this.openStreetMapsToolStripMenuItem.Click += new System.EventHandler(this.openStreetMapsToolStripMenuItem_Click);
+            // 
             // dbLoggingThread
             // 
             this.dbLoggingThread.WorkerSupportsCancellation = true;
@@ -826,9 +857,9 @@
             this.label23.AutoSize = true;
             this.label23.Location = new System.Drawing.Point(485, 6);
             this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(188, 17);
+            this.label23.Size = new System.Drawing.Size(176, 17);
             this.label23.TabIndex = 19;
-            this.label23.Text = "v0.9-alpha Build 09-08-2016";
+            this.label23.Text = "v1-alpha Build 11-08-2016";
             // 
             // groupBox7
             // 
@@ -842,6 +873,23 @@
             this.groupBox7.TabIndex = 20;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Map Location";
+            // 
+            // label25
+            // 
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(320, 20);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(52, 17);
+            this.label25.TabIndex = 16;
+            this.label25.Text = "Status:";
+            // 
+            // mapPaneStatusTectBox
+            // 
+            this.mapPaneStatusTectBox.Location = new System.Drawing.Point(374, 18);
+            this.mapPaneStatusTectBox.Name = "mapPaneStatusTectBox";
+            this.mapPaneStatusTectBox.ReadOnly = true;
+            this.mapPaneStatusTectBox.Size = new System.Drawing.Size(246, 22);
+            this.mapPaneStatusTectBox.TabIndex = 15;
             // 
             // label24
             // 
@@ -876,54 +924,6 @@
             this.mapPane.Size = new System.Drawing.Size(614, 488);
             this.mapPane.TabIndex = 0;
             this.mapPane.Zoom = 10D;
-            // 
-            // mapProviderToolStripMenuItem
-            // 
-            this.mapProviderToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.googleToolStripMenuItem,
-            this.bingToolStripMenuItem,
-            this.openStreetMapsToolStripMenuItem});
-            this.mapProviderToolStripMenuItem.Name = "mapProviderToolStripMenuItem";
-            this.mapProviderToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.mapProviderToolStripMenuItem.Text = "Map provider";
-            // 
-            // googleToolStripMenuItem
-            // 
-            this.googleToolStripMenuItem.Name = "googleToolStripMenuItem";
-            this.googleToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
-            this.googleToolStripMenuItem.Text = "Google*";
-            this.googleToolStripMenuItem.Click += new System.EventHandler(this.googleToolStripMenuItem_Click);
-            // 
-            // bingToolStripMenuItem
-            // 
-            this.bingToolStripMenuItem.Name = "bingToolStripMenuItem";
-            this.bingToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
-            this.bingToolStripMenuItem.Text = "Bing";
-            this.bingToolStripMenuItem.Click += new System.EventHandler(this.bingToolStripMenuItem_Click);
-            // 
-            // openStreetMapsToolStripMenuItem
-            // 
-            this.openStreetMapsToolStripMenuItem.Name = "openStreetMapsToolStripMenuItem";
-            this.openStreetMapsToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
-            this.openStreetMapsToolStripMenuItem.Text = "OpenStreetMaps";
-            this.openStreetMapsToolStripMenuItem.Click += new System.EventHandler(this.openStreetMapsToolStripMenuItem_Click);
-            // 
-            // mapPaneStatusTectBox
-            // 
-            this.mapPaneStatusTectBox.Location = new System.Drawing.Point(374, 18);
-            this.mapPaneStatusTectBox.Name = "mapPaneStatusTectBox";
-            this.mapPaneStatusTectBox.ReadOnly = true;
-            this.mapPaneStatusTectBox.Size = new System.Drawing.Size(246, 22);
-            this.mapPaneStatusTectBox.TabIndex = 15;
-            // 
-            // label25
-            // 
-            this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(320, 20);
-            this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(52, 17);
-            this.label25.TabIndex = 16;
-            this.label25.Text = "Status:";
             // 
             // GPSParser
             // 
