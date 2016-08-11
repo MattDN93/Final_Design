@@ -733,5 +733,7 @@ namespace TEST_GPS_Parsing
             mapPane.MapProvider = GMap.NET.MapProviders.BingMapProvider.Instance;
             trayIconParsing.ShowBalloonTip(3, "Mapping Info", "Map provider switched to Bing", ToolTipIcon.Info);
         }
+
+
     }
 }

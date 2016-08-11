@@ -20,14 +20,17 @@ namespace TEST_GPS_Parsing
         public void parseLatLong(string latitude, string longitude)
         {
             string latTemp, longTemp;
+            int pointIndexLat, pointIndexLong;             //make sure 3 digit degree values are accounted for
             //current lat/long in form DDMM.SSS(H)
             //this transforms to DD.MMSSS(H)
             try
             {
-                latTemp = latitude.Insert(2, ".");
-                latTemp = latTemp.Remove(5, 1);
-                longTemp = longitude.Insert(2, ".");
-                longTemp = longTemp.Remove(5, 1);
+                pointIndexLat = latitude.IndexOf('.');
+                latTemp = latitude.Insert(pointIndexLat-2, ".");
+                latTemp = latTemp.Remove(pointIndexLat+1, 1);
+                pointIndexLong = longitude.IndexOf('.');
+                longTemp = longitude.Insert(pointIndexLong - 2, ".");
+                longTemp = longTemp.Remove(pointIndexLong+1, 1);
 
                 /*pull off headings at the end to modify the lat/long value
                     if N / E = value stays same sign
@@ -54,6 +57,8 @@ namespace TEST_GPS_Parsing
                  */
                 latitudeD = double.Parse(latTemp,System.Globalization.CultureInfo.InvariantCulture);
                 longitudeD = double.Parse(longTemp, System.Globalization.CultureInfo.InvariantCulture);
+                pointIndexLat = 0;
+                pointIndexLong = 0;
                 return;
 
             }
@@ -61,6 +66,10 @@ namespace TEST_GPS_Parsing
             {
                 Console.WriteLine("Co-ordinate values were null or not defined properly");
                 return;
+            }
+            catch (System.FormatException f)
+            {
+                Console.WriteLine("Co-ordinates are in an incorrect format (or blank)");
             }
 
 
