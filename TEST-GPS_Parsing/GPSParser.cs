@@ -89,6 +89,7 @@ namespace TEST_GPS_Parsing
                 mapPane.MapProvider = GMap.NET.MapProviders.OpenStreetMapProvider.Instance;
                 GMaps.Instance.Mode = AccessMode.ServerAndCache;      //we want to cache data locally so network doesn't suffer
                 mapPane.SetPositionByKeywords("Durban, South Africa");                  //init the map before logging starts
+                openStreetMapsToolStripMenuItem.Checked = true;                         //use OSM by default
 
                 //set up the overlay on which to display the markers of user location
                 locationMarkersOverlay = new GMapOverlay("locationMarker");
@@ -686,6 +687,51 @@ namespace TEST_GPS_Parsing
         private void mapDisplayBrowserWindow_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
 
+        }
+
+        private void offlineCacheOnlyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            offlineCacheOnlyToolStripMenuItem.Checked = true;
+            onlineCacheToolStripMenuItem.Checked = false;
+            GMaps.Instance.Mode = AccessMode.CacheOnly;
+        }
+
+        private void onlineCacheToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            offlineCacheOnlyToolStripMenuItem.Checked = false;
+            onlineCacheToolStripMenuItem.Checked = true;
+            GMaps.Instance.Mode = AccessMode.ServerAndCache;
+        }
+
+        private void googleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DialogResult dr = MessageBox.Show("Warning: Accessing Google's Map data in this way may violate their terms of service. Proceed at your own risk?", "Use Google Maps?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (dr == DialogResult.Yes)
+            {
+                bingToolStripMenuItem.Checked = false;
+                openStreetMapsToolStripMenuItem.Checked = false;
+                googleToolStripMenuItem.Checked = true;
+                mapPane.MapProvider = GMap.NET.MapProviders.GoogleMapProvider.Instance;
+                trayIconParsing.ShowBalloonTip(3, "Mapping Info", "(At Own Risk) Map provider switched to Google", ToolTipIcon.Warning);
+            }
+        }
+
+        private void openStreetMapsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            bingToolStripMenuItem.Checked = false;
+            openStreetMapsToolStripMenuItem.Checked = true;
+            googleToolStripMenuItem.Checked = false;
+            mapPane.MapProvider = GMap.NET.MapProviders.OpenStreetMapProvider.Instance;
+            trayIconParsing.ShowBalloonTip(3, "Mapping Info", "Map provider switched to OpenStreetMaps", ToolTipIcon.Info);
+        }
+
+        private void bingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            bingToolStripMenuItem.Checked = true;
+            openStreetMapsToolStripMenuItem.Checked = false;
+            googleToolStripMenuItem.Checked = false;
+            mapPane.MapProvider = GMap.NET.MapProviders.BingMapProvider.Instance;
+            trayIconParsing.ShowBalloonTip(3, "Mapping Info", "Map provider switched to Bing", ToolTipIcon.Info);
         }
     }
 }

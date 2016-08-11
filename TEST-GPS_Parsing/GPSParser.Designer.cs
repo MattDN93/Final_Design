@@ -97,11 +97,21 @@
             this.creationOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.oncePerSessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newFileAtEachStartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mappingOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.offlineCacheOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.onlineCacheToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dbLoggingThread = new System.ComponentModel.BackgroundWorker();
             this.label23 = new System.Windows.Forms.Label();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.label24 = new System.Windows.Forms.Label();
             this.mapPane = new GMap.NET.WindowsForms.GMapControl();
+            this.mapProviderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.googleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openStreetMapsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mapPaneStatusTectBox = new System.Windows.Forms.TextBox();
+            this.label25 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -668,7 +678,8 @@
             this.menuStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Visible;
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.databaseOptionsToolStripMenuItem});
+            this.databaseOptionsToolStripMenuItem,
+            this.mappingOptionsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 570);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
@@ -768,6 +779,41 @@
             this.newFileAtEachStartToolStripMenuItem.ToolTipText = "Creates a new database log file each time \"Start\" is selected per file";
             this.newFileAtEachStartToolStripMenuItem.Click += new System.EventHandler(this.newFileAtEachStartToolStripMenuItem_Click);
             // 
+            // mappingOptionsToolStripMenuItem
+            // 
+            this.mappingOptionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.loadModeToolStripMenuItem,
+            this.mapProviderToolStripMenuItem});
+            this.mappingOptionsToolStripMenuItem.Name = "mappingOptionsToolStripMenuItem";
+            this.mappingOptionsToolStripMenuItem.Size = new System.Drawing.Size(135, 24);
+            this.mappingOptionsToolStripMenuItem.Text = "Mapping options";
+            // 
+            // loadModeToolStripMenuItem
+            // 
+            this.loadModeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.offlineCacheOnlyToolStripMenuItem,
+            this.onlineCacheToolStripMenuItem});
+            this.loadModeToolStripMenuItem.Name = "loadModeToolStripMenuItem";
+            this.loadModeToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.loadModeToolStripMenuItem.Text = "Load mode";
+            // 
+            // offlineCacheOnlyToolStripMenuItem
+            // 
+            this.offlineCacheOnlyToolStripMenuItem.Name = "offlineCacheOnlyToolStripMenuItem";
+            this.offlineCacheOnlyToolStripMenuItem.Size = new System.Drawing.Size(203, 26);
+            this.offlineCacheOnlyToolStripMenuItem.Text = "Offline cache only";
+            this.offlineCacheOnlyToolStripMenuItem.Click += new System.EventHandler(this.offlineCacheOnlyToolStripMenuItem_Click);
+            // 
+            // onlineCacheToolStripMenuItem
+            // 
+            this.onlineCacheToolStripMenuItem.Checked = true;
+            this.onlineCacheToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.onlineCacheToolStripMenuItem.Name = "onlineCacheToolStripMenuItem";
+            this.onlineCacheToolStripMenuItem.ShowShortcutKeys = false;
+            this.onlineCacheToolStripMenuItem.Size = new System.Drawing.Size(203, 26);
+            this.onlineCacheToolStripMenuItem.Text = "Online and cache";
+            this.onlineCacheToolStripMenuItem.Click += new System.EventHandler(this.onlineCacheToolStripMenuItem_Click);
+            // 
             // dbLoggingThread
             // 
             this.dbLoggingThread.WorkerSupportsCancellation = true;
@@ -786,6 +832,8 @@
             // 
             // groupBox7
             // 
+            this.groupBox7.Controls.Add(this.label25);
+            this.groupBox7.Controls.Add(this.mapPaneStatusTectBox);
             this.groupBox7.Controls.Add(this.label24);
             this.groupBox7.Controls.Add(this.mapPane);
             this.groupBox7.Location = new System.Drawing.Point(680, 12);
@@ -828,6 +876,54 @@
             this.mapPane.Size = new System.Drawing.Size(614, 488);
             this.mapPane.TabIndex = 0;
             this.mapPane.Zoom = 10D;
+            // 
+            // mapProviderToolStripMenuItem
+            // 
+            this.mapProviderToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.googleToolStripMenuItem,
+            this.bingToolStripMenuItem,
+            this.openStreetMapsToolStripMenuItem});
+            this.mapProviderToolStripMenuItem.Name = "mapProviderToolStripMenuItem";
+            this.mapProviderToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.mapProviderToolStripMenuItem.Text = "Map provider";
+            // 
+            // googleToolStripMenuItem
+            // 
+            this.googleToolStripMenuItem.Name = "googleToolStripMenuItem";
+            this.googleToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
+            this.googleToolStripMenuItem.Text = "Google*";
+            this.googleToolStripMenuItem.Click += new System.EventHandler(this.googleToolStripMenuItem_Click);
+            // 
+            // bingToolStripMenuItem
+            // 
+            this.bingToolStripMenuItem.Name = "bingToolStripMenuItem";
+            this.bingToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
+            this.bingToolStripMenuItem.Text = "Bing";
+            this.bingToolStripMenuItem.Click += new System.EventHandler(this.bingToolStripMenuItem_Click);
+            // 
+            // openStreetMapsToolStripMenuItem
+            // 
+            this.openStreetMapsToolStripMenuItem.Name = "openStreetMapsToolStripMenuItem";
+            this.openStreetMapsToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
+            this.openStreetMapsToolStripMenuItem.Text = "OpenStreetMaps";
+            this.openStreetMapsToolStripMenuItem.Click += new System.EventHandler(this.openStreetMapsToolStripMenuItem_Click);
+            // 
+            // mapPaneStatusTectBox
+            // 
+            this.mapPaneStatusTectBox.Location = new System.Drawing.Point(374, 18);
+            this.mapPaneStatusTectBox.Name = "mapPaneStatusTectBox";
+            this.mapPaneStatusTectBox.ReadOnly = true;
+            this.mapPaneStatusTectBox.Size = new System.Drawing.Size(246, 22);
+            this.mapPaneStatusTectBox.TabIndex = 15;
+            // 
+            // label25
+            // 
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(320, 20);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(52, 17);
+            this.label25.TabIndex = 16;
+            this.label25.Text = "Status:";
             // 
             // GPSParser
             // 
@@ -953,6 +1049,16 @@
         private System.Windows.Forms.GroupBox groupBox7;
         private GMap.NET.WindowsForms.GMapControl mapPane;
         private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.ToolStripMenuItem mappingOptionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loadModeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem offlineCacheOnlyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem onlineCacheToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mapProviderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem googleToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openStreetMapsToolStripMenuItem;
+        private System.Windows.Forms.Label label25;
+        private System.Windows.Forms.TextBox mapPaneStatusTectBox;
     }
 }
 
