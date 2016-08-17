@@ -19,47 +19,12 @@ camStream::camStream()				//constructor
 	VideoCapture camStreamCapture = VideoCapture();
 	captureChoice = -1;
 	capStartSuccess = false;
+	isStreaming = false;
 }
 
 camStream::~camStream()				//destructor
 {
 	camStreamCapture.release();
-}
-
-bool camStream::camCapture(int choice)
-{
-	if (choice == 0)
-	{
-		camStreamCapture.open(0);
-
-		if (!camStreamCapture.isOpened())
-		{
-			cout << "Failed to open the stream!";
-			return false;
-		}
-		else
-		{
-			doCapture();
-		}
-	}
-	else if (choice == 1)
-	{
-		string fileName;
-		cout << "Enter a filename to open, fully qualified: ";
-		cin >> fileName;
-
-		camStreamCapture.open(fileName);		//pass 0 for a webcam
-
-		if (!camStreamCapture.isOpened())
-		{
-			cout << "Failed to open the stream!";
-			return false;
-		}
-		else
-		{
-			doCapture();
-		}
-	}
 }
 
 void camStream::userInputQuery()
@@ -81,22 +46,102 @@ void camStream::userInputQuery()
 	}
 }
 
+bool camStream::camCapture(int choice)
+{
+	if (choice == 0)
+	{
+		camStreamCapture.open(0);
+
+		if (!camStreamCapture.isOpened())
+		{
+			cout << "Failed to open the stream!";
+			return false;
+		}
+		else
+		{
+			isStreaming = true;
+			return true;
+			//doCapture();
+		}
+	}
+	else if (choice == 1)
+	{
+		string fileName;
+		cout << "Enter a filename to open, fully qualified: ";
+		cin >> fileName;
+
+		camStreamCapture.open(fileName);		//pass 0 for a webcam
+
+		if (!camStreamCapture.isOpened())
+		{
+			cout << "Failed to open the stream!";
+			return false;
+		}
+		else
+		{
+			isStreaming = true;
+			return true; // doCapture();
+		}
+	}
+}
+
+
+
 void camStream::doCapture()
 {
+	isStreaming = true;
 	namedWindow("Incoming Video Stream", CV_WINDOW_AUTOSIZE);
 	Mat webcamVid;			//create a Mat object to manipulate
 	while (camStreamCapture.isOpened())
 	{
 		bool frameOK;
+		int button;
+		isStreaming = true;
 		frameOK = camStreamCapture.read(webcamVid);
 		if (!frameOK)
 		{
 			break;
 		}
 		imshow("Incoming Video Stream", webcamVid);
-		waitKey(30);
-		cout << "Current FPS: " << camStreamCapture.get(CAP_PROP_FPS) << endl;
-		cout << "Frame count:" << camStreamCapture.get(CAP_PROP_FRAME_COUNT) << endl;
+		button = waitKey(30);
+		//cout << "Current FPS: " << camStreamCapture.get(CAP_PROP_FPS) << endl;
+		//cout << "Frame count:" << camStreamCapture.get(CAP_PROP_FRAME_COUNT) << endl;
+		
+		if (button == 27)		//if the ESC button is pressed, quit the capture
+		{
+			break;
+		}
 	}
+
 	//camStream::~camStream();		//dispose of the object
+}
+
+void camStream::getVideoInfo()
+{
+	if (camStreamCapture.isOpened())
+	{
+		vidPixelHeight = camStreamCapture.get(CAP_PROP_FRAME_HEIGHT);
+		vidPixelWidth = camStreamCapture.get(CAP_PROP_FRAME_WIDTH);
+	}
+	cout << "Video height = " << vidPixelHeight << endl;
+	cout << "Video width = " << vidPixelWidth << endl;
+	//isStreaming = false;
+}
+
+bool camStream::streamingInProgress()
+{
+	return isStreaming;
+}
+
+bool camStream::captureOpenedOK()
+{
+	if (capStartSuccess)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+	
 }

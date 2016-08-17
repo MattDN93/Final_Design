@@ -15,8 +15,10 @@ Related to streaming the video from a specific source
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
 #include <opencv2/videoio.hpp>
+
 #include <iostream>
 #include <string>
+#include <future>
 #pragma endregion
 
 using namespace cv;
@@ -32,11 +34,18 @@ public:
 	bool camCapture(int);			//method to initiate capture 
 	void userInputQuery();			//ask user which way they want to open the video
 	void doCapture();				//perform the capture
+	void getVideoInfo();			//get the video properties
+	bool streamingInProgress();		//lets non-class object query streaming status
+	bool captureOpenedOK();			//initial flag set when user opens files
 
 private:
 	VideoCapture camStreamCapture;	//the OpenCV video capture object
 	int captureChoice;				//user's selection of which capture to use
 	bool capStartSuccess;			//whether the capture was opened OK
+	bool isStreaming;				//whether stream is in progress
+
+	int vidPixelWidth;				//video dimensions
+	int vidPixelHeight;
 };
 
 #pragma endregion
