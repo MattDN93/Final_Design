@@ -157,6 +157,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="camStream.cpp" />
+    <ClCompile Include="Overlay.cpp" />
     <ClCompile Include="VideoOpenCV.cpp" />
     <ClCompile Include="VideoVLC.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -164,10 +165,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camStream.h" />
+    <ClInclude Include="Overlay.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ObjectTracker.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="editmarker1.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

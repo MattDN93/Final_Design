@@ -10,11 +10,17 @@ Related to streaming the video from a specific source
 #define CAMSTREAM_H
 
 #pragma Includes
+
+#ifndef OPENCV_HEAD
+#define OPENCV_HEAD
+
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
 #include <opencv2/videoio.hpp>
+
+#endif // !OPENCV_HEAD
 
 #include <iostream>
 #include <string>
@@ -31,6 +37,11 @@ public:
 	camStream();
 	~camStream();
 
+	int vidPixelWidth;				//video dimensions
+	int vidPixelHeight;
+
+	friend class Overlay;
+
 	bool camCapture(int);			//method to initiate capture 
 	void userInputQuery();			//ask user which way they want to open the video
 	void doCapture();				//perform the capture
@@ -39,13 +50,13 @@ public:
 	bool captureOpenedOK();			//initial flag set when user opens files
 
 private:
+	Mat webcamVid;					//create a Mat object to manipulate
 	VideoCapture camStreamCapture;	//the OpenCV video capture object
 	int captureChoice;				//user's selection of which capture to use
 	bool capStartSuccess;			//whether the capture was opened OK
 	bool isStreaming;				//whether stream is in progress
 
-	int vidPixelWidth;				//video dimensions
-	int vidPixelHeight;
+
 };
 
 #pragma endregion

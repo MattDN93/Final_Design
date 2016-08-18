@@ -13,6 +13,8 @@
 #ifndef CAMSTREAM_H
 #include "camStream.h"
 #endif
+#include "Overlay.h"
+
 
 camStream::camStream()				//constructor
 {
@@ -91,18 +93,25 @@ void camStream::doCapture()
 {
 	isStreaming = true;
 	namedWindow("Incoming Video Stream", CV_WINDOW_AUTOSIZE);
-	Mat webcamVid;			//create a Mat object to manipulate
-	while (camStreamCapture.isOpened())
+	webcamVid;			//instantiate camCapture object
+	Overlay ol_mark;		//overlay instantiation
+
+	ol_mark.setupOverlay();	//setup the marker overlay
+
+	while (camStreamCapture.isOpened())		//as long as the camera stream is open we want to read off it
 	{
 		bool frameOK;
 		int button;
-		isStreaming = true;
-		frameOK = camStreamCapture.read(webcamVid);
-		if (!frameOK)
+		isStreaming = true;					//set flag that streaming in progress
+		frameOK = camStreamCapture.read(webcamVid);	//perform the capture and check
+		if (!frameOK)								//if frame failed to capture, quit
 		{
 			break;
 		}
-		imshow("Incoming Video Stream", webcamVid);
+		imshow("Incoming Video Stream", webcamVid); //display the video in a GUI window
+
+		ol_mark.drawMarker(0, 0,webcamVid);					//initiate the overlay draw routine
+
 		button = waitKey(30);
 		//cout << "Current FPS: " << camStreamCapture.get(CAP_PROP_FPS) << endl;
 		//cout << "Frame count:" << camStreamCapture.get(CAP_PROP_FRAME_COUNT) << endl;
@@ -144,4 +153,9 @@ bool camStream::captureOpenedOK()
 		return false;
 	}
 	
+}
+
+void setGridExtents(int, int)
+{
+
 }
