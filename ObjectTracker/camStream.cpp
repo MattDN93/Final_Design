@@ -113,10 +113,12 @@ void camStream::doCapture()
 		}
 		imshow("Incoming Video Stream", webcamVid); //display the video in a GUI window
 		
-		//TEST with random x and y vars below
+		//TEST with random x and y vars below assuming 640*480; will make this variable
 		srand(time(NULL));
-		int x = rand() % 610 + 15;
-		int y = rand() % 450 + 15;
+		int x = rand() % 610;
+		int y = rand() % 450;
+		cout << "x co-ord: " << x + 15 << "; y co-ord: " << y + 15 << endl;
+		//end test code
 
 		ol_mark.drawMarker(x, y,webcamVid);					//initiate the overlay draw routine
 
@@ -130,7 +132,6 @@ void camStream::doCapture()
 		}
 	}
 
-	//camStream::~camStream();		//dispose of the object
 }
 
 void camStream::getVideoInfo()

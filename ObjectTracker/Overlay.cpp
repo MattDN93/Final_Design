@@ -31,20 +31,19 @@ void Overlay::setupOverlay()
 void Overlay::drawMarker(int x_val, int y_val,Mat webcamVidforOverlay)
 {
 	overlayGrid = webcamVidforOverlay.clone();
-	int cx = (overlayGrid.cols - 30) / 2;
 	if (!objectMarker.empty())
 	{
 		srcBGR = Mat(objectMarker.size(), CV_8UC3);
 		//cvtColor(objectMarker, srcBGR, CV_BGR2GRAY);								//CRASHES ATM
 		//TEST BELOW
 		//Rect markerBoundsBox = Rect(cx, overlayGrid.rows / 2, 30, 30);			//rewrite Rect(x_val+15,y_val+15,30,30)
-		Rect markerBoundsBox = Rect(x_val + 15, y_val + 15, 30, 30);
+		Rect markerBoundsBox = Rect(x_val, y_val, 30, 30);
 
 		Mat markerBounds = overlayGrid(markerBoundsBox);
 		srcBGR.copyTo(markerBounds);
 
 	}
 	imshow("Marker On-screen", overlayGrid);
-
+	overlayGrid.release();
 }
 
