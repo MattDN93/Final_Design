@@ -15,6 +15,9 @@
 #endif
 #include "Overlay.h"
 
+//testing random co-ord plot below
+#include <time.h>
+
 
 camStream::camStream()				//constructor
 {
@@ -109,8 +112,13 @@ void camStream::doCapture()
 			break;
 		}
 		imshow("Incoming Video Stream", webcamVid); //display the video in a GUI window
+		
+		//TEST with random x and y vars below
+		srand(time(NULL));
+		int x = rand() % 610 + 15;
+		int y = rand() % 450 + 15;
 
-		ol_mark.drawMarker(0, 0,webcamVid);					//initiate the overlay draw routine
+		ol_mark.drawMarker(x, y,webcamVid);					//initiate the overlay draw routine
 
 		button = waitKey(30);
 		//cout << "Current FPS: " << camStreamCapture.get(CAP_PROP_FPS) << endl;
