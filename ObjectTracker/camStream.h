@@ -24,6 +24,7 @@ Related to streaming the video from a specific source
 
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <future>
 #pragma endregion
 
@@ -42,6 +43,7 @@ public:
 
 	friend class Overlay;
 
+	bool valHasChanged;				//for updating the marker
 	bool camCapture(int);			//method to initiate capture 
 	void userInputQuery();			//ask user which way they want to open the video
 	void doCapture();				//perform the capture

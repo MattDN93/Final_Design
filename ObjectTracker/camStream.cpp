@@ -100,7 +100,10 @@ void camStream::doCapture()
 	Overlay ol_mark;		//overlay instantiation
 
 	ol_mark.setupOverlay();	//setup the marker overlay
+
 	srand(time(NULL));		//seed random number generator
+	int randCountTime = 0;	//counter to update co-ords ~1s
+	int x = 1, y = 1;
 
 	while (camStreamCapture.isOpened())		//as long as the camera stream is open we want to read off it
 	{
@@ -115,16 +118,22 @@ void camStream::doCapture()
 		imshow("Incoming Video Stream", webcamVid); //display the video in a GUI window
 		
 		//TEST with random x and y vars below assuming 640*480; will make this variable
+		randCountTime++;
+		if ((randCountTime % 20) == 0 )
+		{
+			randCountTime = 0;
+			x = rand() % 610;
+			y = rand() % 450;
+			cout << "x co-ord: " << x + 15 << "; y co-ord: " << y + 15 << endl;
+			ol_mark.drawMarker(x, y, webcamVid, true);					//informs routine that previous marker value must be saved for new one
+	
+		}
+			ol_mark.drawMarker(x, y, webcamVid,false);					//initiate the overlay draw routine WITHOUT updating the previous marker
 
-		int x = rand() % 610;
-		int y = rand() % 450;
-		cout << "x co-ord: " << x + 15 << "; y co-ord: " << y + 15 << endl;
+
 		//end test code
 
-		if (ol_mark.marker_x != x && ol_mark.marker_y != y)							//prevents repeatedly drawing the image for same co-ords
-		{
-			ol_mark.drawMarker(x, y, webcamVid);					//initiate the overlay draw routine
-		}
+
 		button = waitKey(30);
 		//cout << "Current FPS: " << camStreamCapture.get(CAP_PROP_FPS) << endl;
 		//cout << "Frame count:" << camStreamCapture.get(CAP_PROP_FRAME_COUNT) << endl;

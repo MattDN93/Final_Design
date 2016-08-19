@@ -25,7 +25,7 @@ public:
 
 	void getVideoInfo(int,int);		//get the dimensions of the video file 
 	void setupOverlay();			//setup the matrices for the overlay
-	void drawMarker(int,int,Mat);		//function to place the marker on the video at (x,y)
+	void drawMarker(int,int,Mat,bool);		//function to place the marker on the video at (x,y)
 	
 	int marker_x;					//current centre x-position of overlay marker
 	int marker_y;					//current centre y-position of overlay marker
