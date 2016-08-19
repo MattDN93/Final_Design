@@ -100,11 +100,12 @@ void camStream::doCapture()
 	Overlay ol_mark;		//overlay instantiation
 
 	ol_mark.setupOverlay();	//setup the marker overlay
+	srand(time(NULL));		//seed random number generator
 
 	while (camStreamCapture.isOpened())		//as long as the camera stream is open we want to read off it
 	{
 		bool frameOK;
-		int button;
+		int button;							//checks which keyboard button is pressed for exit routine
 		isStreaming = true;					//set flag that streaming in progress
 		frameOK = camStreamCapture.read(webcamVid);	//perform the capture and check
 		if (!frameOK)								//if frame failed to capture, quit
@@ -114,14 +115,16 @@ void camStream::doCapture()
 		imshow("Incoming Video Stream", webcamVid); //display the video in a GUI window
 		
 		//TEST with random x and y vars below assuming 640*480; will make this variable
-		srand(time(NULL));
+
 		int x = rand() % 610;
 		int y = rand() % 450;
 		cout << "x co-ord: " << x + 15 << "; y co-ord: " << y + 15 << endl;
 		//end test code
 
-		ol_mark.drawMarker(x, y,webcamVid);					//initiate the overlay draw routine
-
+		if (ol_mark.marker_x != x && ol_mark.marker_y != y)							//prevents repeatedly drawing the image for same co-ords
+		{
+			ol_mark.drawMarker(x, y, webcamVid);					//initiate the overlay draw routine
+		}
 		button = waitKey(30);
 		//cout << "Current FPS: " << camStreamCapture.get(CAP_PROP_FPS) << endl;
 		//cout << "Frame count:" << camStreamCapture.get(CAP_PROP_FRAME_COUNT) << endl;
