@@ -22,10 +22,12 @@ Related to streaming the video from a specific source
 
 #endif // !OPENCV_HEAD
 
+//Standard includes
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <future>
+#include <vector>
 #pragma endregion
 
 using namespace cv;

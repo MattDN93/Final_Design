@@ -43,6 +43,8 @@ private:
 	Point current_point;			//OpenCV Point struct for the current marker
 	Point prev_point;				//OpenCV Point struct for the previous marker
 
+	vector<Point> points;			//vector of the last 10 points generated
+	vector<Point>::iterator pt_it;	//iterator for the vector above
 };
 
 

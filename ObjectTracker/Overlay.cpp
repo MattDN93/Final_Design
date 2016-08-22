@@ -39,14 +39,19 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 		overlayGrid = webcamVidforOverlay.clone();
 		if (!objectMarker.empty())
 		{
-			//set up the Point structs for markers
-			current_point.x = current_xval + 15;
-			current_point.y = current_yval + 15;
+			
 
 			if (valHasChanged == true)
 			{
+				//set up the Point structs for markers
+				current_point.x = current_xval + 15;
+				current_point.y = current_yval + 15;
 				prev_point.x = marker_x;
 				prev_point.y = marker_y;
+
+
+				pt_it = points.begin();					//reallocate the iterator to vector start
+				points.insert(pt_it,current_point);		//insert current point at start so we can iterate the array
 			}
 
 //			srcBGR = Mat(objectMarker.size(), CV_8UC3);
@@ -54,26 +59,41 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 
 			//----------------Draw circle marker--------
 			//void circle(Mat& img, Point center, int radius, const Scalar& color, int thickness = 1, int lineType = 8, int shift = 0)
-			circle(overlayGrid, current_point, 12, Scalar(0, 0, 255), -1, 8, 0);		//current point
-			circle(overlayGrid, prev_point, 12, Scalar(0, 0, 255), -1, 8, 0);			//last point
-
 			//----------------Draw label next to current point
 			//void putText(Mat& img, const string& text, Point org, int fontFace, double fontScale, Scalar color, int thickness=1, int lineType=8, bool bottomLeftOrigin=false )
 			//build a string with the current co-ords
-			std::ostringstream curr_positionInfoSS, prev_positionInfoSS;
-			curr_positionInfoSS << "Current: (" << current_point.x << "," << current_point.y << ")";
-			prev_positionInfoSS << "Previous: (" << prev_point.x << "," << prev_point.y << ")";
-			string curr_posInfoString = curr_positionInfoSS.str();
-			string prev_posInfoString = prev_positionInfoSS.str();
-			
-			putText(overlayGrid, curr_posInfoString, current_point,FONT_HERSHEY_PLAIN,1,Scalar(0,0,255),2,8,false );
-			putText(overlayGrid, prev_posInfoString, prev_point, FONT_HERSHEY_PLAIN, 1, Scalar(0, 0, 255), 2, 8, false);
-
 			//----------------Draw joining line-----------
 			//Setting the below co-ords means you join lines between the CURRENT x_val and the LAST marker_x 
 			//args (line(Mat& img, Point pt1, Point pt2, const Scalar& color, int thickness=1, int lineType=8, int shift=0))
 			//colour is Scalar(B,G,R)
-			line(overlayGrid, current_point, prev_point, Scalar(0, 0, 255), 2, 8, 0);
+
+			/*This loop does all of the above:
+				-draws the circle for each point in the vector
+				-draws the point co-ordinates in text
+				-draws a line from the points
+				-stores points in a vector
+			
+			*/
+			for (int i = 0; i < points.size(); i++)			//use the iterator to traverse the points array
+			{
+				std::ostringstream curr_positionInfoSS;
+				circle(overlayGrid, points[i], 5, Scalar(0, 0, 255), -1, 8, 0);
+				curr_positionInfoSS.clear();
+				curr_positionInfoSS << "Pt:" << i << "(" << points[i].x << "," << points[i].y << ")";
+				string curr_posInfoString = curr_positionInfoSS.str();
+				putText(overlayGrid, curr_posInfoString, points[i], FONT_HERSHEY_PLAIN, 1, Scalar(0, 0, 255), 2, 8, false);
+				
+				if (i >=1)
+				{
+					line(overlayGrid, points[i], points[i - 1], Scalar(0, 0, 255), 2, 8, 0);
+				}
+				
+			}
+
+			
+
+
+
 
 //			Mat markerBounds = overlayGrid(markerBoundsBox);
 //			srcBGR.copyTo(markerBounds);
