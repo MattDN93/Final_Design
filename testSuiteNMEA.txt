@@ -1,0 +1,35 @@
+//case 1: 2 digit lat/long both positive
+$GPRMC,093921.265,V,3654.928,N,7702.496,E,44.9,1.69,220716,,E*4B
+
+//case 2: 2 digit lat long: lat neg
+$GPRMC,093921.265,V,3654.928,S,7702.496,E,44.9,1.69,220716,,E*4B
+
+//case 3: 2 digit lat long: long neg
+$GPRMC,093921.265,V,3654.928,N,7702.496,W,44.9,1.69,220716,,E*4B
+
+//case 4: 2 digit lat long: both neg
+$GPRMC,093921.265,V,3654.928,S,7702.496,W,44.9,1.69,220716,,E*4B
+
+//case 5: 3 digit lat/long both positive
+$GPRMC,093921.265,V,13654.928,N,17702.496,E,44.9,1.69,220716,,E*4B
+
+//case 6: 3 digit lat long: lat neg
+$GPRMC,093921.265,V,13654.928,S,17702.496,E,44.9,1.69,220716,,E*4B
+
+//case 7: 3 digit lat long: long neg
+$GPRMC,093921.265,V,13654.928,N,17702.496,W,44.9,1.69,220716,,E*4B
+
+//case 8: 3 digit lat long: both neg
+$GPRMC,093921.265,V,13654.928,S,17702.496,W,44.9,1.69,220716,,E*4B
+
+//case 9: lead 0 digit on long; lat/long both positive
+$GPRMC,093921.265,V,3654.928,N,07702.496,E,44.9,1.69,220716,,E*4B
+
+//case 10: lead 0 digit on long; lat neg
+$GPRMC,093921.265,V,3654.928,S,07702.496,E,44.9,1.69,220716,,E*4B
+
+//case 11: lead 0 digit on long; long neg
+$GPRMC,093921.265,V,3654.928,N,07702.496,W,44.9,1.69,220716,,E*4B
+
+//case 12: lead 0 digit on long; lat&long neg
+$GPRMC,093921.265,V,3654.928,S,07702.496,W,44.9,1.69,220716,,E*4B

@@ -126,8 +126,8 @@ namespace TEST_GPS_Parsing
                 if (updatedGpsData.time.StartsWith("0") || updatedGpsData.longitude.StartsWith("0") || updatedGpsData.latitude.StartsWith("0"))
                 {
                     //updatedGpsData.time = updatedGpsData.time.TrimStart('0'); //remove leading zeroes
-                    updatedGpsData.latitude = updatedGpsData.latitude.TrimStart('0');
-                    updatedGpsData.longitude = updatedGpsData.longitude.TrimStart('0');
+//                    updatedGpsData.latitude = updatedGpsData.latitude.TrimStart('0');
+//                    updatedGpsData.longitude = updatedGpsData.longitude.TrimStart('0');
                 }
 
                 //convert the track angle in degrees true to a cardinal heading
@@ -135,6 +135,9 @@ namespace TEST_GPS_Parsing
 
                 //convert the time from a horrible string to something nice
                 timeNiceDisplay(updatedGpsData);
+
+                //convert the latitude and longitude from DDMM.MMM(H) to decimal (for Maps and calculations)
+                ///updatedGpsData = latLongConvertToDbl(updatedGpsData);
 
                 return updatedGpsData;
             }
@@ -185,6 +188,17 @@ namespace TEST_GPS_Parsing
             newDateTime += " " + fixTime;
 
             updatedGpsData.dt = DateTime.ParseExact(newDateTime, format, provider); //this will be used for computation
+        }
+
+        //parses the lat and long to a decimal format from DDMM.MMM format
+        //conversion method in the Mapping class
+        private GPSPacket latLongConvertToDbl(GPSPacket updatedGpsDataForLatLong)
+        {
+            Mapping mapObjectTemp = new Mapping();      //used just for the lat/long parsing method
+            mapObjectTemp.parseLatLong(updatedGpsDataForLatLong.latitude, updatedGpsDataForLatLong.longitude);
+            updatedGpsDataForLatLong.latitude = mapObjectTemp.latitudeD.ToString();
+            updatedGpsDataForLatLong.longitude = mapObjectTemp.longitudeD.ToString();
+            return updatedGpsDataForLatLong;
         }
 
         private GPSPacket trackToCardinal(GPSPacket updatedGpsData)

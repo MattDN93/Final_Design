@@ -15,7 +15,7 @@ namespace TEST_GPS_Parsing
     public partial class GPSParser : Form
     {
         //*********THIS VAR IS FOR TESTING FEATURES, set to false for debug features off
-        bool debug = true;
+        bool debug = false;
         //*************************************
         public string inputLogFilename;
         bool dbLoggingActive = true;
