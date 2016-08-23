@@ -59,22 +59,13 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 
 
 				pt_it = points.begin();					//reallocate the iterator to vector start
-				points.insert(pt_it,current_point);		//insert current point at start so we can iterate the array
+				///points.insert(pt_it,current_point);		//insert current point at start so we can iterate the array
+				points.push_back(current_point);			//push back the current point into the vector
 			}
 
 //			srcBGR = Mat(objectMarker.size(), CV_8UC3);
 //			Rect markerBoundsBox = Rect(current_xval, current_yval, 30, 30);
-
-			//----------------Draw circle marker--------
-			//void circle(Mat& img, Point center, int radius, const Scalar& color, int thickness = 1, int lineType = 8, int shift = 0)
-			//----------------Draw label next to current point
-			//void putText(Mat& img, const string& text, Point org, int fontFace, double fontScale, Scalar color, int thickness=1, int lineType=8, bool bottomLeftOrigin=false )
-			//build a string with the current co-ords
-			//----------------Draw joining line-----------
-			//Setting the below co-ords means you join lines between the CURRENT x_val and the LAST marker_x 
-			//args (line(Mat& img, Point pt1, Point pt2, const Scalar& color, int thickness=1, int lineType=8, int shift=0))
-			//colour is Scalar(B,G,R)
-
+		
 			/*This loop does all of the above:
 				-draws the circle for each point in the vector
 				-draws the point co-ordinates in text
@@ -85,12 +76,24 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 			for (size_t i = 0; i < points.size(); i++)			//use the iterator to traverse the points array
 			{
 				std::ostringstream curr_positionInfoSS;
+
+				//----------------Draw circle marker--------
+				//void circle(Mat& img, Point center, int radius, const Scalar& color, int thickness = 1, int lineType = 8, int shift = 0)
 				circle(overlayGrid, points[i], 5, Scalar(0, 0, 255), -1, 8, 0);
+
 				curr_positionInfoSS.clear();
 				curr_positionInfoSS << "Pt:" << i << "(" << points[i].x << "," << points[i].y << ")";
 				string curr_posInfoString = curr_positionInfoSS.str();
-				putText(overlayGrid, curr_posInfoString, points[i], FONT_HERSHEY_PLAIN, 1, Scalar(0, 0, 255), 2, 8, false);
+
+				//----------------Draw label next to current point
+				//void putText(Mat& img, const string& text, Point org, int fontFace, double fontScale, Scalar color, int thickness=1, int lineType=8, bool bottomLeftOrigin=false )
+				//build a string with the current co-ords
+				putText(overlayGrid, curr_posInfoString, points[i], FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(0, 0, 255), 1, 8, false);
 				
+				//----------------Draw joining line-----------
+				//Setting the below co-ords means you join lines between the CURRENT x_val and the LAST marker_x 
+				//args (line(Mat& img, Point pt1, Point pt2, const Scalar& color, int thickness=1, int lineType=8, int shift=0))
+				//colour is Scalar(B,G,R)
 				if (i >=1)
 				{
 					line(overlayGrid, points[i], points[i - 1], Scalar(0, 0, 255), 2, 8, 0);
@@ -99,7 +102,7 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 			}
 
 //			Mat markerBounds = overlayGrid(markerBoundsBox);
-//			srcBGR.copyTo(markerBounds);
+///			srcBGR.copyTo(markerBounds);
 
 			//this is the value stored from the last call
 			marker_x = current_xval + 15;
@@ -107,7 +110,7 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 
 		}
 		imshow("Marker On-screen", overlayGrid);
-		//overlayGrid.release();
+///		//overlayGrid.release();
 	
 
 }
