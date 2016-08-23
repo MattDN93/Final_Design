@@ -34,6 +34,9 @@ public:
 	Mat overlayGrid;		//"background" grid overlay matrix
 	Mat srcBGR;				
 
+	Point orderedPt;				//point object for simulation
+	vector<Point> orderedSimPts;	//list of points to simulate
+
 
 private:
 	int gridWidth;					//specifies the overlay extents
@@ -45,6 +48,8 @@ private:
 
 	vector<Point> points;			//vector of the last 10 points generated
 	vector<Point>::iterator pt_it;	//iterator for the vector above
+
+
 };
 
 

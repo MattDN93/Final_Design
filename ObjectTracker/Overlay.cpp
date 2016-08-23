@@ -30,6 +30,14 @@ void Overlay::setupOverlay()
 	prev_point.y = 0;
 	marker_x = 1;
 	marker_y = 1;
+
+	if (randomSim == false)			//generate ordered points to sim
+	{
+		orderedPt.x = 50;
+		orderedPt.y = 50;
+		orderedSimPts.push_back(orderedPt);	//push back first ordered point
+
+	}
 	
 }
 
@@ -74,7 +82,7 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 				-stores points in a vector
 			
 			*/
-			for (int i = 0; i < points.size(); i++)			//use the iterator to traverse the points array
+			for (size_t i = 0; i < points.size(); i++)			//use the iterator to traverse the points array
 			{
 				std::ostringstream curr_positionInfoSS;
 				circle(overlayGrid, points[i], 5, Scalar(0, 0, 255), -1, 8, 0);
@@ -89,11 +97,6 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 				}
 				
 			}
-
-			
-
-
-
 
 //			Mat markerBounds = overlayGrid(markerBoundsBox);
 //			srcBGR.copyTo(markerBounds);

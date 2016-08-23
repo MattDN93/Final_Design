@@ -39,6 +39,17 @@ void camStream::userInputQuery()
 	{
 		cout << "Enter an interface to capture (0 = Internal Webcam; 1 = specify a file): ";
 		cin >> captureChoice;
+		int ptChoice;
+		cout << "Enter a point mapping mode (0 = Random points; 1 = Ordered line):";
+		cin >> ptChoice;
+
+		switch (ptChoice)
+		{
+		case 0: randomSim = true; break;
+		case 1: randomSim = false; break;
+		default: cout << "Please select a sim mode" << endl;
+			break;
+		}
 
 		switch (captureChoice)
 		{
@@ -121,11 +132,26 @@ void camStream::doCapture()
 		randCountTime++;
 		if ((randCountTime % 20) == 0 )
 		{
-			randCountTime = 0;
-			x = rand() % 610;
-			y = rand() % 450;
-			cout << "x co-ord: " << x + 15 << "; y co-ord: " << y + 15 << endl;
-			ol_mark.drawMarker(x, y, webcamVid, true);					//informs routine that previous marker value must be saved for new one
+			if (randomSim == true)
+			{
+				randCountTime = 0;
+				x = rand() % 610;
+				y = rand() % 450;
+				cout << "x co-ord: " << x + 15 << "; y co-ord: " << y + 15 << endl;
+				ol_mark.drawMarker(x, y, webcamVid, true);					//informs routine that previous marker value must be saved for new one
+			}
+			else if (randomSim == false)					//generate "ordered" list of values that increase as we go along
+			{
+				x = (rand() % 20);			//x = (-10 to +50)
+				y = (rand() % 10);			//y = (-20 to +40)
+				ol_mark.orderedPt.x = ol_mark.orderedSimPts.back().x + x;		//add a random x increment to the vector
+				ol_mark.orderedPt.y = ol_mark.orderedSimPts.back().y + y;		//add a random y increment to the vector
+
+				ol_mark.orderedSimPts.push_back(ol_mark.orderedPt);				//push onto the new vector and display
+				cout << "x co-ord: " << ol_mark.orderedPt.x << "; y co-ord: " << ol_mark.orderedPt.y << endl;
+				ol_mark.drawMarker(ol_mark.orderedPt.x, ol_mark.orderedPt.y, webcamVid, true);					//informs routine that previous marker value must be saved for new one
+			}
+
 	
 		}
 			ol_mark.drawMarker(x, y, webcamVid,false);					//initiate the overlay draw routine WITHOUT updating the previous marker
@@ -135,7 +161,7 @@ void camStream::doCapture()
 
 
 		button = waitKey(30);
-		//cout << "Current FPS: " << camStreamCapture.get(CAP_PROP_FPS) << endl;
+		
 		//cout << "Frame count:" << camStreamCapture.get(CAP_PROP_FRAME_COUNT) << endl;
 		
 		if (button == 27)		//if the ESC button is pressed, quit the capture

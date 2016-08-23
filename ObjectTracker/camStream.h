@@ -59,6 +59,7 @@ private:
 	int captureChoice;				//user's selection of which capture to use
 	bool capStartSuccess;			//whether the capture was opened OK
 	bool isStreaming;				//whether stream is in progress
+	bool randomSim;					//using random simulation mode or ordered
 
 
 };
