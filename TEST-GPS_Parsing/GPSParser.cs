@@ -557,9 +557,14 @@ namespace TEST_GPS_Parsing
 
         //-------------------------End threads---------------------------------------------
 
+        //------------------Open the Video Streaming Component------------------
         private void openPortButton_Click(object sender, EventArgs e)
         {
-
+            CameraBoundsSetup cmBound = new CameraBoundsSetup();
+            updateUITimer.Stop();
+            status2TextBox.AppendText("Camera Bound setup window open; waiting....");
+            DialogResult cmResult = cmBound.ShowDialog();
+            updateUITimer.Start();
         }
 
         private void trayIconParsing_MouseDoubleClick(object sender, MouseEventArgs e)

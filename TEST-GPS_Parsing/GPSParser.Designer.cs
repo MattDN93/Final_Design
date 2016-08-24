@@ -77,13 +77,12 @@
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.rawLogFileTextBox = new System.Windows.Forms.TextBox();
             this.stopButton = new System.Windows.Forms.Button();
-            this.label20 = new System.Windows.Forms.Label();
             this.recvRawDataWorker = new System.ComponentModel.BackgroundWorker();
             this.updateUITimer = new System.Windows.Forms.Timer(this.components);
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.status2TextBox = new System.Windows.Forms.TextBox();
             this.statusTextBox = new System.Windows.Forms.TextBox();
-            this.openPortButton = new System.Windows.Forms.Button();
+            this.openVideoButton = new System.Windows.Forms.Button();
             this.trayIconParsing = new System.Windows.Forms.NotifyIcon(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.databaseOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -112,6 +111,8 @@
             this.mapPaneStatusTectBox = new System.Windows.Forms.TextBox();
             this.label24 = new System.Windows.Forms.Label();
             this.mapPane = new GMap.NET.WindowsForms.GMapControl();
+            this.label26 = new System.Windows.Forms.Label();
+            this.label20 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -519,10 +520,10 @@
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(519, 308);
+            this.startButton.Location = new System.Drawing.Point(367, 345);
             this.startButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.startButton.Name = "startButton";
-            this.startButton.Size = new System.Drawing.Size(57, 50);
+            this.startButton.Size = new System.Drawing.Size(67, 28);
             this.startButton.TabIndex = 6;
             this.startButton.Text = "Start";
             this.startButton.UseVisualStyleBackColor = true;
@@ -530,10 +531,10 @@
             // 
             // openFileButton
             // 
-            this.openFileButton.Location = new System.Drawing.Point(377, 286);
+            this.openFileButton.Location = new System.Drawing.Point(396, 291);
             this.openFileButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.openFileButton.Name = "openFileButton";
-            this.openFileButton.Size = new System.Drawing.Size(114, 50);
+            this.openFileButton.Size = new System.Drawing.Size(89, 50);
             this.openFileButton.TabIndex = 7;
             this.openFileButton.Text = "Open NMEA Log";
             this.openFileButton.UseVisualStyleBackColor = true;
@@ -543,7 +544,7 @@
             // 
             this.label18.AutoSize = true;
             this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label18.Location = new System.Drawing.Point(345, 316);
+            this.label18.Location = new System.Drawing.Point(342, 303);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(26, 29);
             this.label18.TabIndex = 11;
@@ -553,7 +554,7 @@
             // 
             this.label19.AutoSize = true;
             this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.Location = new System.Drawing.Point(493, 316);
+            this.label19.Location = new System.Drawing.Point(341, 344);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(26, 29);
             this.label19.TabIndex = 12;
@@ -589,24 +590,14 @@
             // 
             // stopButton
             // 
-            this.stopButton.Location = new System.Drawing.Point(612, 308);
+            this.stopButton.Location = new System.Drawing.Point(455, 344);
             this.stopButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.stopButton.Name = "stopButton";
-            this.stopButton.Size = new System.Drawing.Size(56, 50);
+            this.stopButton.Size = new System.Drawing.Size(67, 29);
             this.stopButton.TabIndex = 14;
             this.stopButton.Text = "Stop";
             this.stopButton.UseVisualStyleBackColor = true;
             this.stopButton.Click += new System.EventHandler(this.stopButton_Click);
-            // 
-            // label20
-            // 
-            this.label20.AutoSize = true;
-            this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label20.Location = new System.Drawing.Point(581, 316);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(26, 29);
-            this.label20.TabIndex = 15;
-            this.label20.Text = "3";
             // 
             // recvRawDataWorker
             // 
@@ -653,16 +644,16 @@
             this.statusTextBox.Size = new System.Drawing.Size(305, 22);
             this.statusTextBox.TabIndex = 0;
             // 
-            // openPortButton
+            // openVideoButton
             // 
-            this.openPortButton.Location = new System.Drawing.Point(377, 342);
-            this.openPortButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.openPortButton.Name = "openPortButton";
-            this.openPortButton.Size = new System.Drawing.Size(114, 36);
-            this.openPortButton.TabIndex = 17;
-            this.openPortButton.Text = "Open Port";
-            this.openPortButton.UseVisualStyleBackColor = true;
-            this.openPortButton.Click += new System.EventHandler(this.openPortButton_Click);
+            this.openVideoButton.Location = new System.Drawing.Point(581, 309);
+            this.openVideoButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.openVideoButton.Name = "openVideoButton";
+            this.openVideoButton.Size = new System.Drawing.Size(70, 54);
+            this.openVideoButton.TabIndex = 17;
+            this.openVideoButton.Text = "Open Video";
+            this.openVideoButton.UseVisualStyleBackColor = true;
+            this.openVideoButton.Click += new System.EventHandler(this.openPortButton_Click);
             // 
             // trayIconParsing
             // 
@@ -925,17 +916,38 @@
             this.mapPane.TabIndex = 0;
             this.mapPane.Zoom = 10D;
             // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label26.Location = new System.Drawing.Point(524, 322);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(55, 29);
+            this.label26.TabIndex = 21;
+            this.label26.Text = "OR:";
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label20.Location = new System.Drawing.Point(436, 344);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(20, 29);
+            this.label20.TabIndex = 22;
+            this.label20.Text = "/";
+            // 
             // GPSParser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1318, 598);
+            this.Controls.Add(this.label20);
+            this.Controls.Add(this.label26);
+            this.Controls.Add(this.stopButton);
+            this.Controls.Add(this.openVideoButton);
             this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.label23);
-            this.Controls.Add(this.openPortButton);
             this.Controls.Add(this.groupBox6);
-            this.Controls.Add(this.label20);
-            this.Controls.Add(this.stopButton);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.label19);
             this.Controls.Add(this.label18);
@@ -1021,7 +1033,6 @@
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.TextBox rawLogFileTextBox;
         private System.Windows.Forms.Button stopButton;
-        private System.Windows.Forms.Label label20;
         public System.ComponentModel.BackgroundWorker recvRawDataWorker;
         private System.Windows.Forms.Timer updateUITimer;
         private System.Windows.Forms.GroupBox groupBox6;
@@ -1030,7 +1041,7 @@
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.TextBox timeElapsedTextBox;
         private System.Windows.Forms.TextBox status2TextBox;
-        private System.Windows.Forms.Button openPortButton;
+        private System.Windows.Forms.Button openVideoButton;
         private System.Windows.Forms.NotifyIcon trayIconParsing;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem databaseOptionsToolStripMenuItem;
@@ -1059,6 +1070,8 @@
         private System.Windows.Forms.ToolStripMenuItem openStreetMapsToolStripMenuItem;
         private System.Windows.Forms.Label label25;
         private System.Windows.Forms.TextBox mapPaneStatusTectBox;
+        private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.Label label20;
     }
 }
 
