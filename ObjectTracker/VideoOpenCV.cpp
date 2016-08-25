@@ -14,9 +14,9 @@ int main(int argc, char** argv)
 	Overlay ol;			//instantiate overlay object and pass it the video dimensions
 
 	//----------------Sample of arguments if the application is called via the other UI------------
-	if (argc = 1)	//the console is called normally, ask the user what to do
+	if (argc == 1)	//the console is called normally, ask the user what to do
 	{
-
+		cout << "Console launched independently. Going to user query mode..." << endl;
 		cout << argv[0];
 		auto callUserInput = async(launch::async, std::bind(&camStream::userInputQuery, &cs));	//ask user which input to use & run the detection (asynchronously)
 
@@ -38,12 +38,22 @@ int main(int argc, char** argv)
 		Arg[5] = Picture mode; (0 = Internal Webcam; 1 = specify a file)
 		Arg[6] = Draw mode; (0 = Random points; 1 = Ordered line)
 		*/
-		ol.TopLeftCoords.x = atof(argv[1]);
-		ol.TopLeftCoords.y = atof(argv[2]);
-		ol.OuterLimitsCoords.x = atof(argv[3]);
-		ol.OuterLimitsCoords.y = atof(argv[4]);
+		cout << "Console launched via other app - parsing arguments now...." <<endl;
+		ol.TopLeftCoords[0] = atof(argv[1]);
+		ol.TopLeftCoords[1] = atof(argv[2]);
+		ol.OuterLimitsCoords[0] = atof(argv[3]);
+		ol.OuterLimitsCoords[1] = atof(argv[4]);
 
-		cs.captureChoice = atoi(argv[5]);
+		cs.captureChoice = atoi(argv[5]);	//if capture = 0 just open webcam with method call, if 1 pass the method the filename
+
+		bool camCaptureReturnSuccess;					//variable to indicate if camCapture returned OK
+		switch (cs.captureChoice)
+		{
+		case 0: camCaptureReturnSuccess = cs.camCapture(0,"false");	break; //open webcam (don't pass the filename)
+		case 1: camCaptureReturnSuccess = cs.camCapture(1,argv[7]); break; //open file and send filename
+		default: cout << "camCapture method returned failed.";
+			break;
+		}
 
 		switch (atoi(argv[6]))
 		{
@@ -54,6 +64,15 @@ int main(int argc, char** argv)
 			break;
 		}
 
+		//evaluate this special call to see if it's succeeded
+		if (camCaptureReturnSuccess == true)
+		{
+			cout << "prelims from main app call completed successfully!" <<endl;
+		}
+		else
+		{
+			cout << "Something failed whilst processing arguments from the main app." << endl;
+		}
 	}
 
 	

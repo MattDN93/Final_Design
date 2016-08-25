@@ -9,8 +9,6 @@ Related to streaming the video from a specific source
 #ifndef CAMSTREAM_H 
 #define CAMSTREAM_H
 
-#pragma Includes
-
 #ifndef OPENCV_HEAD
 #define OPENCV_HEAD
 
@@ -28,12 +26,11 @@ Related to streaming the video from a specific source
 #include <sstream>
 #include <future>
 #include <vector>
-#pragma endregion
+
 
 using namespace cv;
 using namespace std;
 
-#pragma classDecs
 class camStream
 {
 public:
@@ -46,7 +43,7 @@ public:
 	friend class Overlay;
 
 	bool valHasChanged;				//for updating the marker
-	bool camCapture(int);			//method to initiate capture 
+	bool camCapture(int,string);			//method to initiate capture (string for C# arg pass)
 	void userInputQuery();			//ask user which way they want to open the video
 	void doCapture();				//perform the capture
 	void getVideoInfo();			//get the video properties

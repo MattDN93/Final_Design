@@ -32,6 +32,7 @@ camStream::~camStream()				//destructor
 	camStreamCapture.release();
 }
 
+//This method is only used if the console is not called from a C# instance
 void camStream::userInputQuery()
 {
 
@@ -53,8 +54,8 @@ void camStream::userInputQuery()
 
 		switch (captureChoice)
 		{
-		case 0: capStartSuccess = camCapture(0); break;
-		case 1: capStartSuccess = camCapture(1); break;
+		case 0: capStartSuccess = camCapture(0,"false"); break;		//call the method to perform the opening of the webcam
+		case 1: capStartSuccess = camCapture(1,"false"); break;		//call method to request filename - pass "false" here since the console wasn't called from other app
 		default: cout << "You've made an invalid choice. Try again" << endl;
 			break;
 		}
@@ -62,7 +63,7 @@ void camStream::userInputQuery()
 	}
 }
 
-bool camStream::camCapture(int choice)
+bool camStream::camCapture(int choice, string passThruFilename)
 {
 	if (choice == 0)
 	{
@@ -70,12 +71,14 @@ bool camStream::camCapture(int choice)
 
 		if (!camStreamCapture.isOpened())
 		{
-			cout << "Failed to open the stream!";
+			cout << "Failed to open the stream in camCapture method!";
 			return false;
 		}
 		else
 		{
+			cout << "OpenCV Open call for webcam completed successfully, returning from CamStream" <<endl;
 			isStreaming = true;
+			capStartSuccess = true;	//set again if console called via C#
 			return true;
 			//doCapture();
 		}
@@ -83,19 +86,29 @@ bool camStream::camCapture(int choice)
 	else if (choice == 1)
 	{
 		string fileName;
-		cout << "Enter a filename to open, fully qualified: ";
-		cin >> fileName;
+		if (passThruFilename == "false")	//this clause is used if NOT being launched from C# app
+		{
+			cout << "Enter a filename to open, fully qualified: ";
+			cin >> fileName;
+		}
+		else
+		{
+			cout << "main app call specified an existing video - passing thru filename now" << endl;
+			fileName = passThruFilename;	//use the filename specified by the user in the file dialog
+		}
 
-		camStreamCapture.open(fileName);		//pass 0 for a webcam
+		camStreamCapture.open(fileName);		
 
 		if (!camStreamCapture.isOpened())
 		{
-			cout << "Failed to open the stream!";
+			cout << "Failed to open the stream via camCapture method!";
 			return false;
 		}
 		else
 		{
+			cout << "OpenCV Open call for existing file completed successfully, returning from CamStream" << endl;
 			isStreaming = true;
+			capStartSuccess = true;	//set again if console called via C#
 			return true; // doCapture();
 		}
 	}
@@ -105,6 +118,7 @@ bool camStream::camCapture(int choice)
 
 void camStream::doCapture()
 {
+	cout << "Starting doCapture routine..." << endl;
 	isStreaming = true;
 	namedWindow("Incoming Video Stream", CV_WINDOW_AUTOSIZE);
 	webcamVid;			//instantiate camCapture object

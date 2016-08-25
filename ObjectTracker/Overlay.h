@@ -37,8 +37,8 @@ public:
 	Point orderedPt;				//point object for simulation
 	vector<Point> orderedSimPts;	//list of points to simulate
 
-	Point TopLeftCoords;			//Marks upper left limit of current frame (x=lat; y=long)
-	Point OuterLimitsCoords;		//Marks x=topright_long and y=bottomleft_lat points
+	double TopLeftCoords[2];		//Marks upper left limit of current frame (0=lat; 1=long)
+	double OuterLimitsCoords[2];	//Marks 0=topright_long and 1=bottomleft_lat points
 
 
 private:
