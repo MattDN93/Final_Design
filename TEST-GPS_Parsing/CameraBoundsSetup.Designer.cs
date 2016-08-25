@@ -40,10 +40,10 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.setExtentsButton = new System.Windows.Forms.Button();
-            this.clearFieldsButton = new System.Windows.Forms.Button();
-            this.goBackButton = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
+            this.goBackButton = new System.Windows.Forms.Button();
+            this.clearFieldsButton = new System.Windows.Forms.Button();
+            this.setExtentsButton = new System.Windows.Forms.Button();
             this.camViewStatusTextBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.checkFieldsTimer = new System.Windows.Forms.Timer(this.components);
@@ -146,26 +146,14 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Ready?";
             // 
-            // setExtentsButton
+            // label3
             // 
-            this.setExtentsButton.DialogResult = System.Windows.Forms.DialogResult.Yes;
-            this.setExtentsButton.Location = new System.Drawing.Point(13, 24);
-            this.setExtentsButton.Name = "setExtentsButton";
-            this.setExtentsButton.Size = new System.Drawing.Size(119, 60);
-            this.setExtentsButton.TabIndex = 0;
-            this.setExtentsButton.Text = "Set these extents and START VIDEO";
-            this.setExtentsButton.UseVisualStyleBackColor = true;
-            this.setExtentsButton.Click += new System.EventHandler(this.setExtentsButton_Click);
-            // 
-            // clearFieldsButton
-            // 
-            this.clearFieldsButton.Location = new System.Drawing.Point(186, 24);
-            this.clearFieldsButton.Name = "clearFieldsButton";
-            this.clearFieldsButton.Size = new System.Drawing.Size(79, 60);
-            this.clearFieldsButton.TabIndex = 1;
-            this.clearFieldsButton.Text = "Clear fields";
-            this.clearFieldsButton.UseVisualStyleBackColor = true;
-            this.clearFieldsButton.Click += new System.EventHandler(this.clearFieldsButton_Click);
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(144, 46);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(29, 17);
+            this.label3.TabIndex = 3;
+            this.label3.Text = "OR";
             // 
             // goBackButton
             // 
@@ -178,14 +166,26 @@
             this.goBackButton.UseVisualStyleBackColor = true;
             this.goBackButton.Click += new System.EventHandler(this.goBackButton_Click);
             // 
-            // label3
+            // clearFieldsButton
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(144, 46);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(29, 17);
-            this.label3.TabIndex = 3;
-            this.label3.Text = "OR";
+            this.clearFieldsButton.Location = new System.Drawing.Point(186, 24);
+            this.clearFieldsButton.Name = "clearFieldsButton";
+            this.clearFieldsButton.Size = new System.Drawing.Size(79, 60);
+            this.clearFieldsButton.TabIndex = 1;
+            this.clearFieldsButton.Text = "Clear fields";
+            this.clearFieldsButton.UseVisualStyleBackColor = true;
+            this.clearFieldsButton.Click += new System.EventHandler(this.clearFieldsButton_Click);
+            // 
+            // setExtentsButton
+            // 
+            this.setExtentsButton.DialogResult = System.Windows.Forms.DialogResult.Yes;
+            this.setExtentsButton.Location = new System.Drawing.Point(13, 24);
+            this.setExtentsButton.Name = "setExtentsButton";
+            this.setExtentsButton.Size = new System.Drawing.Size(119, 60);
+            this.setExtentsButton.TabIndex = 0;
+            this.setExtentsButton.Text = "Set these extents and START VIDEO";
+            this.setExtentsButton.UseVisualStyleBackColor = true;
+            this.setExtentsButton.Click += new System.EventHandler(this.setExtentsButton_Click);
             // 
             // camViewStatusTextBox
             // 
