@@ -37,11 +37,13 @@ public:
 	Point orderedPt;				//point object for simulation
 	vector<Point> orderedSimPts;	//list of points to simulate
 
+	Point TopLeftCoords;			//Marks upper left limit of current frame (x=lat; y=long)
+	Point OuterLimitsCoords;		//Marks x=topright_long and y=bottomleft_lat points
+
 
 private:
 	int gridWidth;					//specifies the overlay extents
 	int gridHeight;
-
 
 	Point current_point;			//OpenCV Point struct for the current marker
 	Point prev_point;				//OpenCV Point struct for the previous marker

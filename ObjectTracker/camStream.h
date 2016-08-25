@@ -53,13 +53,16 @@ public:
 	bool streamingInProgress();		//lets non-class object query streaming status
 	bool captureOpenedOK();			//initial flag set when user opens files
 
+	bool randomSim;					//using random simulation mode or ordered
+	int captureChoice;				//user's selection of which capture to use
+
 private:
 	Mat webcamVid;					//create a Mat object to manipulate
 	VideoCapture camStreamCapture;	//the OpenCV video capture object
-	int captureChoice;				//user's selection of which capture to use
+
 	bool capStartSuccess;			//whether the capture was opened OK
 	bool isStreaming;				//whether stream is in progress
-	bool randomSim;					//using random simulation mode or ordered
+
 
 
 };
