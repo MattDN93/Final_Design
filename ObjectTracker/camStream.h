@@ -49,6 +49,7 @@ public:
 	void getVideoInfo();			//get the video properties
 	bool streamingInProgress();		//lets non-class object query streaming status
 	bool captureOpenedOK();			//initial flag set when user opens files
+	void endCapture();				//closes the capture gracefully
 
 	bool randomSim;					//using random simulation mode or ordered
 	int captureChoice;				//user's selection of which capture to use

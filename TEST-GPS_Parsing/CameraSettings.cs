@@ -82,7 +82,18 @@ namespace TEST_GPS_Parsing
         {
             //now actually launch the process!
             Process videoCaptureProcess = new Process();
+
+            Process[] localByName = Process.GetProcessesByName("VideoStreamCPlusPlus");
+            //gets the number of procs running with the name above. If > 1 we must inform user to close them
+            if (localByName.Count() >= 1)
+            {
+                Console.Write("Process is already running. Shut it down first.");
+                throw new ApplicationException();
+            }
+
             videoCaptureProcess.StartInfo.FileName = "C:\\Users\\Matt\\Documents\\Source\\Final_Design\\x64\\Debug\\VideoStreamCPlusPlus.exe";
+
+
 
             /*parse through the arguments from the other app
             Arg[0] = process filename
@@ -101,7 +112,16 @@ namespace TEST_GPS_Parsing
                                                       videoSource.ToString() + " " +
                                                       drawMode.ToString() + " " +
                                                       filenameToOpen;
-            videoCaptureProcess.Start();
+            try
+            {
+                videoCaptureProcess.Start();
+            }
+            catch (InvalidOperationException)
+            {
+                Console.Write("Failed to start process.");
+                throw new InvalidOperationException();
+            }
+            
 
         }
     }

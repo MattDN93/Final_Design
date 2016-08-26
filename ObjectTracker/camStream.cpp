@@ -120,7 +120,7 @@ void camStream::doCapture()
 {
 	cout << "Starting doCapture routine..." << endl;
 	isStreaming = true;
-	namedWindow("Incoming Video Stream", CV_WINDOW_AUTOSIZE);
+	//namedWindow("Incoming Video Stream", CV_WINDOW_AUTOSIZE);
 	webcamVid;			//instantiate camCapture object
 	Overlay ol_mark;		//overlay instantiation
 
@@ -140,7 +140,7 @@ void camStream::doCapture()
 		{
 			break;
 		}
-		imshow("Incoming Video Stream", webcamVid); //display the video in a GUI window
+		//imshow("Incoming Video Stream", webcamVid); //display the video in a GUI window
 		
 		//TEST with random x and y vars below assuming 640*480; will make this variable
 		randCountTime++;
@@ -215,6 +215,17 @@ bool camStream::captureOpenedOK()
 	}
 	
 }
+
+void camStream::endCapture()
+{
+	//shuts down the capture and kills all windows
+	camStreamCapture.release();
+	waitKey(500);
+	//destroyWindow("Marker On-screen");
+	//destroyAllWindows();
+}
+
+
 
 void setGridExtents(int, int)
 {

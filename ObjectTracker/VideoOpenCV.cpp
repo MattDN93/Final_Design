@@ -99,8 +99,8 @@ int main(int argc, char** argv)
 
 	cout << "Done with processing the video!"; 
 
-
-	waitKey(0); // Wait for a keystroke in the window
+	cs.endCapture();		//shut down the capture
+	waitKey(100); // Wait for a keystroke in the window
 	return 0;
 }
 

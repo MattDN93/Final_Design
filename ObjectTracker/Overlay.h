@@ -40,6 +40,8 @@ public:
 	double TopLeftCoords[2];		//Marks upper left limit of current frame (0=lat; 1=long)
 	double OuterLimitsCoords[2];	//Marks 0=topright_long and 1=bottomleft_lat points
 
+	Point staticTextPt;
+
 
 private:
 	int gridWidth;					//specifies the overlay extents

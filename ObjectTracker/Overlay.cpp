@@ -47,7 +47,10 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 		overlayGrid = webcamVidforOverlay.clone();
 		if (!objectMarker.empty())
 		{
-			
+			//write static text over video
+			staticTextPt.x = 10;
+			staticTextPt.y = 10;
+			putText(overlayGrid, "Capture in progress. Press ESC to end.", staticTextPt , FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(0, 0, 255), 1, 8, false);
 
 			if (valHasChanged == true)
 			{
