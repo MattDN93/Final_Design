@@ -14,10 +14,11 @@ int main(int argc, char** argv)
 	Overlay ol;			//instantiate overlay object and pass it the video dimensions
 
 	//----------------Sample of arguments if the application is called via the other UI------------
+	//Use these args to test with: -29.4789 27.89123 27.9000 -29.4800 0 0 C:\Users\Matt\Documents\Source\OpenCVDemos\x64\Debug\megamind.avi
 	if (argc == 1)	//the console is called normally, ask the user what to do
 	{
-		cout << "Console launched independently. Going to user query mode..." << endl;
-		cout << argv[0];
+		cout << "Console launched independently. Going to user query mode... Path is: " << endl;
+		cout << argv[0] << endl;
 		auto callUserInput = async(launch::async, std::bind(&camStream::userInputQuery, &cs));	//ask user which input to use & run the detection (asynchronously)
 
 																								//wait for user to make choice
