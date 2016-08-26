@@ -94,6 +94,7 @@
     <Compile Include="CameraBoundsSetup.Designer.cs">
       <DependentUpon>CameraBoundsSetup.cs</DependentUpon>
     </Compile>
+    <Compile Include="CameraSettings.cs" />
     <Compile Include="GPSParser.cs">
       <SubType>Form</SubType>
     </Compile>

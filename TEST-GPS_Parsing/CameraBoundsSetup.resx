@@ -119,17 +119,24 @@
   </resheader>
   <data name="label1.Text" xml:space="preserve">
     <value>Insert the GPS co-ordinate extents of the main frame in the appropriate boxes.
-NOTE: Please use decimal notation i.e. DD.MMMMM 
 
+Please use decimal notation i.e. DD.MMMMM 
 1. At step 1, insert the co-ordinates for the top-left corner of the view.
 2. Now at step two insert the longitude at the far right of the range - latitude remains constant
 3. Repeat at step 3 with latitude - longitude stays constant
-4. When done, click "Set these extents." To clear fields, choose the "Clear fields" option.</value>
+4. Select the capture settings from the panel to the right
+5. When done, click "Start video capture" To clear fields, choose the "Clear fields" option.</value>
   </data>
   <metadata name="checkFieldsTimer.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <metadata name="chooseVideoFileFialog.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>190, 17</value>
+  </metadata>
+  <metadata name="$this.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>25</value>
+    <value>61</value>
   </metadata>
 </root>

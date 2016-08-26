@@ -47,8 +47,16 @@
             this.camViewStatusTextBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.checkFieldsTimer = new System.Windows.Forms.Timer(this.components);
+            this.label5 = new System.Windows.Forms.Label();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.vidSourceChoiceComboBox = new System.Windows.Forms.ComboBox();
+            this.drawModeChoiceComboBox = new System.Windows.Forms.ComboBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.chooseVideoFileFialog = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -117,9 +125,9 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(24, 613);
+            this.label1.Location = new System.Drawing.Point(30, 640);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(593, 119);
+            this.label1.Size = new System.Drawing.Size(593, 136);
             this.label1.TabIndex = 7;
             this.label1.Text = resources.GetString("label1.Text");
             // 
@@ -129,9 +137,9 @@
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.Location = new System.Drawing.Point(282, 9);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(453, 29);
+            this.label2.Size = new System.Drawing.Size(446, 29);
             this.label2.TabIndex = 8;
-            this.label2.Text = "Let\'s set up the camera\'s field of view!";
+            this.label2.Text = "Let\'s set up the camera\'s field of view";
             // 
             // groupBox1
             // 
@@ -139,9 +147,9 @@
             this.groupBox1.Controls.Add(this.goBackButton);
             this.groupBox1.Controls.Add(this.clearFieldsButton);
             this.groupBox1.Controls.Add(this.setExtentsButton);
-            this.groupBox1.Location = new System.Drawing.Point(710, 630);
+            this.groupBox1.Location = new System.Drawing.Point(710, 698);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(367, 99);
+            this.groupBox1.Size = new System.Drawing.Size(367, 78);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Ready?";
@@ -158,9 +166,9 @@
             // goBackButton
             // 
             this.goBackButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.goBackButton.Location = new System.Drawing.Point(272, 24);
+            this.goBackButton.Location = new System.Drawing.Point(272, 21);
             this.goBackButton.Name = "goBackButton";
-            this.goBackButton.Size = new System.Drawing.Size(79, 60);
+            this.goBackButton.Size = new System.Drawing.Size(79, 48);
             this.goBackButton.TabIndex = 2;
             this.goBackButton.Text = "Go back";
             this.goBackButton.UseVisualStyleBackColor = true;
@@ -168,9 +176,9 @@
             // 
             // clearFieldsButton
             // 
-            this.clearFieldsButton.Location = new System.Drawing.Point(186, 24);
+            this.clearFieldsButton.Location = new System.Drawing.Point(187, 21);
             this.clearFieldsButton.Name = "clearFieldsButton";
-            this.clearFieldsButton.Size = new System.Drawing.Size(79, 60);
+            this.clearFieldsButton.Size = new System.Drawing.Size(79, 48);
             this.clearFieldsButton.TabIndex = 1;
             this.clearFieldsButton.Text = "Clear fields";
             this.clearFieldsButton.UseVisualStyleBackColor = true;
@@ -178,12 +186,11 @@
             // 
             // setExtentsButton
             // 
-            this.setExtentsButton.DialogResult = System.Windows.Forms.DialogResult.Yes;
-            this.setExtentsButton.Location = new System.Drawing.Point(13, 24);
+            this.setExtentsButton.Location = new System.Drawing.Point(19, 21);
             this.setExtentsButton.Name = "setExtentsButton";
-            this.setExtentsButton.Size = new System.Drawing.Size(119, 60);
+            this.setExtentsButton.Size = new System.Drawing.Size(119, 48);
             this.setExtentsButton.TabIndex = 0;
-            this.setExtentsButton.Text = "Set these extents and START VIDEO";
+            this.setExtentsButton.Text = "START VIDEO CAPTURE";
             this.setExtentsButton.UseVisualStyleBackColor = true;
             this.setExtentsButton.Click += new System.EventHandler(this.setExtentsButton_Click);
             // 
@@ -209,12 +216,85 @@
             this.checkFieldsTimer.Interval = 1000;
             this.checkFieldsTimer.Tick += new System.EventHandler(this.checkFieldsTimer_Tick);
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(172, 610);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(215, 25);
+            this.label5.TabIndex = 12;
+            this.label5.Text = "Help and Instructions";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.label7);
+            this.groupBox2.Controls.Add(this.label6);
+            this.groupBox2.Controls.Add(this.drawModeChoiceComboBox);
+            this.groupBox2.Controls.Add(this.vidSourceChoiceComboBox);
+            this.groupBox2.Location = new System.Drawing.Point(710, 615);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(367, 77);
+            this.groupBox2.TabIndex = 13;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Capture Settings";
+            // 
+            // vidSourceChoiceComboBox
+            // 
+            this.vidSourceChoiceComboBox.FormattingEnabled = true;
+            this.vidSourceChoiceComboBox.Items.AddRange(new object[] {
+            "Video file on PC",
+            "Device Webcam"});
+            this.vidSourceChoiceComboBox.Location = new System.Drawing.Point(27, 44);
+            this.vidSourceChoiceComboBox.Name = "vidSourceChoiceComboBox";
+            this.vidSourceChoiceComboBox.Size = new System.Drawing.Size(142, 24);
+            this.vidSourceChoiceComboBox.TabIndex = 0;
+            this.vidSourceChoiceComboBox.Text = "Choose a source...";
+            // 
+            // drawModeChoiceComboBox
+            // 
+            this.drawModeChoiceComboBox.FormattingEnabled = true;
+            this.drawModeChoiceComboBox.Items.AddRange(new object[] {
+            "Random",
+            "Ordered",
+            "Tracking"});
+            this.drawModeChoiceComboBox.Location = new System.Drawing.Point(190, 44);
+            this.drawModeChoiceComboBox.Name = "drawModeChoiceComboBox";
+            this.drawModeChoiceComboBox.Size = new System.Drawing.Size(160, 24);
+            this.drawModeChoiceComboBox.TabIndex = 1;
+            this.drawModeChoiceComboBox.Text = "Choose draw mode...";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(24, 22);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(145, 17);
+            this.label6.TabIndex = 2;
+            this.label6.Text = "Choose video source:";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(187, 25);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(168, 17);
+            this.label7.TabIndex = 3;
+            this.label7.Text = "Choose point draw mode:";
+            // 
+            // chooseVideoFileFialog
+            // 
+            this.chooseVideoFileFialog.Filter = "Video Files | *.avi, *.mp4, *.mpeg, *.mpg, *.wmv, *.mkv, *.mov | All files | *.*";
+            this.chooseVideoFileFialog.FileOk += new System.ComponentModel.CancelEventHandler(this.chooseVideoFileFialog_FileOk);
+            // 
             // CameraBoundsSetup
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(1106, 741);
+            this.ClientSize = new System.Drawing.Size(1106, 788);
+            this.Controls.Add(this.groupBox2);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.camViewStatusTextBox);
             this.Controls.Add(this.groupBox1);
@@ -233,6 +313,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -257,5 +339,12 @@
         private System.Windows.Forms.TextBox camViewStatusTextBox;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Timer checkFieldsTimer;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.ComboBox drawModeChoiceComboBox;
+        private System.Windows.Forms.ComboBox vidSourceChoiceComboBox;
+        private System.Windows.Forms.OpenFileDialog chooseVideoFileFialog;
     }
 }
