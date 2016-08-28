@@ -116,10 +116,15 @@ namespace TEST_GPS_Parsing
             {
                 videoCaptureProcess.Start();
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException io)
             {
                 Console.Write("Failed to start process.");
-                throw new InvalidOperationException();
+                throw io;   //throw specific error to caller
+            }
+            catch (System.ComponentModel.Win32Exception w)
+            {
+                Console.Write(w.Message);
+                throw w;    //throw the specific error to the caller
             }
             
 

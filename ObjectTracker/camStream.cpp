@@ -149,8 +149,8 @@ void camStream::doCapture()
 			if (randomSim == true)
 			{
 				randCountTime = 0;
-				x = rand() % 610;
-				y = rand() % 450;
+				x = rand() % 800;			//default 610
+				y = rand() % 680;			//default 450
 				cout << "x co-ord: " << x + 15 << "; y co-ord: " << y + 15 << endl;
 				ol_mark.drawMarker(x, y, webcamVid, true);					//informs routine that previous marker value must be saved for new one
 			}

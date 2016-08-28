@@ -51,17 +51,21 @@ namespace TEST_GPS_Parsing
                 }
 
                 //now start the process!
-                try
+                  try
                 {
                     camParameter.startNewVideoConsole();
                 }
-                catch (InvalidOperationException)
+                catch (InvalidOperationException io)
                 {
-                    MessageBox.Show("The video capture process failed to start. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("The video capture process failed to start. " + io.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 catch (ApplicationException)
                 {
                     MessageBox.Show("Another instance of the video capture process is already running. Please close it and try again.", "Already running", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                catch(System.ComponentModel.Win32Exception w)
+                {
+                    MessageBox.Show("The video capture process failed to start. " + w.Message + ".", "Process start failed.", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 
 

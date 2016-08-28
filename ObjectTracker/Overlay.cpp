@@ -38,6 +38,8 @@ void Overlay::setupOverlay()
 		orderedSimPts.push_back(orderedPt);	//push back first ordered point
 
 	}
+
+
 	
 }
 
@@ -48,18 +50,20 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 		if (!objectMarker.empty())
 		{
 			//write static text over video
-			staticTextPt.x = 10;
-			staticTextPt.y = 10;
-			putText(overlayGrid, "Capture in progress. Press ESC to end.", staticTextPt , FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(0, 0, 255), 1, 8, false);
+			putText(overlayGrid, "Capture in progress. Press ESC to end.", Point(10,10) , FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(0, 0, 255), 1, 8, false);
+			//check if the current point is out of bounds & warn if so				
+			checkBounds(current_xval, current_yval, overlayGrid);
+
 
 			if (valHasChanged == true)
 			{
+
+
 				//set up the Point structs for markers
-				current_point.x = current_xval + 15;
-				current_point.y = current_yval + 15;
+				current_point.x = current_xval;
+				current_point.y = current_yval;
 				prev_point.x = marker_x;
 				prev_point.y = marker_y;
-
 
 				pt_it = points.begin();					//reallocate the iterator to vector start
 				///points.insert(pt_it,current_point);		//insert current point at start so we can iterate the array
@@ -68,6 +72,7 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 
 //			srcBGR = Mat(objectMarker.size(), CV_8UC3);
 //			Rect markerBoundsBox = Rect(current_xval, current_yval, 30, 30);
+
 		
 			/*This loop does all of the above:
 				-draws the circle for each point in the vector
@@ -78,19 +83,20 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 			*/
 			for (size_t i = 0; i < points.size(); i++)			//use the iterator to traverse the points array
 			{
-				std::ostringstream curr_positionInfoSS;
+				
 
 				//----------------Draw circle marker--------
 				//void circle(Mat& img, Point center, int radius, const Scalar& color, int thickness = 1, int lineType = 8, int shift = 0)
-				circle(overlayGrid, points[i], 5, Scalar(0, 0, 255), -1, 8, 0);
-
-				curr_positionInfoSS.clear();
-				curr_positionInfoSS << "Pt:" << i << "(" << points[i].x << "," << points[i].y << ")";
-				string curr_posInfoString = curr_positionInfoSS.str();
+				circle(overlayGrid, points[i], 5, Scalar(0, 0, 255), -1, 8, 0);				
 
 				//----------------Draw label next to current point
 				//void putText(Mat& img, const string& text, Point org, int fontFace, double fontScale, Scalar color, int thickness=1, int lineType=8, bool bottomLeftOrigin=false )
 				//build a string with the current co-ords
+				std::ostringstream curr_positionInfoSS;		//string stream for the current position marker
+				curr_positionInfoSS.clear();
+				curr_positionInfoSS << "Pt:" << i << "(" << points[i].x << "," << points[i].y << ")";
+				string curr_posInfoString = curr_positionInfoSS.str();
+
 				putText(overlayGrid, curr_posInfoString, points[i], FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(0, 0, 255), 1, 8, false);
 				
 				//----------------Draw joining line-----------
@@ -108,13 +114,36 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 ///			srcBGR.copyTo(markerBounds);
 
 			//this is the value stored from the last call
-			marker_x = current_xval + 15;
-			marker_y = current_yval + 15;
+			marker_x = current_xval;
+			marker_y = current_yval;
 
 		}
+
+		//show the actual frames in a GUI
 		imshow("Marker On-screen", overlayGrid);
 ///		//overlayGrid.release();
 	
 
+}
+
+void Overlay::checkBounds(int curr_x, int curr_y, Mat overlay)
+{
+	//the overlay grid gives us the size of the video so that we can determine where the limits are
+	if (curr_x < 0 || curr_x > overlay.cols)
+	{
+		limitExceededLong.clear();
+		LimitExceededLong_SS.str("");
+		LimitExceededLong_SS << "Longitude offscreen: (" << curr_x << "," << curr_y << ")";
+		limitExceededLong = LimitExceededLong_SS.str();
+		putText(overlayGrid, limitExceededLong, Point(10, 20), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
+	}
+	if (curr_y < 0 || curr_y > overlay.rows)
+	{
+		limitExceededLat.clear();
+		LimitExceededLat_SS.str("");
+		LimitExceededLat_SS << "Latitude offscreen: (" << curr_x << "," << curr_y << ")";
+		limitExceededLat = LimitExceededLat_SS.str();
+		putText(overlayGrid, limitExceededLat, Point(10, 30), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
+	}
 }
 
