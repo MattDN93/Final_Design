@@ -19,11 +19,13 @@ void Overlay::getVideoInfo(int wdth, int hgt)
 
 void Overlay::setupOverlay()
 {
-	objectMarker = imread("C:\\Users\\Matt\\Documents\\Source\\Final_Design\\ObjectTracker\\mark.png", CV_LOAD_IMAGE_ANYCOLOR);					//load objectmarker into matrix
+	//objectMarker = imread("C:\\Users\\Matt\\Documents\\Source\\Final_Design\\ObjectTracker\\mark.png", CV_LOAD_IMAGE_ANYCOLOR);					//load objectmarker into matrix
 	//imshow("loaded img", objectMarker);
-	resize(objectMarker, objectMarker, Size(30, 30));				//resize the target reticle 
+	//resize(objectMarker, objectMarker, Size(30, 30));				//resize the target reticle 
 	
 	overlayGrid.zeros(Size(gridWidth, gridHeight), CV_8UC3);		//set up a blank grid matrix
+	
+	videoFrame.zeros(Size(gridWidth, gridHeight), CV_8UC3);
 
 	//initialise the point element for the line-drawing
 	prev_point.x = 0;
@@ -45,19 +47,16 @@ void Overlay::setupOverlay()
 
 void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOverlay, bool valHasChanged)
 {
-
+		//videoFrame = webcamVidforOverlay.clone();
 		overlayGrid = webcamVidforOverlay.clone();
-		if (!objectMarker.empty())
-		{
-			//write static text over video
-			putText(overlayGrid, "Capture in progress. Press ESC to end.", Point(10,10) , FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(0, 0, 255), 1, 8, false);
-			//check if the current point is out of bounds & warn if so				
-			checkBounds(current_xval, current_yval, overlayGrid);
 
+		//write static text over video
+		putText(overlayGrid, "Capture in progress. Press ESC to end.", Point(10,10) , FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(0, 0, 255), 1, 8, false);
+
+		checkBounds(current_xval, current_yval, overlayGrid);
 
 			if (valHasChanged == true)
 			{
-
 
 				//set up the Point structs for markers
 				current_point.x = current_xval;
@@ -66,8 +65,8 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 				prev_point.y = marker_y;
 
 				pt_it = points.begin();					//reallocate the iterator to vector start
-				///points.insert(pt_it,current_point);		//insert current point at start so we can iterate the array
 				points.push_back(current_point);			//push back the current point into the vector
+
 			}
 
 //			srcBGR = Mat(objectMarker.size(), CV_8UC3);
@@ -92,10 +91,11 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 				//----------------Draw label next to current point
 				//void putText(Mat& img, const string& text, Point org, int fontFace, double fontScale, Scalar color, int thickness=1, int lineType=8, bool bottomLeftOrigin=false )
 				//build a string with the current co-ords
-				std::ostringstream curr_positionInfoSS;		//string stream for the current position marker
-				curr_positionInfoSS.clear();
+
+				curr_posInfoString.clear();
+				curr_positionInfoSS.str("");
 				curr_positionInfoSS << "Pt:" << i << "(" << points[i].x << "," << points[i].y << ")";
-				string curr_posInfoString = curr_positionInfoSS.str();
+				curr_posInfoString = curr_positionInfoSS.str();
 
 				putText(overlayGrid, curr_posInfoString, points[i], FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(0, 0, 255), 1, 8, false);
 				
@@ -117,7 +117,7 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 			marker_x = current_xval;
 			marker_y = current_yval;
 
-		}
+		
 
 		//show the actual frames in a GUI
 		imshow("Marker On-screen", overlayGrid);

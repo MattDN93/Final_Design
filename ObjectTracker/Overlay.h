@@ -32,9 +32,10 @@ public:
 	int marker_x;					//current centre x-position of overlay marker
 	int marker_y;					//current centre y-position of overlay marker
 	
-	Mat objectMarker;		//matrix to hold object marker 
 	Mat overlayGrid;		//"background" grid overlay matrix
-	Mat srcBGR;				
+	Mat srcBGR;	
+
+	Mat videoFrame;
 
 	Point orderedPt;				//point object for simulation
 	vector<Point> orderedSimPts;	//list of points to simulate
@@ -55,8 +56,11 @@ private:
 	vector<Point> points;			//vector of the last 10 points generated
 	vector<Point>::iterator pt_it;	//iterator for the vector above
 
-	std::ostringstream LimitExceededLat_SS;		//stringstream for lat exceeded
-	std::ostringstream LimitExceededLong_SS;	//stringstream for long exceeded
+	ostringstream curr_positionInfoSS;		//string stream for the current position marker
+	string curr_posInfoString;
+
+	ostringstream LimitExceededLat_SS;		//stringstream for lat exceeded
+	ostringstream LimitExceededLong_SS;	//stringstream for long exceeded
 	string limitExceededLat;
 	string limitExceededLong;
 };
