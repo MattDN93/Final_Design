@@ -126,10 +126,15 @@ void Overlay::drawMarker(int current_xval, int current_yval,Mat webcamVidforOver
 
 }
 
-void Overlay::checkBounds(int curr_x, int curr_y, Mat overlay)
+void Overlay::checkBounds(int curr_x, int curr_y, Mat overlay) 
 {
 	//the overlay grid gives us the size of the video so that we can determine where the limits are
-	if (curr_x < 0 || curr_x > overlay.cols)
+	//Overlay.cols = number of x-colums (pixels) in the image
+	//Overlay.rows = number of y-rows (pixels) in the image
+	int xLimit = overlay.cols;
+	int yLimit = overlay.rows;
+
+	if (curr_x < 0 || curr_x > xLimit)
 	{
 		limitExceededLong.clear();
 		LimitExceededLong_SS.str("");
@@ -137,7 +142,7 @@ void Overlay::checkBounds(int curr_x, int curr_y, Mat overlay)
 		limitExceededLong = LimitExceededLong_SS.str();
 		putText(overlayGrid, limitExceededLong, Point(10, 20), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
 	}
-	if (curr_y < 0 || curr_y > overlay.rows)
+	if (curr_y < 0 || curr_y > yLimit)
 	{
 		limitExceededLat.clear();
 		LimitExceededLat_SS.str("");
@@ -145,5 +150,81 @@ void Overlay::checkBounds(int curr_x, int curr_y, Mat overlay)
 		limitExceededLat = LimitExceededLat_SS.str();
 		putText(overlayGrid, limitExceededLat, Point(10, 30), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
 	}
+
+	//systematic check to determine where the offscreen point is so that we can draw an arrow to it
+	/*
+			The letters correspond to the zones we check in order shown
+			The top-left corner is the origin of the video frame
+			_A_|________D_____|_F_
+			 B |	onscreen  | G
+			__ |_____________ |__
+			 C |		E	  | H
+
+			 Drawing arrow:
+			 arrowedLine(InputOutputArray img, Point pt1, Point pt2, const Scalar& color, int thickness=1, int lineType=8, int shift=0, double tipLength=0.1)
+
+	*/
+
+	
+	if (curr_x < 0)		//narrow to A,B,C
+	{
+		if (curr_y<0)
+		{
+			//draw line to corner of A
+			arrowedLine(overlayGrid, Point(50, 50), Point(0, 0), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
+			putText(overlayGrid, "Offscreen here", Point(40, 40), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
+		}
+		else if (curr_y > 0 && curr_y < yLimit)
+		{
+			//draw line to the y-part of B
+			arrowedLine(overlayGrid, Point(50, curr_y), Point(0, curr_y), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
+			putText(overlayGrid, "Offscreen here", Point(40, curr_y), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
+		}
+		else if (curr_y > yLimit)
+		{
+			//draw line to point of C
+			arrowedLine(overlayGrid, Point(0, yLimit), Point(50, yLimit - 50), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
+			putText(overlayGrid, "Offscreen here", Point(40, yLimit - 40), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
+		}
+		
+	}
+	else if (curr_x > 0 && curr_x < xLimit)		//narrow to D or E
+	{
+		if (curr_y < 0)
+		{
+			//draw D
+			arrowedLine(overlayGrid, Point(curr_x, 50), Point(curr_x, 0), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
+			putText(overlayGrid, "Offscreen here", Point(curr_x, 40), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
+		}
+		else if (curr_y > yLimit)
+		{
+			//draw E
+			arrowedLine(overlayGrid, Point(curr_x, yLimit - 50), Point(curr_x, yLimit), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
+			putText(overlayGrid, "Offscreen here", Point(curr_x, yLimit - 40), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
+		}
+	}
+	else if (curr_x > xLimit)					//narrow to F,G,H
+	{
+		if (curr_y < 0)
+		{
+			//draw F
+			arrowedLine(overlayGrid, Point(xLimit - 50, 50), Point(xLimit, 0), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
+			putText(overlayGrid, "Offscreen here", Point(xLimit - 40, 40), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
+		}
+		else if (curr_y > 0 && curr_y < yLimit)
+		{
+			//draw G
+			arrowedLine(overlayGrid, Point(xLimit - 50, curr_y), Point(xLimit, curr_y), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
+			putText(overlayGrid, "Offscreen here", Point(xLimit - 80, curr_y), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
+		}
+		else if (curr_y > yLimit)
+		{
+			//draw H
+			arrowedLine(overlayGrid, Point(xLimit - 50, yLimit - 50), Point(xLimit,yLimit), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
+			putText(overlayGrid, "Offscreen here", Point(xLimit - 80, yLimit - 40), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
+		}
+
+	}
+	
 }
 
