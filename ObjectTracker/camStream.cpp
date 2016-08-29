@@ -168,7 +168,15 @@ void camStream::doCapture()
 
 	
 		}
-			ol_mark.drawMarker(x, y, webcamVid,false);					//initiate the overlay draw routine WITHOUT updating the previous marker
+		if (randomSim == true)
+		{
+			ol_mark.drawMarker(x, y, webcamVid, false);					//initiate the overlay draw routine WITHOUT updating the previous marker
+		}
+		else
+		{
+			ol_mark.drawMarker(ol_mark.orderedPt.x, ol_mark.orderedPt.y, webcamVid, false);
+		}
+			
 
 
 		//end test code

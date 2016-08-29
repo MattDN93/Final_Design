@@ -199,7 +199,7 @@ void Overlay::checkBounds(int curr_x, int curr_y, Mat overlay)
 		else if (curr_y > yLimit)
 		{
 			//draw E
-			arrowedLine(overlayGrid, Point(curr_x, yLimit - 50), Point(curr_x, yLimit), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
+			arrowedLine(overlayGrid, Point(curr_x, yLimit - 60), Point(curr_x, yLimit), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
 			putText(overlayGrid, "Offscreen here", Point(curr_x, yLimit - 40), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
 		}
 	}
@@ -208,20 +208,20 @@ void Overlay::checkBounds(int curr_x, int curr_y, Mat overlay)
 		if (curr_y < 0)
 		{
 			//draw F
-			arrowedLine(overlayGrid, Point(xLimit - 50, 50), Point(xLimit, 0), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
-			putText(overlayGrid, "Offscreen here", Point(xLimit - 40, 40), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
+			arrowedLine(overlayGrid, Point(xLimit - 80, 50), Point(xLimit, 0), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
+			putText(overlayGrid, "Offscreen here", Point(xLimit - 100, 50), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
 		}
 		else if (curr_y > 0 && curr_y < yLimit)
 		{
 			//draw G
-			arrowedLine(overlayGrid, Point(xLimit - 50, curr_y), Point(xLimit, curr_y), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
-			putText(overlayGrid, "Offscreen here", Point(xLimit - 80, curr_y), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
+			arrowedLine(overlayGrid, Point(xLimit - 80, curr_y), Point(xLimit, curr_y), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
+			putText(overlayGrid, "Offscreen here", Point(xLimit - 100, curr_y), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
 		}
 		else if (curr_y > yLimit)
 		{
 			//draw H
-			arrowedLine(overlayGrid, Point(xLimit - 50, yLimit - 50), Point(xLimit,yLimit), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
-			putText(overlayGrid, "Offscreen here", Point(xLimit - 80, yLimit - 40), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
+			arrowedLine(overlayGrid, Point(xLimit - 80, yLimit - 80), Point(xLimit,yLimit), Scalar(255, 0, 0), 0.5, CV_AA, 0, 0.1);
+			putText(overlayGrid, "Offscreen here", Point(xLimit - 100, yLimit - 40), FONT_HERSHEY_COMPLEX_SMALL, 0.5, Scalar(255, 0, 0), 1, 8, false);
 		}
 
 	}
