@@ -47,6 +47,12 @@
       <HintPath>..\packages\BruTile.Desktop.0.18.2\lib\net40\BruTile.MbTiles.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Emgu.CV.UI">
+      <HintPath>..\..\emgucv-310\bin\Emgu.CV.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="Emgu.CV.World">
+      <HintPath>..\..\emgucv-310\bin\Emgu.CV.World.dll</HintPath>
+    </Reference>
     <Reference Include="GMap.NET.Core">
       <HintPath>..\..\Release-NETv4.0\GMap.NET.Core.dll</HintPath>
     </Reference>
@@ -95,6 +101,7 @@
       <DependentUpon>CameraBoundsSetup.cs</DependentUpon>
     </Compile>
     <Compile Include="CameraSettings.cs" />
+    <Compile Include="camStream.cs" />
     <Compile Include="GPSParser.cs">
       <SubType>Form</SubType>
     </Compile>
