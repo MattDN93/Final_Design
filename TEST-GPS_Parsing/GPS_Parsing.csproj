@@ -110,6 +110,7 @@
     </Compile>
     <Compile Include="GPSPacket.cs" />
     <Compile Include="Mapping.cs" />
+    <Compile Include="Overlay.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="XMLNodes.cs" />
