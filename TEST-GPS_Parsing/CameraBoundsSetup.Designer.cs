@@ -49,10 +49,10 @@
             this.checkFieldsTimer = new System.Windows.Forms.Timer(this.components);
             this.label5 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.vidSourceChoiceComboBox = new System.Windows.Forms.ComboBox();
-            this.drawModeChoiceComboBox = new System.Windows.Forms.ComboBox();
-            this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.drawModeChoiceComboBox = new System.Windows.Forms.ComboBox();
+            this.vidSourceChoiceComboBox = new System.Windows.Forms.ComboBox();
             this.chooseVideoFileFialog = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -239,17 +239,23 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Capture Settings";
             // 
-            // vidSourceChoiceComboBox
+            // label7
             // 
-            this.vidSourceChoiceComboBox.FormattingEnabled = true;
-            this.vidSourceChoiceComboBox.Items.AddRange(new object[] {
-            "Video file on PC",
-            "Device Webcam"});
-            this.vidSourceChoiceComboBox.Location = new System.Drawing.Point(27, 44);
-            this.vidSourceChoiceComboBox.Name = "vidSourceChoiceComboBox";
-            this.vidSourceChoiceComboBox.Size = new System.Drawing.Size(142, 24);
-            this.vidSourceChoiceComboBox.TabIndex = 0;
-            this.vidSourceChoiceComboBox.Text = "Choose a source...";
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(187, 25);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(168, 17);
+            this.label7.TabIndex = 3;
+            this.label7.Text = "Choose point draw mode:";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(24, 22);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(145, 17);
+            this.label6.TabIndex = 2;
+            this.label6.Text = "Choose video source:";
             // 
             // drawModeChoiceComboBox
             // 
@@ -264,23 +270,17 @@
             this.drawModeChoiceComboBox.TabIndex = 1;
             this.drawModeChoiceComboBox.Text = "Choose draw mode...";
             // 
-            // label6
+            // vidSourceChoiceComboBox
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(24, 22);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(145, 17);
-            this.label6.TabIndex = 2;
-            this.label6.Text = "Choose video source:";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(187, 25);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(168, 17);
-            this.label7.TabIndex = 3;
-            this.label7.Text = "Choose point draw mode:";
+            this.vidSourceChoiceComboBox.FormattingEnabled = true;
+            this.vidSourceChoiceComboBox.Items.AddRange(new object[] {
+            "Video file on PC",
+            "Device Webcam"});
+            this.vidSourceChoiceComboBox.Location = new System.Drawing.Point(27, 44);
+            this.vidSourceChoiceComboBox.Name = "vidSourceChoiceComboBox";
+            this.vidSourceChoiceComboBox.Size = new System.Drawing.Size(142, 24);
+            this.vidSourceChoiceComboBox.TabIndex = 0;
+            this.vidSourceChoiceComboBox.Text = "Choose a source...";
             // 
             // chooseVideoFileFialog
             // 
