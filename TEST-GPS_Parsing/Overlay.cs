@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TEST_GPS_Parsing
 {
-    class Overlay : camStream
+    class Overlay : VideoOutputWindow
     {
     }
 }

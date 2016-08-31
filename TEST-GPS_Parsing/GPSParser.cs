@@ -561,6 +561,7 @@ namespace TEST_GPS_Parsing
         private void openPortButton_Click(object sender, EventArgs e)
         {
             CameraBoundsSetup cmBound = new CameraBoundsSetup();
+            ///VideoOutputWindow voWindow = new VideoOutputWindow();
             updateUITimer.Stop();
             status2TextBox.AppendText("Camera Bound setup window open; waiting....");
             DialogResult cmResult = cmBound.ShowDialog();

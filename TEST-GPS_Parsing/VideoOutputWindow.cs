@@ -8,134 +8,103 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Emgu.CV;
-using Emgu.CV.Util;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
+using Emgu.Util;
 
 namespace TEST_GPS_Parsing
 {
     public partial class VideoOutputWindow : Form
     {
-            //privates for status
-        private Mat webcamVid;                  //create a Mat object to manipulate
-        private Capture camStreamCapture;       //the OpenCV capture stream
-
-        public int captureChoice;              //user's selection of which capture to use
-        public int drawMode;
         public string fileName;
+        public int drawMode;
+        public int captureChoice;
 
-        private bool capStartSuccess;           //whether the capture was opened OK
-        private bool isStreaming;               //whether stream is in progress
-        private bool randomSim;                 //using random simulation mode or ordered
-        private bool valHasChanged;             //for updating the marker
-        int button;                             //finds out if user has hit ESC
-
-         
-
-            //enums for user requirements
-            //source choice
-        const int EXTERNAL_WEBCAM = 0;
-        const int OFFLINE_FILE = 1;
-        //point mapping
-
-        const int RANDOM_POINTS = 0;
-        const int ORDERED_POINTS = 1;
-        int vidPixelWidth;              //video dimensions
-        int vidPixelHeight;
+        private Capture _capture = null;
+        private bool _captureInProgress;
 
         public VideoOutputWindow()
         {
             InitializeComponent();
-            
-
+            CvInvoke.UseOpenCL = false;
+            try
+            {
+                _capture = new Capture();
+                _capture.ImageGrabbed += ProcessFrame;
+            }
+            catch (NullReferenceException excpt)
+            {
+                MessageBox.Show(excpt.Message);
+            }
         }
 
         private void VideoOutputWindow_Load(object sender, EventArgs e)
         {
             //the drawMode, fileName and videoSource are set by the other form
             //evaluates what the user chose from the bounds setup box
-            switch (drawMode)
-            {
-                case RANDOM_POINTS: randomSim = true; break;
-                case ORDERED_POINTS: randomSim = false; break;
-                default:
-                    Console.Write("Please select a sim mode");
-                    break;
-            }
 
-            switch (captureChoice)
-            {
-                case EXTERNAL_WEBCAM: capStartSuccess = doCapture(EXTERNAL_WEBCAM); break;
-                case OFFLINE_FILE: capStartSuccess = doCapture(OFFLINE_FILE, fileName); break;
-                default:
-                    Console.Write("You've made an invalid choice. Try again");
-                    break;
-            }
-            if (capStartSuccess == false)
-            {
-                throw new Exception();
-            }
         }
 
-
-        public bool doCapture(int choice, string fileName = "")        //perform the capture
+        private void ProcessFrame(object sender, EventArgs arg)
         {
-            isStreaming = true;
-            CvInvoke.NamedWindow("Incoming Video Stream", Emgu.CV.CvEnum.NamedWindowType.AutoSize); //load up a named window
-            getVideoInfo();                     //get the extents of the frame
-            //webcamVid;
+            Mat frame = new Mat();
+            _capture.Retrieve(frame, 0);
+            Mat grayFrame = new Mat();
+            CvInvoke.CvtColor(frame, grayFrame, ColorConversion.Bgr2Gray);
+            Mat smallGrayFrame = new Mat();
+            CvInvoke.PyrDown(grayFrame, smallGrayFrame);
+            Mat smoothedGrayFrame = new Mat();
+            CvInvoke.PyrUp(smallGrayFrame, smoothedGrayFrame);
 
-            //overlayMarker.setupOverlay();       //setup the image overlay
+            //Image<Gray, Byte> smallGrayFrame = grayFrame.PyrDown();
+            //Image<Gray, Byte> smoothedGrayFrame = smallGrayFrame.PyrUp();
+            Mat cannyFrame = new Mat();
+            CvInvoke.Canny(smoothedGrayFrame, cannyFrame, 100, 60);
 
-            if (camStreamCapture != null) camStreamCapture.Dispose();   //close the instance if it's already open 
+            //Image<Gray, Byte> cannyFrame = smoothedGrayFrame.Canny(100, 60);
 
-            try
+            rawVideoFramesBox.Image = frame;
+            //grayscaleImageBox.Image = grayFrame;
+            //smoothedGrayscaleImageBox.Image = smoothedGrayFrame;
+            //cannyImageBox.Image = cannyFrame;
+        }
+
+        private void startCaptureButton_Click(object sender, EventArgs e)
+        {
+            if (_capture != null)
             {
-                //Set up capture device based on choice
-                    switch (choice)
+                if (_captureInProgress)
+                {  //stop the capture
+                    startCaptureButton.Text = "Start Capture";
+                    _capture.Pause();
+                }
+                else
                 {
-                    case EXTERNAL_WEBCAM: camStreamCapture = new Capture(EXTERNAL_WEBCAM); break;
-                    case OFFLINE_FILE: camStreamCapture = new Capture(OFFLINE_FILE); break;
-                    default:
-                        break;
+                    //start the capture
+                    startCaptureButton.Text = "Stop";
+                    _capture.Start();
                 }
 
-                camStreamCapture.ImageGrabbed += parseFrames;       //add the image grabbed to the frame
-                return true;
+                _captureInProgress = !_captureInProgress;
             }
-            catch (NullReferenceException excpt)
-            {
-                throw new NullReferenceException();
-            }
-
         }
 
-        private void parseFrames(object sender, EventArgs e)
+        private void ReleaseData()
         {
-            webcamVid = camStreamCapture.QueryFrame();
-            if (webcamVid == null)                  //quit if no image received
-            {
-                return;
-            }
-
-            CvInvoke.Imshow("Incoming Video Stream", webcamVid);
-
-            button = CvInvoke.WaitKey(30);
-            if (button == 27)
-            {
-                Console.Write("ESC pressed.");
-            }
+            if (_capture != null)
+                _capture.Dispose();
         }
 
-
-        void getVideoInfo()            //get the video properties
+        private void FlipHorizontalButtonClick(object sender, EventArgs e)
         {
-            vidPixelHeight = (int)camStreamCapture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight);
-            vidPixelWidth = (int)camStreamCapture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameWidth);
+            if (_capture != null) _capture.FlipHorizontal = !_capture.FlipHorizontal;
         }
 
-        public bool streamingInProgress()
+        private void FlipVerticalButtonClick(object sender, EventArgs e)
         {
-            return isStreaming;
+            if (_capture != null) _capture.FlipVertical = !_capture.FlipVertical;
         }
-
     }
+
+       
 }
