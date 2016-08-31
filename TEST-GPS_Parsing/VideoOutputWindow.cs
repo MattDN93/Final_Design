@@ -16,12 +16,21 @@ namespace TEST_GPS_Parsing
 {
     public partial class VideoOutputWindow : Form
     {
-        public string fileName;
-        public int drawMode;
-        public int captureChoice;
+        public Mat webcamVid;                  //create a Mat object to manipulate
+        private Capture camStreamCapture = null;       //the OpenCV capture stream
 
-        private Capture _capture = null;
-        private bool _captureInProgress;
+        public int captureChoice;              //user's selection of which capture to use
+        public int drawMode;
+        public string fileName;
+
+        private bool capStartSuccess;           //whether the capture was opened OK
+        private bool isStreaming;               //whether stream is in progress
+        private bool randomSim;                 //using random simulation mode or ordered
+        private bool valHasChanged;             //for updating the marker
+        int button;                             //finds out if user has hit ESC
+
+        int vidPixelWidth;              //video dimensions
+        int vidPixelHeight;
 
         public VideoOutputWindow()
         {
@@ -29,8 +38,9 @@ namespace TEST_GPS_Parsing
             CvInvoke.UseOpenCL = false;
             try
             {
-                _capture = new Capture();
-                _capture.ImageGrabbed += ProcessFrame;
+                camStreamCapture = new Capture();               //instantiate new capture object
+                camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
+                webcamVid = new Mat(vidPixelHeight, vidPixelWidth, DepthType.Cv8U, 3);      //create the webcam mat object
             }
             catch (NullReferenceException excpt)
             {
@@ -42,69 +52,96 @@ namespace TEST_GPS_Parsing
         {
             //the drawMode, fileName and videoSource are set by the other form
             //evaluates what the user chose from the bounds setup box
+            switch (captureChoice)
+            {
+                case 0: videoModeLabel.Text = "Live Video";break;
+                case 1: videoModeLabel.Text = "Recorded Video";break;
+                default: videoModeLabel.Text = "None Set";
+                    break;
+            }
+            switch (drawMode)
+            {
+                case 0: drawModeLabel.Text = "Random";break;
+                case 1: drawModeLabel.Text = "Ordered";break;
+                default:
+                    break;
+            }
+
+            getVideoInfo();                                         //call video info function
+            frameHeightLabel.Text = vidPixelHeight.ToString();      //get the video parameters
+            frameWidthLabel.Text = vidPixelWidth.ToString();
+
+            if (camStreamCapture != null)
+            {
+                camStreamCapture.Start();                           //immediately start capturing
+                isStreaming = true;
+                startCaptureButton.Text = "Stop Capture";
+            }
 
         }
 
-        private void ProcessFrame(object sender, EventArgs arg)
+        private void parseFrames(object sender, EventArgs arg)
         {
-            Mat frame = new Mat();
-            _capture.Retrieve(frame, 0);
-            Mat grayFrame = new Mat();
-            CvInvoke.CvtColor(frame, grayFrame, ColorConversion.Bgr2Gray);
-            Mat smallGrayFrame = new Mat();
-            CvInvoke.PyrDown(grayFrame, smallGrayFrame);
-            Mat smoothedGrayFrame = new Mat();
-            CvInvoke.PyrUp(smallGrayFrame, smoothedGrayFrame);
+            //Mat webcamVid = new Mat();
+            try
+            {
+                camStreamCapture.Retrieve(webcamVid, 0);
+                rawVideoFramesBox.Image = webcamVid;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Capturing failed. Reason: " + e.Message, "Something happened!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                isStreaming = false;
+                startCaptureButton.Text = "(Re)Start Capture";
+                ReleaseData();      //something failed so release the data
+                return;
+            }
 
-            //Image<Gray, Byte> smallGrayFrame = grayFrame.PyrDown();
-            //Image<Gray, Byte> smoothedGrayFrame = smallGrayFrame.PyrUp();
-            Mat cannyFrame = new Mat();
-            CvInvoke.Canny(smoothedGrayFrame, cannyFrame, 100, 60);
-
-            //Image<Gray, Byte> cannyFrame = smoothedGrayFrame.Canny(100, 60);
-
-            rawVideoFramesBox.Image = frame;
-            //grayscaleImageBox.Image = grayFrame;
-            //smoothedGrayscaleImageBox.Image = smoothedGrayFrame;
-            //cannyImageBox.Image = cannyFrame;
         }
 
         private void startCaptureButton_Click(object sender, EventArgs e)
         {
-            if (_capture != null)
-            {
-                if (_captureInProgress)
+                if (isStreaming)
                 {  //stop the capture
                     startCaptureButton.Text = "Start Capture";
-                    _capture.Pause();
+                    camStreamCapture.Pause();
+                    isStreaming = false;
                 }
                 else
                 {
                     //start the capture
-                    startCaptureButton.Text = "Stop";
-                    _capture.Start();
+                    startCaptureButton.Text = "Stop Capture";
+                    try
+                    {
+                    camStreamCapture.Start();
+                    isStreaming = true;
+                    }
+                    catch (Exception re)
+                    {
+                        MessageBox.Show("Capturing still failed. Try again later. Reason: " + re.Message, "Something happened!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        isStreaming = false;
+                        startCaptureButton.Text = "(Re)Start Capture";
+                        ReleaseData();      //something failed so release the data
+                        return;
+                    }
                 }
 
-                _captureInProgress = !_captureInProgress;
-            }
         }
 
         private void ReleaseData()
         {
-            if (_capture != null)
-                _capture.Dispose();
+            if (camStreamCapture != null)
+                camStreamCapture.Dispose();
         }
 
-        private void FlipHorizontalButtonClick(object sender, EventArgs e)
+        private void getVideoInfo()            //get the video properties
         {
-            if (_capture != null) _capture.FlipHorizontal = !_capture.FlipHorizontal;
+            vidPixelHeight = (int)camStreamCapture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight);
+            vidPixelWidth = (int)camStreamCapture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameWidth);
         }
 
-        private void FlipVerticalButtonClick(object sender, EventArgs e)
-        {
-            if (_capture != null) _capture.FlipVertical = !_capture.FlipVertical;
-        }
     }
 
-       
+
+
 }

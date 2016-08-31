@@ -230,8 +230,9 @@ namespace TEST_GPS_Parsing
             vo.fileName = filenameToOpen;       //set the filename to open on the other form
             vo.drawMode = drawMode;             //set the draw mode on the other form
             vo.captureChoice = videoSource;     //set the video source on the other form
+            vo.BringToFront();
             vo.Show();
-
+            
 
             //now actually launch the process!
             //Process videoCaptureProcess = new Process();
