@@ -81,6 +81,7 @@
             this.rawVideoFramesBox.Location = new System.Drawing.Point(405, 22);
             this.rawVideoFramesBox.Name = "rawVideoFramesBox";
             this.rawVideoFramesBox.Size = new System.Drawing.Size(305, 234);
+            this.rawVideoFramesBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.rawVideoFramesBox.TabIndex = 2;
             this.rawVideoFramesBox.TabStop = false;
             // 
@@ -201,6 +202,7 @@
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "VideoOutputWindow";
             this.Text = "VideoOutputWindow";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.VideoOutputWindow_FormClosing);
             this.Load += new System.EventHandler(this.VideoOutputWindow_Load);
             ((System.ComponentModel.ISupportInitialize)(this.overlayVideoFramesBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rawVideoFramesBox)).EndInit();

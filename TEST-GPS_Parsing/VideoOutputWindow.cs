@@ -85,8 +85,12 @@ namespace TEST_GPS_Parsing
             //Mat webcamVid = new Mat();
             try
             {
-                camStreamCapture.Retrieve(webcamVid, 0);
-                rawVideoFramesBox.Image = webcamVid;
+                if (!rawVideoFramesBox.IsDisposed)      //make sure not to grab a frame if the window is closig
+                {
+                    camStreamCapture.Retrieve(webcamVid, 0);
+                    rawVideoFramesBox.Image = webcamVid;
+                }
+
             }
             catch (Exception e)
             {
@@ -115,6 +119,7 @@ namespace TEST_GPS_Parsing
                     {
                     camStreamCapture.Start();
                     isStreaming = true;
+                    
                     }
                     catch (Exception re)
                     {
@@ -131,7 +136,11 @@ namespace TEST_GPS_Parsing
         private void ReleaseData()
         {
             if (camStreamCapture != null)
+            {
                 camStreamCapture.Dispose();
+                rawVideoFramesBox.Dispose();
+            }
+                
         }
 
         private void getVideoInfo()            //get the video properties
@@ -140,6 +149,20 @@ namespace TEST_GPS_Parsing
             vidPixelWidth = (int)camStreamCapture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameWidth);
         }
 
+        private void VideoOutputWindow_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (isStreaming)
+            {
+                MessageBox.Show("Capture is still in progress. Stop it first then close this window.", "Stop capture first!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                e.Cancel = true;        //stop the form closing
+            }
+            else
+            { 
+                ReleaseData();      //try to release the capture
+            }
+            
+            
+        }
     }
 
 
