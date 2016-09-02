@@ -17,20 +17,23 @@ namespace TEST_GPS_Parsing
     public partial class VideoOutputWindow : Form
     {
         public Mat webcamVid;                  //create a Mat object to manipulate
+        public Mat overlayVid;
         private Capture camStreamCapture = null;       //the OpenCV capture stream
 
         public int captureChoice;              //user's selection of which capture to use
         public int drawMode;
         public string fileName;
 
-        private bool capStartSuccess;           //whether the capture was opened OK
-        private bool isStreaming;               //whether stream is in progress
-        private bool randomSim;                 //using random simulation mode or ordered
-        private bool valHasChanged;             //for updating the marker
+        protected bool capStartSuccess;           //whether the capture was opened OK
+        protected bool isStreaming;               //whether stream is in progress
+        protected bool randomSim;                 //using random simulation mode or ordered
+        protected bool valHasChanged;             //for updating the marker
         int button;                             //finds out if user has hit ESC
 
         int vidPixelWidth;              //video dimensions
         int vidPixelHeight;
+
+        private Overlay ol_mark;                //object for the overlay of points
 
         public VideoOutputWindow()
         {
@@ -40,7 +43,7 @@ namespace TEST_GPS_Parsing
             {
                 camStreamCapture = new Capture();               //instantiate new capture object
                 camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
-                webcamVid = new Mat(vidPixelHeight, vidPixelWidth, DepthType.Cv8U, 3);      //create the webcam mat object
+                webcamVid = new Mat();                          //create the webcam mat object
             }
             catch (NullReferenceException excpt)
             {
@@ -73,6 +76,8 @@ namespace TEST_GPS_Parsing
 
             if (camStreamCapture != null)
             {
+                ol_mark = new Overlay();                            //init the overlay object
+                ol_mark.setupOverlay();                             //setup the overlay
                 camStreamCapture.Start();                           //immediately start capturing
                 isStreaming = true;
                 startCaptureButton.Text = "Stop Capture";
@@ -80,6 +85,7 @@ namespace TEST_GPS_Parsing
 
         }
 
+        //this method is called every time the IsGrabbed event is raised i.e. every time a new frame is captured
         private void parseFrames(object sender, EventArgs arg)
         {
             //Mat webcamVid = new Mat();
@@ -87,8 +93,16 @@ namespace TEST_GPS_Parsing
             {
                 if (!rawVideoFramesBox.IsDisposed)      //make sure not to grab a frame if the window is closig
                 {
-                    camStreamCapture.Retrieve(webcamVid, 0);
-                    rawVideoFramesBox.Image = webcamVid;
+                    camStreamCapture.Retrieve(webcamVid, 0);    //grab a frame and store to webcamVid matrix
+                    rawVideoFramesBox.Image = webcamVid;        //display on-screen
+
+                    //Now draw the markers on the overlay and display
+                    bool returnVal = ol_mark.drawMarker(100, 150, webcamVid, true);
+
+                    if (returnVal == true)              //if the marker routine returned OK, draw the result in the video window
+                    {
+                        overlayVideoFramesBox.Image = ol_mark.overlayGrid;
+                    }
                 }
 
             }
