@@ -96,10 +96,11 @@ namespace TEST_GPS_Parsing
                     camStreamCapture.Retrieve(webcamVid, 0);    //grab a frame and store to webcamVid matrix
                     rawVideoFramesBox.Image = webcamVid;        //display on-screen
 
-                    //Now draw the markers on the overlay and display
-                    bool returnVal = ol_mark.drawMarker(100, 150, webcamVid, true);
-
-                    if (returnVal == true)              //if the marker routine returned OK, draw the result in the video window
+                    //Now draw the markers on the overlay and display [SIMULATION VALUES HERE]
+                    //this method sends a FALSE since the image updates 24+ times per second but the data only 1 per second
+                    //This means the check and update of marker is only done on the TIMER TICK every 500ms, otherwise the overlay is just redrawn
+                    bool returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, false);
+                    if (returnVal == true)
                     {
                         overlayVideoFramesBox.Image = ol_mark.overlayGrid;
                     }
@@ -113,6 +114,24 @@ namespace TEST_GPS_Parsing
                 startCaptureButton.Text = "(Re)Start Capture";
                 ReleaseData();      //something failed so release the data
                 return;
+            }
+
+        }
+
+        //This recalculates the incoming datapoints once every 500ms since GPS data only arrives that often
+        private void refreshOverlay_Tick(object sender, EventArgs e)
+        {
+
+            if (ol_mark != null)    
+            {
+                //SIMULATION
+                ol_mark.generateSimPts();
+                bool returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, true);
+
+                if (returnVal == true)              //if the marker routine returned OK, draw the result in the video window
+                {
+                    overlayVideoFramesBox.Image = ol_mark.overlayGrid;
+                }
             }
 
         }
@@ -177,6 +196,8 @@ namespace TEST_GPS_Parsing
             
             
         }
+
+
     }
 
 

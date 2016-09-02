@@ -48,6 +48,7 @@
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.status1TextBox = new System.Windows.Forms.TextBox();
             this.status2TextBox = new System.Windows.Forms.TextBox();
+            this.refreshOverlay = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.rawVideoFramesBox)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.overlayVideoFramesBox)).BeginInit();
@@ -222,9 +223,9 @@
             // 
             // groupBox3
             // 
-            this.groupBox3.Location = new System.Drawing.Point(295, 17);
+            this.groupBox3.Location = new System.Drawing.Point(295, 12);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(238, 209);
+            this.groupBox3.Size = new System.Drawing.Size(238, 214);
             this.groupBox3.TabIndex = 7;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Incoming Data";
@@ -253,6 +254,12 @@
             this.status2TextBox.Name = "status2TextBox";
             this.status2TextBox.Size = new System.Drawing.Size(503, 22);
             this.status2TextBox.TabIndex = 1;
+            // 
+            // refreshOverlay
+            // 
+            this.refreshOverlay.Enabled = true;
+            this.refreshOverlay.Interval = 500;
+            this.refreshOverlay.Tick += new System.EventHandler(this.refreshOverlay_Tick);
             // 
             // VideoOutputWindow
             // 
@@ -304,5 +311,6 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.TextBox status2TextBox;
         private System.Windows.Forms.TextBox status1TextBox;
+        private System.Windows.Forms.Timer refreshOverlay;
     }
 }
