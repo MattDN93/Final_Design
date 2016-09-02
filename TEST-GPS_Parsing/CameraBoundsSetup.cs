@@ -26,6 +26,11 @@ namespace TEST_GPS_Parsing
         public int drawMode;
         public string filenameToOpen;
 
+        //-------SIMULATION
+        public static int DRAW_MODE_RANDOM = 0;
+        public static int DRAW_MODE_ORDERED = 1;
+        public static int DRAW_MODE_TRACKING = 2;
+
         public CameraBoundsSetup()
         {
 
@@ -46,9 +51,9 @@ namespace TEST_GPS_Parsing
                 //The index of draw mode defines the selected item. 0=Random 1=Ordered 2=Tracking
                 switch (drawModeChoiceComboBox.SelectedIndex)
                 {
-                    case 0: drawModeChoice = 0;break;
-                    case 1: drawModeChoice = 1;break;
-                    case 2: drawModeChoice = 2;break;
+                    case 0: drawModeChoice = DRAW_MODE_RANDOM;break;
+                    case 1: drawModeChoice = DRAW_MODE_ORDERED;break;
+                    case 2: drawModeChoice = DRAW_MODE_TRACKING;break;
                     default: drawModeChoice = -1;
                         break;
                 }
@@ -228,7 +233,7 @@ namespace TEST_GPS_Parsing
         {
             VideoOutputWindow vo = new VideoOutputWindow();
             vo.fileName = filenameToOpen;       //set the filename to open on the other form
-            vo.drawMode = drawMode;             //set the draw mode on the other form
+            vo.drawMode_Overlay = drawMode;             //set the draw mode on the other form
             vo.captureChoice = videoSource;     //set the video source on the other form
             vo.TopMost = true;
             vo.Show();
@@ -257,6 +262,11 @@ namespace TEST_GPS_Parsing
                                                       filenameToOpen;
             //videoCaptureProcess.Start();
             */
+        }
+
+        private void drawModeChoiceComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

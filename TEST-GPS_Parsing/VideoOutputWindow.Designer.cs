@@ -45,14 +45,20 @@
             this.overlayVideoFramesBox = new Emgu.CV.UI.ImageBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.LongitudeLabel = new System.Windows.Forms.Label();
+            this.latitudeLabel = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.latOORStatusBox = new System.Windows.Forms.TextBox();
             this.status1TextBox = new System.Windows.Forms.TextBox();
-            this.status2TextBox = new System.Windows.Forms.TextBox();
             this.refreshOverlay = new System.Windows.Forms.Timer(this.components);
+            this.longOORTextBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.rawVideoFramesBox)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.overlayVideoFramesBox)).BeginInit();
             this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -80,7 +86,7 @@
             // 
             this.rawVideoFramesBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.rawVideoFramesBox.Location = new System.Drawing.Point(540, 27);
-            this.rawVideoFramesBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.rawVideoFramesBox.Margin = new System.Windows.Forms.Padding(4);
             this.rawVideoFramesBox.Name = "rawVideoFramesBox";
             this.rawVideoFramesBox.Size = new System.Drawing.Size(405, 287);
             this.rawVideoFramesBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -90,7 +96,7 @@
             // startCaptureButton
             // 
             this.startCaptureButton.Location = new System.Drawing.Point(12, 22);
-            this.startCaptureButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.startCaptureButton.Margin = new System.Windows.Forms.Padding(4);
             this.startCaptureButton.Name = "startCaptureButton";
             this.startCaptureButton.Size = new System.Drawing.Size(247, 28);
             this.startCaptureButton.TabIndex = 4;
@@ -109,9 +115,9 @@
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Location = new System.Drawing.Point(17, 75);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox1.Size = new System.Drawing.Size(271, 151);
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
@@ -204,9 +210,9 @@
             // overlayVideoFramesBox
             // 
             this.overlayVideoFramesBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.overlayVideoFramesBox.Location = new System.Drawing.Point(17, 358);
+            this.overlayVideoFramesBox.Location = new System.Drawing.Point(24, 357);
             this.overlayVideoFramesBox.Name = "overlayVideoFramesBox";
-            this.overlayVideoFramesBox.Size = new System.Drawing.Size(928, 483);
+            this.overlayVideoFramesBox.Size = new System.Drawing.Size(921, 547);
             this.overlayVideoFramesBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.overlayVideoFramesBox.TabIndex = 2;
             this.overlayVideoFramesBox.TabStop = false;
@@ -223,6 +229,10 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.LongitudeLabel);
+            this.groupBox3.Controls.Add(this.latitudeLabel);
+            this.groupBox3.Controls.Add(this.label7);
+            this.groupBox3.Controls.Add(this.label6);
             this.groupBox3.Location = new System.Drawing.Point(295, 12);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(238, 214);
@@ -230,9 +240,50 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Incoming Data";
             // 
+            // LongitudeLabel
+            // 
+            this.LongitudeLabel.AutoSize = true;
+            this.LongitudeLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LongitudeLabel.Location = new System.Drawing.Point(87, 62);
+            this.LongitudeLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.LongitudeLabel.Name = "LongitudeLabel";
+            this.LongitudeLabel.Size = new System.Drawing.Size(26, 17);
+            this.LongitudeLabel.TabIndex = 9;
+            this.LongitudeLabel.Text = "__";
+            // 
+            // latitudeLabel
+            // 
+            this.latitudeLabel.AutoSize = true;
+            this.latitudeLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.latitudeLabel.Location = new System.Drawing.Point(87, 32);
+            this.latitudeLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.latitudeLabel.Name = "latitudeLabel";
+            this.latitudeLabel.Size = new System.Drawing.Size(26, 17);
+            this.latitudeLabel.TabIndex = 8;
+            this.latitudeLabel.Text = "__";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(6, 63);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(75, 17);
+            this.label7.TabIndex = 1;
+            this.label7.Text = "Longitude:";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(6, 33);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(63, 17);
+            this.label6.TabIndex = 0;
+            this.label6.Text = "Latitude:";
+            // 
             // groupBox4
             // 
-            this.groupBox4.Controls.Add(this.status2TextBox);
+            this.groupBox4.Controls.Add(this.longOORTextBox);
+            this.groupBox4.Controls.Add(this.latOORStatusBox);
             this.groupBox4.Controls.Add(this.status1TextBox);
             this.groupBox4.Location = new System.Drawing.Point(17, 233);
             this.groupBox4.Name = "groupBox4";
@@ -241,6 +292,13 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Current Status";
             // 
+            // latOORStatusBox
+            // 
+            this.latOORStatusBox.Location = new System.Drawing.Point(7, 50);
+            this.latOORStatusBox.Name = "latOORStatusBox";
+            this.latOORStatusBox.Size = new System.Drawing.Size(247, 22);
+            this.latOORStatusBox.TabIndex = 1;
+            // 
             // status1TextBox
             // 
             this.status1TextBox.Location = new System.Drawing.Point(7, 22);
@@ -248,24 +306,24 @@
             this.status1TextBox.Size = new System.Drawing.Size(503, 22);
             this.status1TextBox.TabIndex = 0;
             // 
-            // status2TextBox
-            // 
-            this.status2TextBox.Location = new System.Drawing.Point(7, 50);
-            this.status2TextBox.Name = "status2TextBox";
-            this.status2TextBox.Size = new System.Drawing.Size(503, 22);
-            this.status2TextBox.TabIndex = 1;
-            // 
             // refreshOverlay
             // 
             this.refreshOverlay.Enabled = true;
             this.refreshOverlay.Interval = 500;
             this.refreshOverlay.Tick += new System.EventHandler(this.refreshOverlay_Tick);
             // 
+            // longOORTextBox
+            // 
+            this.longOORTextBox.Location = new System.Drawing.Point(260, 50);
+            this.longOORTextBox.Name = "longOORTextBox";
+            this.longOORTextBox.Size = new System.Drawing.Size(250, 22);
+            this.longOORTextBox.TabIndex = 2;
+            // 
             // VideoOutputWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(963, 865);
+            this.ClientSize = new System.Drawing.Size(963, 916);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -276,7 +334,7 @@
             this.Controls.Add(this.label1);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "VideoOutputWindow";
-            this.Text = "VideoOutputWindow";
+            this.Text = "Video Capture Window";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.VideoOutputWindow_FormClosing);
             this.Load += new System.EventHandler(this.VideoOutputWindow_Load);
             ((System.ComponentModel.ISupportInitialize)(this.rawVideoFramesBox)).EndInit();
@@ -284,6 +342,8 @@
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.overlayVideoFramesBox)).EndInit();
             this.groupBox2.ResumeLayout(false);
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.ResumeLayout(false);
@@ -309,8 +369,13 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.GroupBox groupBox4;
-        private System.Windows.Forms.TextBox status2TextBox;
+        private System.Windows.Forms.TextBox latOORStatusBox;
         private System.Windows.Forms.TextBox status1TextBox;
         private System.Windows.Forms.Timer refreshOverlay;
+        private System.Windows.Forms.Label LongitudeLabel;
+        private System.Windows.Forms.Label latitudeLabel;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox longOORTextBox;
     }
 }

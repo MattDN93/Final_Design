@@ -21,7 +21,7 @@ namespace TEST_GPS_Parsing
         private Capture camStreamCapture = null;       //the OpenCV capture stream
 
         public int captureChoice;              //user's selection of which capture to use
-        public int drawMode;
+        public int drawMode_Overlay;
         public string fileName;
 
         protected bool capStartSuccess;           //whether the capture was opened OK
@@ -30,10 +30,18 @@ namespace TEST_GPS_Parsing
         protected bool valHasChanged;             //for updating the marker
         int button;                             //finds out if user has hit ESC
 
-        int vidPixelWidth;              //video dimensions
-        int vidPixelHeight;
+        protected int vidPixelWidth;              //video dimensions
+        protected int vidPixelHeight;
 
         private Overlay ol_mark;                //object for the overlay of points
+
+        protected string latitudeOutOfRangeOverlayMessage = "";      //strings for the overlay class to write into
+        protected string longitudeOutOfRangeOverlayMessage = "";     //if a variable is offscreen
+
+        //-------SIMULATION
+        public static int DRAW_MODE_RANDOM = 0;
+        public static int DRAW_MODE_ORDERED = 1;
+        public static int DRAW_MODE_TRACKING = 2;
 
         public VideoOutputWindow()
         {
@@ -62,10 +70,10 @@ namespace TEST_GPS_Parsing
                 default: videoModeLabel.Text = "None Set";
                     break;
             }
-            switch (drawMode)
+            switch (drawMode_Overlay)
             {
-                case 0: drawModeLabel.Text = "Random";break;
-                case 1: drawModeLabel.Text = "Ordered";break;
+                case 0: drawModeLabel.Text = "Random"; drawMode_Overlay = DRAW_MODE_RANDOM; break;
+                case 1: drawModeLabel.Text = "Ordered";drawMode_Overlay = DRAW_MODE_ORDERED; break;
                 default:
                     break;
             }
@@ -78,6 +86,9 @@ namespace TEST_GPS_Parsing
             {
                 ol_mark = new Overlay();                            //init the overlay object
                 ol_mark.setupOverlay();                             //setup the overlay
+                ol_mark.gridWidth = vidPixelWidth;
+                ol_mark.gridHeight = vidPixelHeight;
+
                 camStreamCapture.Start();                           //immediately start capturing
                 isStreaming = true;
                 startCaptureButton.Text = "Stop Capture";
@@ -125,13 +136,26 @@ namespace TEST_GPS_Parsing
             if (ol_mark != null)    
             {
                 //SIMULATION
-                ol_mark.generateSimPts();
+                if (isStreaming)
+                {
+                    ol_mark.generateSimPts();
+                }
+                
                 bool returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, true);
 
                 if (returnVal == true)              //if the marker routine returned OK, draw the result in the video window
                 {
                     overlayVideoFramesBox.Image = ol_mark.overlayGrid;
                 }
+
+                //Update the UI with information
+                latitudeLabel.Text = ol_mark.y.ToString();
+                LongitudeLabel.Text = ol_mark.x.ToString();
+                latOORStatusBox.Clear();
+                latOORStatusBox.Text = ol_mark.latitudeOutOfRangeOverlayMessage;    //pull the status from the checkBounds method
+                longOORTextBox.Clear();
+                longOORTextBox.Text = ol_mark.longitudeOutOfRangeOverlayMessage;    //pull status from the checkBounds methods
+
             }
 
         }

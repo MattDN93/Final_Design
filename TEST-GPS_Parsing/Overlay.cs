@@ -15,8 +15,8 @@ namespace TEST_GPS_Parsing
         //---------marker data vars----------
         int marker_x;                   //current centre x-position of overlay marker
         int marker_y;                   //current centre y-position of overlay marker
-        private int gridWidth;          //specifies the overlay extents
-        private int gridHeight;
+        public int gridWidth;          //specifies the overlay extents
+        public int gridHeight;
 
         //---------overlay structures--------
         public Mat overlayGrid;        //"background" grid overlay matrix
@@ -31,7 +31,6 @@ namespace TEST_GPS_Parsing
         //---------strings for OSD------------
         string curr_posInfoString;
         public string LimitExceededLong { get; private set; }
-        public string limitExceededLong { get; private set; }
         public string LimitExceededLat { get; private set; }
 
         //------------Simulation vars-------------------
@@ -49,12 +48,13 @@ namespace TEST_GPS_Parsing
             randPointGenerator = new Random();                  //[SIMULATION]seed random number
 
             //initialise the point element for the line-drawing
+
             prev_point.X = 0;
             prev_point.Y = 0;
             marker_x = 1;
             marker_y = 1;
 
-            if (randomSim == false)         //generate ordered points to sim
+            if (drawMode_Overlay == DRAW_MODE_ORDERED)         //generate ordered points to sim
             {
                 orderedPt.X = 50;
                 orderedPt.Y = 50;
@@ -74,11 +74,10 @@ namespace TEST_GPS_Parsing
                 //void putText(Mat& img, const string& text, Point org, int fontFace, double fontScale, new MCvScalar color, int thickness=1, int lineType=8, bool bottomLeftOrigin=false )
                 CvInvoke.PutText(overlayGrid, "Capture in progress. Press ESC to end.", new Point(10, 10), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(0, 0, 255), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
 
-                ///checkBounds(current_xval, current_yval, overlayGrid);       //make sure these points aren't out of bounds
+                checkBounds(current_xval, current_yval, overlayGrid);       //make sure these points aren't out of bounds
 
                 if (valHasChanged == true)
                 {
-
                     //set up the Point structs for markers
                     current_point.X = current_xval;
                     current_point.Y = current_yval;
@@ -152,13 +151,24 @@ namespace TEST_GPS_Parsing
             if (curr_x < 0 || curr_x > xLimit)
             {
                 LimitExceededLong = "Longitude offscreen: (" + curr_x + "," + curr_y + ")";
+                longitudeOutOfRangeOverlayMessage = LimitExceededLong;      //write this message to the UI class
                 CvInvoke.PutText(overlayGrid, LimitExceededLong, new Point(10, 20), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
+            }
+            else
+            {
+                longitudeOutOfRangeOverlayMessage = "";     //clear out of bounds message
             }
             if (curr_y < 0 || curr_y > yLimit)
             {
                 LimitExceededLat = "";
                 LimitExceededLat = "Latitude offscreen: (" + curr_x + "," + curr_y + ")";
+                latitudeOutOfRangeOverlayMessage = LimitExceededLat;        //write this message to the UI class
                 CvInvoke.PutText(overlayGrid, LimitExceededLat, new Point(10, 30), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
+                
+            }
+            else
+            {
+                latitudeOutOfRangeOverlayMessage = "";          //clear out of bounds message
             }
 
             //systematic check to determine where the offscreen point is so that we can draw an arrow to it
@@ -183,18 +193,24 @@ namespace TEST_GPS_Parsing
                     //draw line to corner of A
                     CvInvoke.ArrowedLine(overlayGrid, new Point(50, 50), new Point(0, 0), new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, 0, 0.1);
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(40, 40), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
+                    latitudeOutOfRangeOverlayMessage = "Latitude Out Of Range: " + curr_y.ToString();
+                    longitudeOutOfRangeOverlayMessage = "Longitude Out Of Range:" + curr_x.ToString();
                 }
                 else if (curr_y > 0 && curr_y < yLimit)
                 {
                     //draw line to the y-part of B
                     CvInvoke.ArrowedLine(overlayGrid, new Point(50, curr_y), new Point(0, curr_y), new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, 0, 0.1);
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(40, curr_y), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
+                    latitudeOutOfRangeOverlayMessage = "Latitude in range - Switch Cam Left";
+                    longitudeOutOfRangeOverlayMessage = "Longitude " + curr_x.ToString() + " OOR - Switch Cam Left";
                 }
                 else if (curr_y > yLimit)
                 {
                     //draw line to point of C
                     CvInvoke.ArrowedLine(overlayGrid, new Point(0, yLimit), new Point(50, yLimit - 50), new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, 0, 0.1);
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(40, yLimit - 40), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
+                    latitudeOutOfRangeOverlayMessage = "Latitude Out Of Range: " + curr_y.ToString();
+                    longitudeOutOfRangeOverlayMessage = "Longitude Out Of Range:" + curr_x.ToString();
                 }
 
             }
@@ -205,12 +221,16 @@ namespace TEST_GPS_Parsing
                     //draw D
                     CvInvoke.ArrowedLine(overlayGrid, new Point(curr_x, 50), new Point(curr_x, 0), new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, 0, 0.1);
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(curr_x, 40), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
+                    latitudeOutOfRangeOverlayMessage = "Latitude out of range";
+                    longitudeOutOfRangeOverlayMessage = "Longitude " + curr_y.ToString() + " in range above";
                 }
                 else if (curr_y > yLimit)
                 {
                     //draw E
                     CvInvoke.ArrowedLine(overlayGrid, new Point(curr_x, yLimit - 60), new Point(curr_x, yLimit), new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, 0, 0.1);
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(curr_x, yLimit - 40), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
+                    latitudeOutOfRangeOverlayMessage = "Latitude out of range";
+                    longitudeOutOfRangeOverlayMessage = "Longitude " + curr_y.ToString() + " in range below";
                 }
             }
             else if (curr_x > xLimit)                   //narrow to F,G,H
@@ -220,18 +240,30 @@ namespace TEST_GPS_Parsing
                     //draw F
                     CvInvoke.ArrowedLine(overlayGrid, new Point(xLimit - 80, 50), new Point(xLimit, 0), new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, 0, 0.1);
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(xLimit - 100, 50), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
+                    latitudeOutOfRangeOverlayMessage = "Latitude Out Of Range: " + curr_y.ToString();
+                    longitudeOutOfRangeOverlayMessage = "Longitude Out Of Range:" + curr_x.ToString();
                 }
                 else if (curr_y > 0 && curr_y < yLimit)
                 {
                     //draw G
                     CvInvoke.ArrowedLine(overlayGrid, new Point(xLimit - 80, curr_y), new Point(xLimit, curr_y), new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, 0, 0.1);
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(xLimit - 100, curr_y), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
+                    latitudeOutOfRangeOverlayMessage = "Latitude in range - Switch Cam Right";
+                    longitudeOutOfRangeOverlayMessage = "Longitude " + curr_x.ToString() + " OOR - Switch Cam Right";
                 }
                 else if (curr_y > yLimit)
                 {
                     //draw H
                     CvInvoke.ArrowedLine(overlayGrid, new Point(xLimit - 80, yLimit - 80), new Point(xLimit, yLimit), new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, 0, 0.1);
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(xLimit - 100, yLimit - 40), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
+                    latitudeOutOfRangeOverlayMessage = "Latitude Out Of Range: " + curr_y.ToString();
+                    longitudeOutOfRangeOverlayMessage = "Longitude Out Of Range:" + curr_x.ToString();
+                }
+                else
+                {
+                    //clear the out of range messages since nothing was out of range
+                    longitudeOutOfRangeOverlayMessage = "";
+                    latitudeOutOfRangeOverlayMessage = ""; 
                 }
 
             }
@@ -240,27 +272,29 @@ namespace TEST_GPS_Parsing
 
         public void generateSimPts()
         {
-                //-----------------SIMULATION OF POINTS-------------------------
-                if (randomSim == true)
+            //-----------------SIMULATION OF POINTS-------------------------
+                if (drawMode_Overlay == DRAW_MODE_RANDOM)
                 {
                     randCountTime = 0;
-                    x = randPointGenerator.Next(0, 610);
-                    y = randPointGenerator.Next(0, 450);
+                    x = randPointGenerator.Next(2000);
+                    y = randPointGenerator.Next(1000);
                     //drawMarker(x, y, webcamVid, true);                  //informs routine that previous marker value must be saved for new one
                 }
-                else if (randomSim == false)                    //generate "ordered" list of values that increase as we go along
+                else if (drawMode_Overlay == DRAW_MODE_ORDERED)                    //generate "ordered" list of values that increase as we go along
                 {
-                    x = randPointGenerator.Next(-10, 55);          //x = (-10 to +50)
-                    y = randPointGenerator.Next(-20, 40);          //y = (-20 to +40)
+                    x = randPointGenerator.Next(-5, 55);          //x = (-10 to +50)
+                    y = randPointGenerator.Next(-8, 40);          //y = (-20 to +40)
 
-                   orderedPt.X = orderedSimPts.ElementAt(orderedSimPts.Count()-1).X + x;       //add a random x increment to the vector
-                   orderedPt.Y = orderedSimPts.ElementAt(orderedSimPts.Count()-1).Y + y;       //add a random y increment to the vector
+                    orderedPt.X = orderedSimPts.ElementAt(orderedSimPts.Count() - 1).X + x;       //add a random x increment to the vector
+                    orderedPt.Y = orderedSimPts.ElementAt(orderedSimPts.Count() - 1).Y + y;       //add a random y increment to the vector
 
                     orderedSimPts.Add(orderedPt);             //push onto the new vector and display
                     //drawMarker(orderedPt.X, orderedPt.Y, webcamVid, true);                  //informs routine that previous marker value must be saved for new one
                 }
                 //------------------END POINT SIM-------------------------------
-            }
+          
+
+        }
 
 
 

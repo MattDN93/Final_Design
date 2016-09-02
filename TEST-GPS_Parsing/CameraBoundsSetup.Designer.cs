@@ -269,6 +269,7 @@
             this.drawModeChoiceComboBox.Size = new System.Drawing.Size(160, 24);
             this.drawModeChoiceComboBox.TabIndex = 1;
             this.drawModeChoiceComboBox.Text = "Choose draw mode...";
+            this.drawModeChoiceComboBox.SelectedIndexChanged += new System.EventHandler(this.drawModeChoiceComboBox_SelectedIndexChanged);
             // 
             // vidSourceChoiceComboBox
             // 
