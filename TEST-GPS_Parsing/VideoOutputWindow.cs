@@ -84,6 +84,7 @@ namespace TEST_GPS_Parsing
             {
                 case 0: drawModeLabel.Text = "Random"; drawMode_Overlay = DRAW_MODE_RANDOM; break;
                 case 1: drawModeLabel.Text = "Ordered";drawMode_Overlay = DRAW_MODE_ORDERED; break;
+                case 2: drawModeLabel.Text = "Tracking";drawMode_Overlay = DRAW_MODE_TRACKING;break;
                 default:
                     break;
             }
@@ -106,10 +107,18 @@ namespace TEST_GPS_Parsing
 
             if (camStreamCapture != null)
             {
+                //ASSIGN THESE LIMITS TO THE OVERLAY CLASS TO WORK WITH THEM THERE
                 ol_mark = new Overlay();                            //init the overlay object
                 ol_mark.setupOverlay();                             //setup the overlay
-                ol_mark.gridWidth = vidPixelWidth;
+                ol_mark.gridWidth = vidPixelWidth;                  //pass these variables to the other class
                 ol_mark.gridHeight = vidPixelHeight;
+                ol_mark.dx = delta_x;
+                ol_mark.dy = delta_y;
+                for (int i = 0; i <= 1; i++)
+                {
+                    ol_mark.ulBound[i] = upperLeftBound[i];
+                    ol_mark.olBound[i] = outerLimitBound[i];
+                }
 
                 camStreamCapture.Start();                           //immediately start capturing
                 isStreaming = true;

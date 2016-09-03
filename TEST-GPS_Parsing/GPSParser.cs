@@ -35,7 +35,8 @@ namespace TEST_GPS_Parsing
 
         GPSPacket gpsData = new GPSPacket();          //global GPS data packet for UI display                                                     
         Mapping mapData = new Mapping();              //set up a new mapping object for mapping function access
-        GMapOverlay locationMarkersOverlay;           //overlay for the location markers
+        GMapOverlay locationMarkersOverlay;           //overlay for the location markers on map
+        Overlay ovl = new Overlay();                                  //overlay object for the Video UI  
         string sentenceBuffer;                        //global buffer to read incoming data used for parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
@@ -48,6 +49,7 @@ namespace TEST_GPS_Parsing
             //set all the values in the UI to default
             //set up a new packet object with default constructor
             GPSPacket gpsData = new GPSPacket();
+            Overlay ovl = new Overlay();
 
             //Monitoring
             packetIDTextBox.Text = gpsData.ID.ToString();
@@ -215,7 +217,7 @@ namespace TEST_GPS_Parsing
 
         //-------------------------THREADING SECTION--------------------------------
         //-------------------------RESOURCE LOCK MANAGER----------------------------
-        //-------------------------RESOURCE LOCKING METHOD------------------------------
+        //-------------------------RESOURCE LOCKING METHOD (DEPRECATED)------------------------------
         public bool resourceUse(XmlDocument dbFile = null, XmlNode root = null, System.IO.StreamWriter dbOutputFile = null)
         {
             //0 indicates that the method is not in use.
@@ -276,9 +278,14 @@ namespace TEST_GPS_Parsing
                     gpsData = gpsData.parseSelection(sentenceBuffer, gpsData);  //perform the parsing operation
 
                     mapData.parseLatLong(gpsData.latitude, gpsData.longitude);  //pass the data to the mapping method
-                    
-                    //send the co-ordinates to the video output UI
-                    Overlay.
+
+                    //send the co-ordinates to the video output UI - keeps calling till its set
+                    bool haveSetCoords = false;
+                    while (!haveSetCoords)
+                    {
+                        haveSetCoords = ovl.setNewCoords(mapData.latitudeD, mapData.longitudeD);
+                    }
+
 
                     count++;
 

@@ -35,6 +35,10 @@ namespace TEST_GPS_Parsing
 
         double current_pointGPS_lat;        //the decimal floating pt rep for the GPS coords
         double current_pointGPS_long;
+        public double dx;                          //delta_X storage from VideoOutput class
+        public double dy;                          //delta_Y from Video output class
+        public double[] ulBound = new double[2];         //[0] = latitude top left; [1] = longitude top left
+        public double[] olBound = new double[2];        //[0] = longitude top right; [1] = latitude bottom left
 
         //---------overlay structures--------
         public Mat overlayGrid;        //"background" grid overlay matrix
@@ -89,13 +93,14 @@ namespace TEST_GPS_Parsing
             }
             else
             {
-
+                scaleGpsCoordsToDisplayBounds(lat_forDisplay, long_forDisplay);
+                return true;
             }
         }
 
         //This method takes the lat/long limits of the camera frame, calculates an offset based on
         //where the given GPS coords are, and then scales it to a pixel value to be overlayed onscreen
-        public void ScaleGpsCoordsToDisplayBounds(double incoming_lat,double incoming_long)
+        public void scaleGpsCoordsToDisplayBounds(double incoming_lat,double incoming_long)
         {
             /* DEFINITIONS:
              * UpperLeftBound[0] = latitude top left; [1] = longitude top left
@@ -113,12 +118,12 @@ namespace TEST_GPS_Parsing
                         
                         (r,s) is then scaled down to an integer
 
-                        here,   s = marker_y
-                                r = marker_x
+                        here,   s = marker_y or y
+                                r = marker_x or x
              */
-            
 
-            
+            y = Convert.ToInt32(Math.Round((Math.Abs(incoming_lat - ulBound[0]) / dy) * gridHeight));
+            x = Convert.ToInt32(Math.Round((((incoming_long - ulBound[1])/ dx) * gridWidth)));
         }
 
         public bool drawMarker(int current_xval, int current_yval, Mat webcamVidforOverlay, bool valHasChanged)
@@ -352,6 +357,10 @@ namespace TEST_GPS_Parsing
                     orderedSimPts.Add(orderedPt);             //push onto the new vector and display
                     //drawMarker(orderedPt.X, orderedPt.Y, webcamVid, true);                  //informs routine that previous marker value must be saved for new one
                 }
+            else if (drawMode_Overlay == DRAW_MODE_TRACKING)
+            {
+                return;
+            }
                 //------------------END POINT SIM-------------------------------
           
 

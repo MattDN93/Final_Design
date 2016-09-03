@@ -63,6 +63,7 @@ namespace TEST_GPS_Parsing
                 {
                     case 0: chooseVideoFileFialog.ShowDialog();break;                   //show user file dialog first
                     case 1: setVideoParameters(0, drawModeChoice);break;   //using webcam so no filename needed
+                    case 2: setVideoParameters(0, drawModeChoice); break;   //using webcam and GPS values
                     default:
                         break;
                 }
