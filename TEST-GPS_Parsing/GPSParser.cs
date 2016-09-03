@@ -276,6 +276,7 @@ namespace TEST_GPS_Parsing
                     gpsData = gpsData.parseSelection(sentenceBuffer, gpsData);  //perform the parsing operation
 
                     mapData.parseLatLong(gpsData.latitude, gpsData.longitude);  //pass the data to the mapping method
+                    //send the co-ordinates to 
 
                     count++;
 

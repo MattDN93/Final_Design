@@ -31,12 +31,12 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CameraBoundsSetup));
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.longUpperLeft = new System.Windows.Forms.TextBox();
-            this.longUpperRight = new System.Windows.Forms.TextBox();
-            this.latUpperLeft = new System.Windows.Forms.TextBox();
-            this.latBottomLeft = new System.Windows.Forms.TextBox();
-            this.latUpperRight = new System.Windows.Forms.TextBox();
-            this.longBottomLeft = new System.Windows.Forms.TextBox();
+            this.longUpperLeftTextbox = new System.Windows.Forms.TextBox();
+            this.longUpperRightTextbox = new System.Windows.Forms.TextBox();
+            this.latUpperLeftTextbox = new System.Windows.Forms.TextBox();
+            this.latBottomLeftTextbox = new System.Windows.Forms.TextBox();
+            this.latUpperRightTextbox = new System.Windows.Forms.TextBox();
+            this.longBottomLeftTextbox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -70,57 +70,57 @@
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
-            // longUpperLeft
+            // longUpperLeftTextbox
             // 
-            this.longUpperLeft.BackColor = System.Drawing.Color.Green;
-            this.longUpperLeft.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.longUpperLeft.Location = new System.Drawing.Point(160, 124);
-            this.longUpperLeft.Name = "longUpperLeft";
-            this.longUpperLeft.Size = new System.Drawing.Size(127, 22);
-            this.longUpperLeft.TabIndex = 1;
+            this.longUpperLeftTextbox.BackColor = System.Drawing.Color.Green;
+            this.longUpperLeftTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.longUpperLeftTextbox.Location = new System.Drawing.Point(160, 124);
+            this.longUpperLeftTextbox.Name = "longUpperLeftTextbox";
+            this.longUpperLeftTextbox.Size = new System.Drawing.Size(127, 22);
+            this.longUpperLeftTextbox.TabIndex = 1;
             // 
-            // longUpperRight
+            // longUpperRightTextbox
             // 
-            this.longUpperRight.BackColor = System.Drawing.Color.Green;
-            this.longUpperRight.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.longUpperRight.Location = new System.Drawing.Point(898, 117);
-            this.longUpperRight.Name = "longUpperRight";
-            this.longUpperRight.Size = new System.Drawing.Size(127, 22);
-            this.longUpperRight.TabIndex = 2;
+            this.longUpperRightTextbox.BackColor = System.Drawing.Color.Green;
+            this.longUpperRightTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.longUpperRightTextbox.Location = new System.Drawing.Point(898, 117);
+            this.longUpperRightTextbox.Name = "longUpperRightTextbox";
+            this.longUpperRightTextbox.Size = new System.Drawing.Size(127, 22);
+            this.longUpperRightTextbox.TabIndex = 2;
             // 
-            // latUpperLeft
+            // latUpperLeftTextbox
             // 
-            this.latUpperLeft.BackColor = System.Drawing.Color.Blue;
-            this.latUpperLeft.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.latUpperLeft.Location = new System.Drawing.Point(160, 158);
-            this.latUpperLeft.Name = "latUpperLeft";
-            this.latUpperLeft.Size = new System.Drawing.Size(127, 22);
-            this.latUpperLeft.TabIndex = 3;
+            this.latUpperLeftTextbox.BackColor = System.Drawing.Color.Blue;
+            this.latUpperLeftTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.latUpperLeftTextbox.Location = new System.Drawing.Point(160, 158);
+            this.latUpperLeftTextbox.Name = "latUpperLeftTextbox";
+            this.latUpperLeftTextbox.Size = new System.Drawing.Size(127, 22);
+            this.latUpperLeftTextbox.TabIndex = 3;
             // 
-            // latBottomLeft
+            // latBottomLeftTextbox
             // 
-            this.latBottomLeft.BackColor = System.Drawing.Color.Blue;
-            this.latBottomLeft.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.latBottomLeft.Location = new System.Drawing.Point(160, 540);
-            this.latBottomLeft.Name = "latBottomLeft";
-            this.latBottomLeft.Size = new System.Drawing.Size(127, 22);
-            this.latBottomLeft.TabIndex = 4;
+            this.latBottomLeftTextbox.BackColor = System.Drawing.Color.Blue;
+            this.latBottomLeftTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.latBottomLeftTextbox.Location = new System.Drawing.Point(160, 540);
+            this.latBottomLeftTextbox.Name = "latBottomLeftTextbox";
+            this.latBottomLeftTextbox.Size = new System.Drawing.Size(127, 22);
+            this.latBottomLeftTextbox.TabIndex = 4;
             // 
-            // latUpperRight
+            // latUpperRightTextbox
             // 
-            this.latUpperRight.Location = new System.Drawing.Point(900, 150);
-            this.latUpperRight.Name = "latUpperRight";
-            this.latUpperRight.ReadOnly = true;
-            this.latUpperRight.Size = new System.Drawing.Size(127, 22);
-            this.latUpperRight.TabIndex = 5;
+            this.latUpperRightTextbox.Location = new System.Drawing.Point(900, 150);
+            this.latUpperRightTextbox.Name = "latUpperRightTextbox";
+            this.latUpperRightTextbox.ReadOnly = true;
+            this.latUpperRightTextbox.Size = new System.Drawing.Size(127, 22);
+            this.latUpperRightTextbox.TabIndex = 5;
             // 
-            // longBottomLeft
+            // longBottomLeftTextbox
             // 
-            this.longBottomLeft.Location = new System.Drawing.Point(160, 504);
-            this.longBottomLeft.Name = "longBottomLeft";
-            this.longBottomLeft.ReadOnly = true;
-            this.longBottomLeft.Size = new System.Drawing.Size(127, 22);
-            this.longBottomLeft.TabIndex = 6;
+            this.longBottomLeftTextbox.Location = new System.Drawing.Point(160, 504);
+            this.longBottomLeftTextbox.Name = "longBottomLeftTextbox";
+            this.longBottomLeftTextbox.ReadOnly = true;
+            this.longBottomLeftTextbox.Size = new System.Drawing.Size(127, 22);
+            this.longBottomLeftTextbox.TabIndex = 6;
             // 
             // label1
             // 
@@ -301,12 +301,12 @@
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.longBottomLeft);
-            this.Controls.Add(this.latUpperRight);
-            this.Controls.Add(this.latBottomLeft);
-            this.Controls.Add(this.latUpperLeft);
-            this.Controls.Add(this.longUpperRight);
-            this.Controls.Add(this.longUpperLeft);
+            this.Controls.Add(this.longBottomLeftTextbox);
+            this.Controls.Add(this.latUpperRightTextbox);
+            this.Controls.Add(this.latBottomLeftTextbox);
+            this.Controls.Add(this.latUpperLeftTextbox);
+            this.Controls.Add(this.longUpperRightTextbox);
+            this.Controls.Add(this.longUpperLeftTextbox);
             this.Controls.Add(this.pictureBox1);
             this.Name = "CameraBoundsSetup";
             this.Text = "Select Extent of Camera View";
@@ -324,12 +324,12 @@
         #endregion
 
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.TextBox longUpperLeft;
-        private System.Windows.Forms.TextBox longUpperRight;
-        private System.Windows.Forms.TextBox latUpperLeft;
-        private System.Windows.Forms.TextBox latBottomLeft;
-        private System.Windows.Forms.TextBox latUpperRight;
-        private System.Windows.Forms.TextBox longBottomLeft;
+        private System.Windows.Forms.TextBox longUpperLeftTextbox;
+        private System.Windows.Forms.TextBox longUpperRightTextbox;
+        private System.Windows.Forms.TextBox latUpperLeftTextbox;
+        private System.Windows.Forms.TextBox latBottomLeftTextbox;
+        private System.Windows.Forms.TextBox latUpperRightTextbox;
+        private System.Windows.Forms.TextBox longBottomLeftTextbox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.GroupBox groupBox1;

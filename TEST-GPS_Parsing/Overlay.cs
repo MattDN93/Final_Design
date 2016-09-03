@@ -110,7 +110,9 @@ namespace TEST_GPS_Parsing
                     //build a string with the current co-ords
 
                     curr_posInfoString = "";        //clear previous string contents
-                    curr_posInfoString = "Pt:" + i + "(" + points[i].X + "," + points[i].Y + ")";
+
+                    //IMPORTANT: Co-ords are calculated on x and y offset in (x,y) but DISPLAYED as (lat(y),long(x))
+                    curr_posInfoString = "Pt:" + i + "(" + points[i].Y + "," + points[i].X + ")";
                     CvInvoke.PutText(overlayGrid, curr_posInfoString, points[i], Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(0, 0, 255), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
 
                     //----------------Draw joining line-----------

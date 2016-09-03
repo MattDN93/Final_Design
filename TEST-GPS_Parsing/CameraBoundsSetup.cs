@@ -15,8 +15,8 @@ namespace TEST_GPS_Parsing
     {
         //CameraSettings camParameter = new CameraSettings();         //instantiate new camParameter object
         //video GPS coordinate extents
-        double[] upperLeftCoords = new double[2];       //[0] = latitude top left; [1] = longitude top left
-        double[] outerLimitCoords = new double[2];      //[0] = longitude top right; [1] = latitude bottom left
+        private double[] upperLeftCoords = new double[2];       //[0] = latitude top left; [1] = longitude top left
+        private double[] outerLimitCoords = new double[2];      //[0] = longitude top right; [1] = latitude bottom left
         int drawModeChoice = -1;
 
         //video parameters
@@ -91,12 +91,12 @@ namespace TEST_GPS_Parsing
 
         private void clearFieldsButton_Click(object sender, EventArgs e)
         {
-            latBottomLeft.Clear();
-            latUpperLeft.Clear();
-            latUpperRight.Clear();
-            longBottomLeft.Clear();
-            longUpperLeft.Clear();
-            longUpperRight.Clear();
+            latBottomLeftTextbox.Clear();
+            latUpperLeftTextbox.Clear();
+            latUpperRightTextbox.Clear();
+            longBottomLeftTextbox.Clear();
+            longUpperLeftTextbox.Clear();
+            longUpperRightTextbox.Clear();
 
         }
 
@@ -116,25 +116,25 @@ namespace TEST_GPS_Parsing
         private void checkFieldsTimer_Tick(object sender, EventArgs e)
         {
             
-            if (longUpperLeft.Text == "" || latUpperLeft.Text == "" || latBottomLeft.Text == "" || longUpperRight.Text == "" )
+            if (longUpperLeftTextbox.Text == "" || latUpperLeftTextbox.Text == "" || latBottomLeftTextbox.Text == "" || longUpperRightTextbox.Text == "" )
             {
                 setExtentsButton.Enabled = false;      //keep disabled until all fields are filled so they can't start prematurely
                 camViewStatusTextBox.Clear();           //clears from last tick
                 camViewStatusTextBox.BackColor = Color.Orange;
                 camViewStatusTextBox.AppendText("Fields empty:");   //append which fields are still empty until they're fixed
-                if (longUpperLeft.Text == "")
+                if (longUpperLeftTextbox.Text == "")
                 {
                     camViewStatusTextBox.AppendText(" Long. Step 1;");
                 }
-                if (latUpperLeft.Text == "")
+                if (latUpperLeftTextbox.Text == "")
                 {
                     camViewStatusTextBox.AppendText(" Lat. Step 1;");
                 }
-                if (longUpperRight.Text == "")
+                if (longUpperRightTextbox.Text == "")
                 {
                     camViewStatusTextBox.AppendText(" Long. Step 2;");
                 }
-                if (latBottomLeft.Text == "")
+                if (latBottomLeftTextbox.Text == "")
                 {
                     camViewStatusTextBox.AppendText(" Lat. Step 3;");
                 }
@@ -147,7 +147,7 @@ namespace TEST_GPS_Parsing
 
                 //save all values to vars - if this process fails, inform user and don't let them start
                 bool setBoundsResult = false;
-                setBoundsResult = setCameraCoordBounds(latUpperLeft.Text, longUpperLeft.Text, longUpperRight.Text, latBottomLeft.Text);
+                setBoundsResult = setCameraCoordBounds(latUpperLeftTextbox.Text, longUpperLeftTextbox.Text, longUpperRightTextbox.Text, latBottomLeftTextbox.Text);
                 if (setBoundsResult == true)
                 {
                     setExtentsButton.Enabled = true;        //keep start button enabled if fields contain something
@@ -163,8 +163,8 @@ namespace TEST_GPS_Parsing
 
             }
 
-            latUpperRight.Text = latUpperLeft.Text;
-            longBottomLeft.Text = longUpperLeft.Text;
+            latUpperRightTextbox.Text = latUpperLeftTextbox.Text;
+            longBottomLeftTextbox.Text = longUpperLeftTextbox.Text;
         }
 
 
@@ -235,6 +235,13 @@ namespace TEST_GPS_Parsing
             vo.fileName = filenameToOpen;       //set the filename to open on the other form
             vo.drawMode_Overlay = drawMode;             //set the draw mode on the other form
             vo.captureChoice = videoSource;     //set the video source on the other form
+            
+            //pass parameters of the outer limits to the other UI
+            vo.upperLeftBound[0] = upperLeftCoords[0];
+            vo.upperLeftBound[1] = upperLeftCoords[1];
+            vo.outerLimitBound[0] = outerLimitCoords[0];
+            vo.outerLimitBound[1] = outerLimitCoords[1];
+
             vo.TopMost = true;
             vo.Show();
             

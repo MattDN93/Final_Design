@@ -16,27 +16,36 @@ namespace TEST_GPS_Parsing
 {
     public partial class VideoOutputWindow : Form
     {
+        //-----------------Matrix and Capture Objects----------
         public Mat webcamVid;                  //create a Mat object to manipulate
         public Mat overlayVid;
         private Capture camStreamCapture = null;       //the OpenCV capture stream
+        private Overlay ol_mark;                //object for the overlay of points
 
+        protected string latitudeOutOfRangeOverlayMessage = "";      //strings for the overlay class to write into
+        protected string longitudeOutOfRangeOverlayMessage = "";     //if a variable is offscreen
+
+        //-----------------User options and parameters---------
         public int captureChoice;              //user's selection of which capture to use
         public int drawMode_Overlay;
         public string fileName;
 
+        //-----------------Status flags and parameters----------
         protected bool capStartSuccess;           //whether the capture was opened OK
         protected bool isStreaming;               //whether stream is in progress
         protected bool randomSim;                 //using random simulation mode or ordered
         protected bool valHasChanged;             //for updating the marker
         int button;                             //finds out if user has hit ESC
 
+        //-----------------Settings parameters------------------
         protected int vidPixelWidth;              //video dimensions
         protected int vidPixelHeight;
 
-        private Overlay ol_mark;                //object for the overlay of points
+        //-----------------Camera GPS boundary variables--------
+               
+        public double[] upperLeftBound = new double[2];       //[0] = latitude top left; [1] = longitude top left
+        public double[] outerLimitBound = new double[2];      //[0] = longitude top right; [1] = latitude bottom left
 
-        protected string latitudeOutOfRangeOverlayMessage = "";      //strings for the overlay class to write into
-        protected string longitudeOutOfRangeOverlayMessage = "";     //if a variable is offscreen
 
         //-------SIMULATION
         public static int DRAW_MODE_RANDOM = 0;
@@ -81,6 +90,14 @@ namespace TEST_GPS_Parsing
             getVideoInfo();                                         //call video info function
             frameHeightLabel.Text = vidPixelHeight.ToString();      //get the video parameters
             frameWidthLabel.Text = vidPixelWidth.ToString();
+
+            //display the limits set on previous window
+            //[0] = latitude top left; [1] = longitude top left
+            //[0] = longitude top right; [1] = latitude bottom left
+            latTopLeftLabel.Text = upperLeftBound[0].ToString();
+            longTopLeftLabel.Text = upperLeftBound[1].ToString();
+            longTopRightLabel.Text = outerLimitBound[0].ToString();
+            latBotLeftLabel.Text = outerLimitBound[1].ToString();
 
             if (camStreamCapture != null)
             {
