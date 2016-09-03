@@ -43,9 +43,10 @@ namespace TEST_GPS_Parsing
 
         //-----------------Camera GPS boundary variables--------
                
-        public double[] upperLeftBound = new double[2];       //[0] = latitude top left; [1] = longitude top left
-        public double[] outerLimitBound = new double[2];      //[0] = longitude top right; [1] = latitude bottom left
-
+        public double[] upperLeftBound = new double[2];         //[0] = latitude top left; [1] = longitude top left
+        public double[] outerLimitBound = new double[2];        //[0] = longitude top right; [1] = latitude bottom left
+        public double delta_y;                                  //range of latitude in camera frame
+        public double delta_x;                                  //range of longitude in camera frame
 
         //-------SIMULATION
         public static int DRAW_MODE_RANDOM = 0;
@@ -92,12 +93,16 @@ namespace TEST_GPS_Parsing
             frameWidthLabel.Text = vidPixelWidth.ToString();
 
             //display the limits set on previous window
-            //[0] = latitude top left; [1] = longitude top left
-            //[0] = longitude top right; [1] = latitude bottom left
+            //upperLeftBound[0] = latitude top left; [1] = longitude top left
+            //OuterLimitBound[0] = longitude top right; [1] = latitude bottom left
             latTopLeftLabel.Text = upperLeftBound[0].ToString();
             longTopLeftLabel.Text = upperLeftBound[1].ToString();
             longTopRightLabel.Text = outerLimitBound[0].ToString();
             latBotLeftLabel.Text = outerLimitBound[1].ToString();
+
+            //calculate the camera frame coordinate range - assume African co-ords; latitude always <0 longitude always >0
+            delta_y = Math.Abs(outerLimitBound[1] - upperLeftBound[0]);
+            delta_x = outerLimitBound[0] - upperLeftBound[1];
 
             if (camStreamCapture != null)
             {
