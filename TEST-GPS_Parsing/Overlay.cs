@@ -33,8 +33,8 @@ namespace TEST_GPS_Parsing
         //Performing the bound calculations requires doubles, which are later rounded to 
         //ints for display onscreen.
 
-        double current_pointGPS_lat;        //the decimal floating pt rep for the GPS coords
-        double current_pointGPS_long;
+        public double current_pointGPS_lat;        //the decimal floating pt rep for the GPS coords
+        public double current_pointGPS_long;
         public double dx;                          //delta_X storage from VideoOutput class
         public double dy;                          //delta_Y from Video output class
         public double[] ulBound = new double[2];         //[0] = latitude top left; [1] = longitude top left
@@ -56,7 +56,7 @@ namespace TEST_GPS_Parsing
         Random randPointGenerator;
 
         //------------Usage flags------------------------
-        bool usingCoords;
+        public bool usingCoords;
 
         public void setupOverlay()             //called once to initialize the overlay of points
         {
@@ -93,6 +93,9 @@ namespace TEST_GPS_Parsing
             }
             else
             {
+                current_pointGPS_lat = lat_forDisplay;
+                current_pointGPS_long = long_forDisplay;
+
                 scaleGpsCoordsToDisplayBounds(lat_forDisplay, long_forDisplay);
                 return true;
             }

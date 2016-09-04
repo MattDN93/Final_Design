@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Emgu.CV;
@@ -47,6 +48,10 @@ namespace TEST_GPS_Parsing
         public double[] outerLimitBound = new double[2];        //[0] = longitude top right; [1] = latitude bottom left
         public double delta_y;                                  //range of latitude in camera frame
         public double delta_x;                                  //range of longitude in camera frame
+
+        //-----------------Delegate for thread safe controls----
+        public delegate void SetTextCallback(string message);   //to set the Video UI elements with thread safe operations
+        private int type = -1;                                  //to call teh correct invoke to put the data on the UI in a thread safe way
 
         //-------SIMULATION
         public static int DRAW_MODE_RANDOM = 0;
@@ -164,29 +169,101 @@ namespace TEST_GPS_Parsing
         private void refreshOverlay_Tick(object sender, EventArgs e)
         {
 
-            if (ol_mark != null)    
+            overlayTick();      //call the overlay update without passing GPS coords
+
+        }
+
+        public void overlayTick(double incoming_lat= 0.0, double incoming_long = 0.0)
+        {
+            if (ol_mark != null)
             {
-                //SIMULATION
-                if (isStreaming)
+                //SIMULATION - enable to generate random points
+                /*if (isStreaming)
                 {
                     ol_mark.generateSimPts();
-                }
-                
-                bool returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, true);
+                }*/
 
-                if (returnVal == true)              //if the marker routine returned OK, draw the result in the video window
+                if (incoming_lat != 0.0 && incoming_long != 0.0)    //this means that this method was called from the parser not by the timer
                 {
-                    overlayVideoFramesBox.Image = ol_mark.overlayGrid;
+                    bool varsInUse = false;
+                    while (!varsInUse)
+                    {
+                        varsInUse = ol_mark.setNewCoords(incoming_lat, incoming_long);      //set coords if not being read from/written to
+                    }
+                    bool returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, true);
+                    if (returnVal == true)              //if the marker routine returned OK, draw the result in the video window
+                    {
+                        overlayVideoFramesBox.Image = ol_mark.overlayGrid;
+                    }
+                }
+                else
+                {   //this is just a normaltimer tick and it's likely values haven't  changed. Thus just redraw the overlay without recalc
+                    bool returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, false);
+                    if (returnVal == true)              //if the marker routine returned OK, draw the result in the video window
+                    {
+                        overlayVideoFramesBox.Image = ol_mark.overlayGrid;
+                    }
                 }
 
-                //Update the UI with information
-                latitudeLabel.Text = ol_mark.y.ToString();
-                LongitudeLabel.Text = ol_mark.x.ToString();
-                latOORStatusBox.Clear();
-                latOORStatusBox.Text = ol_mark.latitudeOutOfRangeOverlayMessage;    //pull the status from the checkBounds method
-                longOORTextBox.Clear();
-                longOORTextBox.Text = ol_mark.longitudeOutOfRangeOverlayMessage;    //pull status from the checkBounds methods
+                ol_mark.usingCoords = true;             //prevents the double lat/long variables from being modified
+                type = 0;
+                double realLat = ol_mark.current_pointGPS_lat;  //gets the actual lat/long as opposed to the scaled versions of pixels for screen
+                setTextonVideoUI(realLat.ToString()); //we need to do this to prevent the marshall by ref warning
 
+                type = 1;
+                double realLong = ol_mark.current_pointGPS_long;
+                setTextonVideoUI(realLong.ToString()); //we need to do this to prevent the marshall by ref warning
+
+                type = 2;
+                setTextonVideoUI(ol_mark.latitudeOutOfRangeOverlayMessage);
+
+                type = 3;
+                setTextonVideoUI(ol_mark.longitudeOutOfRangeOverlayMessage);
+                ol_mark.usingCoords = false;            //unlocks double lat/long vars
+                type = -1;
+            }
+        }
+
+        private void setTextonVideoUI(string text)
+        {
+            //Update the UI with information -check threadsafe since the other thread might be using it
+            // If the calling thread is different from the thread that
+            // created the TextBox control, this method creates a
+            // SetTextCallback and calls itself asynchronously using the
+            // Invoke method.
+            switch (type)
+            {
+                case 0:
+                    if (this.latitudeLabel.InvokeRequired)
+                    {
+                        SetTextCallback l = new SetTextCallback(setTextonVideoUI);
+                        Invoke(l, new object[] { text });
+
+                    }
+                    else { this.latitudeLabel.Text = text; }; break;
+                case 1:
+                    if (this.LongitudeLabel.InvokeRequired)
+                    {
+                        SetTextCallback l = new SetTextCallback(setTextonVideoUI);
+                        Invoke(l, new object[] { text });
+                    }
+                    else { this.LongitudeLabel.Text = text; }; break;
+                case 2:
+                    if (this.latOORStatusBox.InvokeRequired)
+                    {
+                        SetTextCallback l = new SetTextCallback(setTextonVideoUI);
+                        Invoke(l, new object[] { text });
+                    }
+                    else { this.latOORStatusBox.Text = text; }; break;
+                case 3:
+                    if (this.longOORTextBox.InvokeRequired)
+                    {
+                        SetTextCallback l = new SetTextCallback(setTextonVideoUI);
+                        Invoke(l, new object[] { text });
+                    }
+                    else { this.longOORTextBox.Text = text; }; break;
+                default: Console.Write("Couldn't update one or more UI elements with cross-thread call");
+                    break;
             }
 
         }
@@ -227,6 +304,7 @@ namespace TEST_GPS_Parsing
             {
                 camStreamCapture.Dispose();
                 rawVideoFramesBox.Dispose();
+                this.Dispose();
             }
                 
         }

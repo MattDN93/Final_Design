@@ -36,7 +36,7 @@ namespace TEST_GPS_Parsing
         GPSPacket gpsData = new GPSPacket();          //global GPS data packet for UI display                                                     
         Mapping mapData = new Mapping();              //set up a new mapping object for mapping function access
         GMapOverlay locationMarkersOverlay;           //overlay for the location markers on map
-        Overlay ovl = new Overlay();                                  //overlay object for the Video UI  
+        VideoOutputWindow vo = new VideoOutputWindow();
         string sentenceBuffer;                        //global buffer to read incoming data used for parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
@@ -49,7 +49,6 @@ namespace TEST_GPS_Parsing
             //set all the values in the UI to default
             //set up a new packet object with default constructor
             GPSPacket gpsData = new GPSPacket();
-            Overlay ovl = new Overlay();
 
             //Monitoring
             packetIDTextBox.Text = gpsData.ID.ToString();
@@ -279,14 +278,6 @@ namespace TEST_GPS_Parsing
 
                     mapData.parseLatLong(gpsData.latitude, gpsData.longitude);  //pass the data to the mapping method
 
-                    //send the co-ordinates to the video output UI - keeps calling till its set
-                    bool haveSetCoords = false;
-                    while (!haveSetCoords)
-                    {
-                        haveSetCoords = ovl.setNewCoords(mapData.latitudeD, mapData.longitudeD);
-                    }
-
-
                     count++;
 
                     //this allows for a thread-safe variable access
@@ -294,7 +285,13 @@ namespace TEST_GPS_Parsing
                     {
                         gpsData.deltaCount++;
                         //locationMarkersOverlay = mapData.plotOnMap(locationMarkersOverlay);          //passes the initialised overlay to be populated
-                                                                            
+                        //send the co-ordinates to the video output UI - keeps calling till its set
+                        if (parseIsRunning && vo != null)
+                        {
+                            vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
+                        }
+
+
                         //unlock the data to write to the DB 
                         _waitHandleParser.Set();
                         Console.WriteLine("Parser released lock");
@@ -570,8 +567,13 @@ namespace TEST_GPS_Parsing
         //------------------Open the Video Streaming Component------------------
         private void openPortButton_Click(object sender, EventArgs e)
         {
-            CameraBoundsSetup cmBound = new CameraBoundsSetup();
-            ///VideoOutputWindow voWindow = new VideoOutputWindow();
+            if (vo != null)         //if the object was created before, destroy and recreate it
+            {
+                VideoOutputWindow vo = new VideoOutputWindow();
+            }
+            CameraBoundsSetup cmBound = new CameraBoundsSetup(vo);
+
+
             updateUITimer.Stop();
             status2TextBox.AppendText("Camera Bound setup window open; waiting....");
             DialogResult cmResult = cmBound.ShowDialog();

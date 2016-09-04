@@ -26,16 +26,17 @@ namespace TEST_GPS_Parsing
         public int drawMode;
         public string filenameToOpen;
 
+        VideoOutputWindow vo;
+
         //-------SIMULATION
         public static int DRAW_MODE_RANDOM = 0;
         public static int DRAW_MODE_ORDERED = 1;
         public static int DRAW_MODE_TRACKING = 2;
 
-        public CameraBoundsSetup()
+        public CameraBoundsSetup(VideoOutputWindow incoming_vo)
         {
-
             InitializeComponent();
-
+            vo = incoming_vo;           //create a VO object for the parser to use
         }
 
         private void setExtentsButton_Click(object sender, EventArgs e)
@@ -79,7 +80,7 @@ namespace TEST_GPS_Parsing
                 }
 
 
-                this.Close();           //close the form and open the next one
+                this.Hide();           //close the form and open the next one
             }
         }
 
@@ -232,7 +233,6 @@ namespace TEST_GPS_Parsing
 
         public void startNewVideoConsole()
         {
-            VideoOutputWindow vo = new VideoOutputWindow();
             vo.fileName = filenameToOpen;       //set the filename to open on the other form
             vo.drawMode_Overlay = drawMode;             //set the draw mode on the other form
             vo.captureChoice = videoSource;     //set the video source on the other form
