@@ -36,7 +36,6 @@ namespace TEST_GPS_Parsing
         protected bool isStreaming;               //whether stream is in progress
         protected bool randomSim;                 //using random simulation mode or ordered
         protected bool valHasChanged;             //for updating the marker
-        int button;                             //finds out if user has hit ESC
 
         //-----------------Settings parameters------------------
         protected int vidPixelWidth;              //video dimensions

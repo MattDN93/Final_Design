@@ -135,12 +135,12 @@ namespace TEST_GPS_Parsing
                 return;
 
             }
-            catch (ArgumentOutOfRangeException a)
+            catch (ArgumentOutOfRangeException)
             {
                 Console.WriteLine("Co-ordinate values were null or not defined properly");
                 return;
             }
-            catch (System.FormatException f)
+            catch (System.FormatException)
             {
                 Console.WriteLine("Co-ordinates are in an incorrect format (or blank)");
             }

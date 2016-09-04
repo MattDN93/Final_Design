@@ -41,7 +41,7 @@ namespace TEST_GPS_Parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
         int duplicatePacketCounter = 1;                     //used to ensure duplicate packets aren't saved into the DB
-        private XmlWriter fileStream;
+        //private XmlWriter fileStream;
 
         public GPSParser()
         {
@@ -96,7 +96,7 @@ namespace TEST_GPS_Parsing
                 locationMarkersOverlay = new GMapOverlay("locationMarker");
 
             }
-            catch (SystemException e)
+            catch (SystemException)
             {
                 return false;
 
@@ -351,7 +351,6 @@ namespace TEST_GPS_Parsing
                 myXmlDb.createXmlDbFile();  //calls the method to set the DB up
 
                 int packetCount = 0;
-                bool dataUnlocked = false;
                 //now enter the continuous logging loop for as long as the incoming data parser thread is running
                 while (parseIsRunning)      //stay in this loop as long as the parser is active
                 {
