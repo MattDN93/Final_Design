@@ -37,6 +37,7 @@ namespace TEST_GPS_Parsing
         Mapping mapData = new Mapping();              //set up a new mapping object for mapping function access
         GMapOverlay locationMarkersOverlay;           //overlay for the location markers on map
         VideoOutputWindow vo = new VideoOutputWindow();
+        VideoOutputWindow vo_renew;
         string sentenceBuffer;                        //global buffer to read incoming data used for parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
@@ -216,37 +217,6 @@ namespace TEST_GPS_Parsing
 
         //-------------------------THREADING SECTION--------------------------------
         //-------------------------RESOURCE LOCK MANAGER----------------------------
-        //-------------------------RESOURCE LOCKING METHOD (DEPRECATED)------------------------------
-        public bool resourceUse(XmlDocument dbFile = null, XmlNode root = null, System.IO.StreamWriter dbOutputFile = null)
-        {
-            //0 indicates that the method is not in use.
-            if (0 == Interlocked.Exchange(ref resourceInUse, 1))
-            {
-                Console.WriteLine("{0} acquired the lock", Thread.CurrentThread.Name);
-
-                //Code to access a resource that is not thread safe would go here.
-                if (Thread.CurrentThread.Name == "GPS Logging Thread")
-                {
-                    gpsData = gpsData.parseSelection(sentenceBuffer, gpsData);
-                }
-                else if (Thread.CurrentThread.Name == "Database Write Thread")
-                {
-                    //writeToDatabase(dbFile,gpsData,root,dbOutputFile);        //write gpsData to the XML database
-                }
-               
-                Console.WriteLine("{0} exiting lock", Thread.CurrentThread.Name);
-
-                //Release the lock
-                Interlocked.Exchange(ref resourceInUse, 0);
-                return true;
-            }
-            else
-            {
-                Console.WriteLine("   {0} was denied the lock", Thread.CurrentThread.Name);
-                return false;
-            }
-
-        }
 
 
         //-------------------------THREAD 1: FOR BACKGROUND WORK--------------------
@@ -285,10 +255,20 @@ namespace TEST_GPS_Parsing
                     {
                         gpsData.deltaCount++;
                         //locationMarkersOverlay = mapData.plotOnMap(locationMarkersOverlay);          //passes the initialised overlay to be populated
+                        
                         //send the co-ordinates to the video output UI - keeps calling till its set
-                        if (parseIsRunning && vo != null)
+                        //pass the new instance of the overlay if it's been disposed before
+                        if (parseIsRunning)
                         {
-                            vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
+                            if (!vo.IsDisposed)
+                            {
+                                vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
+                            }
+                            else if (vo_renew !=null)
+                            {
+                                vo_renew.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
+                            }
+                            
                         }
 
 
@@ -566,17 +546,27 @@ namespace TEST_GPS_Parsing
         //------------------Open the Video Streaming Component------------------
         private void openPortButton_Click(object sender, EventArgs e)
         {
-            if (vo != null)         //if the object was created before, destroy and recreate it
+            if (vo.IsDisposed)         //if the object was created before, destroy and recreate it
             {
-                VideoOutputWindow vo = new VideoOutputWindow();
+                vo_renew = new VideoOutputWindow();
+                CameraBoundsSetup cmBound = new CameraBoundsSetup(vo_renew);
+                updateUITimer.Stop();
+                status2TextBox.AppendText("Camera Bound setup window open; waiting....");
+                DialogResult cmResult = cmBound.ShowDialog();
+                updateUITimer.Start();
             }
-            CameraBoundsSetup cmBound = new CameraBoundsSetup(vo);
+            if (!vo.IsDisposed)
+            {
+                CameraBoundsSetup cmBound = new CameraBoundsSetup(vo);
+                updateUITimer.Stop();
+                status2TextBox.AppendText("Camera Bound setup window open; waiting....");
+                DialogResult cmResult = cmBound.ShowDialog();
+                updateUITimer.Start();
+            }
+            
 
 
-            updateUITimer.Stop();
-            status2TextBox.AppendText("Camera Bound setup window open; waiting....");
-            DialogResult cmResult = cmBound.ShowDialog();
-            updateUITimer.Start();
+
         }
 
         private void trayIconParsing_MouseDoubleClick(object sender, MouseEventArgs e)

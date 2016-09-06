@@ -72,7 +72,13 @@ namespace TEST_GPS_Parsing
                 //now start the process!
                 try
                 {
-                    startNewVideoConsole();
+                    bool startedOK = false;
+                    startedOK = startNewVideoConsole();
+                    if (startedOK)
+                    {
+                        this.Hide();           //close the form and open the next one
+                    }
+                    
                 }
                 catch (NotSupportedException ns)
                 {
@@ -80,7 +86,7 @@ namespace TEST_GPS_Parsing
                 }
 
 
-                this.Hide();           //close the form and open the next one
+                
             }
         }
 
@@ -231,7 +237,7 @@ namespace TEST_GPS_Parsing
             Console.Write("Set video parameters successfully.");
         }
 
-        public void startNewVideoConsole()
+        public bool startNewVideoConsole()
         {
             vo.fileName = filenameToOpen;       //set the filename to open on the other form
             vo.drawMode_Overlay = drawMode;             //set the draw mode on the other form
@@ -243,33 +249,39 @@ namespace TEST_GPS_Parsing
             vo.outerLimitBound[0] = outerLimitCoords[0];
             vo.outerLimitBound[1] = outerLimitCoords[1];
 
-            vo.TopMost = true;
-            vo.Show();
+            if (vo.Visible == true)
+            {
+                MessageBox.Show("Only one instance of the video capture window may be open at a time. Close the other first.", "Instance already running!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            else
+            {
+                try
+                {
+                    vo.TopMost = true;      //set the window to the top and make it visible
+                    vo.Visible = true;
+                    vo.Show();
+
+                }
+                catch (ObjectDisposedException d)
+                {
+                    vo.fileName = filenameToOpen;       //set the filename to open on the other form
+                    vo.drawMode_Overlay = drawMode;             //set the draw mode on the other form
+                    vo.captureChoice = videoSource;     //set the video source on the other form
+
+                    //pass parameters of the outer limits to the other UI
+                    vo.upperLeftBound[0] = upperLeftCoords[0];
+                    vo.upperLeftBound[1] = upperLeftCoords[1];
+                    vo.outerLimitBound[0] = outerLimitCoords[0];
+                    vo.outerLimitBound[1] = outerLimitCoords[1];
+                    vo.TopMost = true;      //set the window to the top and make it visible
+                    vo.Visible = true;
+                    vo.Show();
+                }
+                return true;
+            }     
             
 
-            //now actually launch the process!
-            //Process videoCaptureProcess = new Process();
-            //videoCaptureProcess.StartInfo.FileName = "C:\\Users\\Matt\\Documents\\Source\\Final_Design\\x64\\Debug\\VideoStreamCPlusPlus.exe";
-
-            /*parse through the arguments from the other app
-            Arg[0] = process filename
-            Arg[1] = lat-topLeft
-            Arg[2] = long-topLeft
-            Arg[3] = long-topRight
-            Arg[4] = lat-botLeft
-            Arg[5] = Picture mode; (0 = Internal Webcam; 1 = specify a file)
-            Arg[6] = Draw mode; (0 = Random points; 1 = Ordered line)
-            Arg[7] = file to open
-            */
-            /*videoCaptureProcess.StartInfo.Arguments = upperLeftCoords[0].ToString() + " " +
-                                                      upperLeftCoords[1].ToString() + " " +
-                                                      outerLimitCoords[0].ToString() + " " +
-                                                      outerLimitCoords[1].ToString() + " " +
-                                                      videoSource.ToString() + " " +
-                                                      drawMode.ToString() + " " +
-                                                      filenameToOpen;
-            //videoCaptureProcess.Start();
-            */
         }
 
         private void drawModeChoiceComboBox_SelectedIndexChanged(object sender, EventArgs e)

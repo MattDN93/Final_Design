@@ -75,6 +75,14 @@ namespace TEST_GPS_Parsing
 
         private void VideoOutputWindow_Load(object sender, EventArgs e)
         {
+            //recreate the objects if they were disposed by the last call
+            if (camStreamCapture == null || webcamVid == null)
+            {
+                camStreamCapture = new Capture();               //instantiate new capture object
+                camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
+                webcamVid = new Mat();                          //create the webcam mat object
+            }
+
             //the drawMode, fileName and videoSource are set by the other form
             //evaluates what the user chose from the bounds setup box
             switch (captureChoice)
@@ -168,7 +176,8 @@ namespace TEST_GPS_Parsing
         private void refreshOverlay_Tick(object sender, EventArgs e)
         {
 
-            overlayTick();      //call the overlay update without passing GPS coords
+                overlayTick();      //call the overlay update without passing GPS coords
+           
 
         }
 
@@ -187,18 +196,28 @@ namespace TEST_GPS_Parsing
                     bool varsInUse = false;
                     while (!varsInUse)
                     {
-                        varsInUse = ol_mark.setNewCoords(incoming_lat, incoming_long);      //set coords if not being read from/written to
+                        try
+                        {
+                            varsInUse = ol_mark.setNewCoords(incoming_lat, incoming_long);      //set coords if not being read from/written to
+                        }
+                        catch (OverflowException)
+                        {
+                            type = 4;
+                            setTextonVideoUI("Arithmetic error in calculating bounds - did you set them correctly?");       //use thread safe var access
+                            return;
+                        }
+                        
                     }
                     bool returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, true);
-                    if (returnVal == true)              //if the marker routine returned OK, draw the result in the video window
+                    if (returnVal == true && isStreaming)              //if the marker routine returned OK, draw the result in the video window
                     {
-                        overlayVideoFramesBox.Image = ol_mark.overlayGrid;
+                            overlayVideoFramesBox.Image = ol_mark.overlayGrid;                       
                     }
                 }
                 else
                 {   //this is just a normaltimer tick and it's likely values haven't  changed. Thus just redraw the overlay without recalc
                     bool returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, false);
-                    if (returnVal == true)              //if the marker routine returned OK, draw the result in the video window
+                    if (returnVal == true && isStreaming)              //if the marker routine returned OK, draw the result in the video window
                     {
                         overlayVideoFramesBox.Image = ol_mark.overlayGrid;
                     }
@@ -230,39 +249,51 @@ namespace TEST_GPS_Parsing
             // created the TextBox control, this method creates a
             // SetTextCallback and calls itself asynchronously using the
             // Invoke method.
-            switch (type)
+            if (isStreaming)
             {
-                case 0:
-                    if (this.latitudeLabel.InvokeRequired)
-                    {
-                        SetTextCallback l = new SetTextCallback(setTextonVideoUI);
-                        Invoke(l, new object[] { text });
 
-                    }
-                    else { this.latitudeLabel.Text = text; }; break;
-                case 1:
-                    if (this.LongitudeLabel.InvokeRequired)
-                    {
-                        SetTextCallback l = new SetTextCallback(setTextonVideoUI);
-                        Invoke(l, new object[] { text });
-                    }
-                    else { this.LongitudeLabel.Text = text; }; break;
-                case 2:
-                    if (this.latOORStatusBox.InvokeRequired)
-                    {
-                        SetTextCallback l = new SetTextCallback(setTextonVideoUI);
-                        Invoke(l, new object[] { text });
-                    }
-                    else { this.latOORStatusBox.Text = text; }; break;
-                case 3:
-                    if (this.longOORTextBox.InvokeRequired)
-                    {
-                        SetTextCallback l = new SetTextCallback(setTextonVideoUI);
-                        Invoke(l, new object[] { text });
-                    }
-                    else { this.longOORTextBox.Text = text; }; break;
-                default: Console.Write("Couldn't update one or more UI elements with cross-thread call");
-                    break;
+                switch (type)
+                {
+                    case 0:
+                        if (this.latitudeLabel.InvokeRequired)
+                        {
+                            SetTextCallback l = new SetTextCallback(setTextonVideoUI);
+                            Invoke(l, new object[] { text });
+
+                        }
+                        else { this.latitudeLabel.Text = text; }; break;
+                    case 1:
+                        if (this.LongitudeLabel.InvokeRequired)
+                        {
+                            SetTextCallback l = new SetTextCallback(setTextonVideoUI);
+                            Invoke(l, new object[] { text });
+                        }
+                        else { this.LongitudeLabel.Text = text; }; break;
+                    case 2:
+                        if (this.latOORStatusBox.InvokeRequired)
+                        {
+                            SetTextCallback l = new SetTextCallback(setTextonVideoUI);
+                            Invoke(l, new object[] { text });
+                        }
+                        else { this.latOORStatusBox.Text = text; }; break;
+                    case 3:
+                        if (this.longOORTextBox.InvokeRequired)
+                        {
+                            SetTextCallback l = new SetTextCallback(setTextonVideoUI);
+                            Invoke(l, new object[] { text });
+                        }
+                        else { this.status1TextBox.Text = text; }; break;
+                    case 4:
+                        if (this.status1TextBox.InvokeRequired)
+                        {
+                            SetTextCallback l = new SetTextCallback(setTextonVideoUI);
+                            Invoke(l, new object[] { text });
+                        }
+                        else { this.status1TextBox.Text = text; }; break;
+                    default:
+                        Console.Write("Couldn't update one or more UI elements with cross-thread call");
+                        break;
+                }
             }
 
         }
@@ -273,6 +304,7 @@ namespace TEST_GPS_Parsing
                 {  //stop the capture
                     startCaptureButton.Text = "Start Capture";
                     camStreamCapture.Pause();
+                    ol_mark.clearScreen();      //remove the marker and lines off the screen.
                     isStreaming = false;
                 }
                 else
@@ -303,7 +335,7 @@ namespace TEST_GPS_Parsing
             {
                 camStreamCapture.Dispose();
                 rawVideoFramesBox.Dispose();
-                this.Dispose();
+                //this.Dispose();
             }
                 
         }
@@ -322,7 +354,8 @@ namespace TEST_GPS_Parsing
                 e.Cancel = true;        //stop the form closing
             }
             else
-            { 
+            {
+                this.Visible = false;
                 ReleaseData();      //try to release the capture
             }
             

@@ -96,9 +96,28 @@ namespace TEST_GPS_Parsing
                 current_pointGPS_lat = lat_forDisplay;
                 current_pointGPS_long = long_forDisplay;
 
-                scaleGpsCoordsToDisplayBounds(lat_forDisplay, long_forDisplay);
+                try
+                {
+                    scaleGpsCoordsToDisplayBounds(lat_forDisplay, long_forDisplay);
+                }
+                catch (OverflowException e)
+                {
+                    throw e;
+                }
+                
                 return true;
             }
+        }
+
+        //this method clears the overlay object and removes the displayed points from the screen
+        public void clearScreen()
+        {
+            points.Clear();
+            current_point.X = 0;
+            current_point.Y = 0;
+            marker_x = 0;
+            marker_y = 0;
+            //overlayGrid.Dispose();
         }
 
         //This method takes the lat/long limits of the camera frame, calculates an offset based on
@@ -125,8 +144,10 @@ namespace TEST_GPS_Parsing
                                 r = marker_x or x
              */
 
-            y = Convert.ToInt32(Math.Round((Math.Abs(incoming_lat - ulBound[0]) / dy) * gridHeight));
-            x = Convert.ToInt32(Math.Round((((incoming_long - ulBound[1])/ dx) * gridWidth)));
+                y = Convert.ToInt32(Math.Round((Math.Abs(incoming_lat - ulBound[0]) / dy) * gridHeight));
+                x = Convert.ToInt32(Math.Round((((incoming_long - ulBound[1]) / dx) * gridWidth)));
+
+
         }
 
         public bool drawMarker(int current_xval, int current_yval, Mat webcamVidforOverlay, bool valHasChanged)
