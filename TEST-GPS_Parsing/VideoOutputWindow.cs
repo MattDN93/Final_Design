@@ -204,6 +204,7 @@ namespace TEST_GPS_Parsing
                         {
                             type = 4;
                             setTextonVideoUI("Arithmetic error in calculating bounds - did you set them correctly?");       //use thread safe var access
+                            type = -1;
                             return;
                         }
                         

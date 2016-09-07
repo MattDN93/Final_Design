@@ -82,7 +82,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(555, 7);
+            this.label1.Location = new System.Drawing.Point(66, 576);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(97, 13);
             this.label1.TabIndex = 2;
@@ -91,7 +91,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(321, 274);
+            this.label2.Location = new System.Drawing.Point(755, 3);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(107, 13);
             this.label2.TabIndex = 3;
@@ -100,9 +100,9 @@
             // rawVideoFramesBox
             // 
             this.rawVideoFramesBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.rawVideoFramesBox.Location = new System.Drawing.Point(482, 22);
+            this.rawVideoFramesBox.Location = new System.Drawing.Point(12, 592);
             this.rawVideoFramesBox.Name = "rawVideoFramesBox";
-            this.rawVideoFramesBox.Size = new System.Drawing.Size(228, 234);
+            this.rawVideoFramesBox.Size = new System.Drawing.Size(204, 148);
             this.rawVideoFramesBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.rawVideoFramesBox.TabIndex = 2;
             this.rawVideoFramesBox.TabStop = false;
@@ -213,10 +213,10 @@
             // overlayVideoFramesBox
             // 
             this.overlayVideoFramesBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.overlayVideoFramesBox.Location = new System.Drawing.Point(18, 290);
-            this.overlayVideoFramesBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.overlayVideoFramesBox.Location = new System.Drawing.Point(248, 16);
+            this.overlayVideoFramesBox.Margin = new System.Windows.Forms.Padding(2);
             this.overlayVideoFramesBox.Name = "overlayVideoFramesBox";
-            this.overlayVideoFramesBox.Size = new System.Drawing.Size(692, 427);
+            this.overlayVideoFramesBox.Size = new System.Drawing.Size(1070, 701);
             this.overlayVideoFramesBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.overlayVideoFramesBox.TabIndex = 2;
             this.overlayVideoFramesBox.TabStop = false;
@@ -225,9 +225,9 @@
             // 
             this.groupBox2.Controls.Add(this.startCaptureButton);
             this.groupBox2.Location = new System.Drawing.Point(9, 10);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox2.Size = new System.Drawing.Size(207, 50);
             this.groupBox2.TabIndex = 6;
             this.groupBox2.TabStop = false;
@@ -248,11 +248,11 @@
             this.groupBox3.Controls.Add(this.latitudeLabel);
             this.groupBox3.Controls.Add(this.label7);
             this.groupBox3.Controls.Add(this.label6);
-            this.groupBox3.Location = new System.Drawing.Point(221, 10);
-            this.groupBox3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox3.Location = new System.Drawing.Point(13, 189);
+            this.groupBox3.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.groupBox3.Size = new System.Drawing.Size(255, 174);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(2);
+            this.groupBox3.Size = new System.Drawing.Size(203, 281);
             this.groupBox3.TabIndex = 7;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Incoming Data";
@@ -261,7 +261,7 @@
             // 
             this.longTopRightLabel.AutoSize = true;
             this.longTopRightLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.longTopRightLabel.Location = new System.Drawing.Point(142, 125);
+            this.longTopRightLabel.Location = new System.Drawing.Point(73, 212);
             this.longTopRightLabel.Name = "longTopRightLabel";
             this.longTopRightLabel.Size = new System.Drawing.Size(21, 13);
             this.longTopRightLabel.TabIndex = 17;
@@ -271,7 +271,7 @@
             // 
             this.latBotLeftLabel.AutoSize = true;
             this.latBotLeftLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.latBotLeftLabel.Location = new System.Drawing.Point(142, 143);
+            this.latBotLeftLabel.Location = new System.Drawing.Point(72, 257);
             this.latBotLeftLabel.Name = "latBotLeftLabel";
             this.latBotLeftLabel.Size = new System.Drawing.Size(21, 13);
             this.latBotLeftLabel.TabIndex = 16;
@@ -281,7 +281,7 @@
             // 
             this.longTopLeftLabel.AutoSize = true;
             this.longTopLeftLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.longTopLeftLabel.Location = new System.Drawing.Point(142, 75);
+            this.longTopLeftLabel.Location = new System.Drawing.Point(73, 124);
             this.longTopLeftLabel.Name = "longTopLeftLabel";
             this.longTopLeftLabel.Size = new System.Drawing.Size(21, 13);
             this.longTopLeftLabel.TabIndex = 15;
@@ -291,7 +291,7 @@
             // 
             this.latTopLeftLabel.AutoSize = true;
             this.latTopLeftLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.latTopLeftLabel.Location = new System.Drawing.Point(142, 94);
+            this.latTopLeftLabel.Location = new System.Drawing.Point(73, 168);
             this.latTopLeftLabel.Name = "latTopLeftLabel";
             this.latTopLeftLabel.Size = new System.Drawing.Size(21, 13);
             this.latTopLeftLabel.TabIndex = 8;
@@ -300,7 +300,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(4, 125);
+            this.label11.Location = new System.Drawing.Point(26, 189);
             this.label11.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(130, 13);
@@ -310,7 +310,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(4, 143);
+            this.label12.Location = new System.Drawing.Point(31, 235);
             this.label12.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(119, 13);
@@ -320,7 +320,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(4, 76);
+            this.label10.Location = new System.Drawing.Point(29, 104);
             this.label10.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(126, 13);
@@ -330,7 +330,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(4, 95);
+            this.label9.Location = new System.Drawing.Point(32, 147);
             this.label9.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(114, 13);
@@ -341,7 +341,7 @@
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(43, 51);
+            this.label8.Location = new System.Drawing.Point(14, 79);
             this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(169, 13);
@@ -352,7 +352,7 @@
             // 
             this.LongitudeLabel.AutoSize = true;
             this.LongitudeLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.LongitudeLabel.Location = new System.Drawing.Point(186, 27);
+            this.LongitudeLabel.Location = new System.Drawing.Point(72, 54);
             this.LongitudeLabel.Name = "LongitudeLabel";
             this.LongitudeLabel.Size = new System.Drawing.Size(21, 13);
             this.LongitudeLabel.TabIndex = 9;
@@ -362,7 +362,7 @@
             // 
             this.latitudeLabel.AutoSize = true;
             this.latitudeLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.latitudeLabel.Location = new System.Drawing.Point(65, 26);
+            this.latitudeLabel.Location = new System.Drawing.Point(72, 27);
             this.latitudeLabel.Name = "latitudeLabel";
             this.latitudeLabel.Size = new System.Drawing.Size(21, 13);
             this.latitudeLabel.TabIndex = 8;
@@ -371,7 +371,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(118, 27);
+            this.label7.Location = new System.Drawing.Point(4, 54);
             this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(57, 13);
@@ -393,37 +393,37 @@
             this.groupBox4.Controls.Add(this.longOORTextBox);
             this.groupBox4.Controls.Add(this.latOORStatusBox);
             this.groupBox4.Controls.Add(this.status1TextBox);
-            this.groupBox4.Location = new System.Drawing.Point(13, 189);
-            this.groupBox4.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox4.Location = new System.Drawing.Point(13, 474);
+            this.groupBox4.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.groupBox4.Size = new System.Drawing.Size(464, 66);
+            this.groupBox4.Padding = new System.Windows.Forms.Padding(2);
+            this.groupBox4.Size = new System.Drawing.Size(203, 96);
             this.groupBox4.TabIndex = 8;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Current Status";
             // 
             // longOORTextBox
             // 
-            this.longOORTextBox.Location = new System.Drawing.Point(237, 41);
-            this.longOORTextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.longOORTextBox.Location = new System.Drawing.Point(4, 65);
+            this.longOORTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.longOORTextBox.Name = "longOORTextBox";
-            this.longOORTextBox.Size = new System.Drawing.Size(223, 20);
+            this.longOORTextBox.Size = new System.Drawing.Size(195, 20);
             this.longOORTextBox.TabIndex = 2;
             // 
             // latOORStatusBox
             // 
-            this.latOORStatusBox.Location = new System.Drawing.Point(5, 41);
-            this.latOORStatusBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.latOORStatusBox.Location = new System.Drawing.Point(4, 41);
+            this.latOORStatusBox.Margin = new System.Windows.Forms.Padding(2);
             this.latOORStatusBox.Name = "latOORStatusBox";
-            this.latOORStatusBox.Size = new System.Drawing.Size(228, 20);
+            this.latOORStatusBox.Size = new System.Drawing.Size(195, 20);
             this.latOORStatusBox.TabIndex = 1;
             // 
             // status1TextBox
             // 
             this.status1TextBox.Location = new System.Drawing.Point(5, 18);
-            this.status1TextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.status1TextBox.Margin = new System.Windows.Forms.Padding(2);
             this.status1TextBox.Name = "status1TextBox";
-            this.status1TextBox.Size = new System.Drawing.Size(455, 20);
+            this.status1TextBox.Size = new System.Drawing.Size(194, 20);
             this.status1TextBox.TabIndex = 0;
             // 
             // refreshOverlay
@@ -435,7 +435,7 @@
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(10, 258);
+            this.label13.Location = new System.Drawing.Point(218, 0);
             this.label13.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(30, 13);
@@ -445,7 +445,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(683, 258);
+            this.label14.Location = new System.Drawing.Point(1313, 0);
             this.label14.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(30, 13);
@@ -455,7 +455,7 @@
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(7, 723);
+            this.label15.Location = new System.Drawing.Point(221, 727);
             this.label15.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(31, 13);
@@ -465,7 +465,7 @@
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(683, 719);
+            this.label16.Location = new System.Drawing.Point(1310, 719);
             this.label16.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(31, 13);
@@ -475,7 +475,7 @@
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(10, 275);
+            this.label17.Location = new System.Drawing.Point(218, 17);
             this.label17.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(28, 13);
@@ -485,7 +485,7 @@
             // label18
             // 
             this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(682, 274);
+            this.label18.Location = new System.Drawing.Point(1312, 16);
             this.label18.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(27, 13);
@@ -495,7 +495,7 @@
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(686, 737);
+            this.label19.Location = new System.Drawing.Point(1313, 737);
             this.label19.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(26, 13);
@@ -505,7 +505,7 @@
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(7, 737);
+            this.label20.Location = new System.Drawing.Point(221, 741);
             this.label20.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(27, 13);
@@ -516,7 +516,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(722, 754);
+            this.ClientSize = new System.Drawing.Size(1343, 754);
             this.Controls.Add(this.label20);
             this.Controls.Add(this.label19);
             this.Controls.Add(this.label18);
@@ -533,7 +533,7 @@
             this.Controls.Add(this.rawVideoFramesBox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "VideoOutputWindow";
             this.Text = "Video Capture Window";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.VideoOutputWindow_FormClosing);

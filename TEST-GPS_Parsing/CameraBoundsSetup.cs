@@ -32,6 +32,7 @@ namespace TEST_GPS_Parsing
         public static int DRAW_MODE_RANDOM = 0;
         public static int DRAW_MODE_ORDERED = 1;
         public static int DRAW_MODE_TRACKING = 2;
+        public
 
         public CameraBoundsSetup(VideoOutputWindow incoming_vo)
         {

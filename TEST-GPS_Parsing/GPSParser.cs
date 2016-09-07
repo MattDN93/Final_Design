@@ -15,7 +15,7 @@ namespace TEST_GPS_Parsing
     public partial class GPSParser : Form
     {
         //*********THIS VAR IS FOR TESTING FEATURES, set to false for debug features off
-        bool debug = false;
+        bool debug = true;
         //*************************************
         public string inputLogFilename;
         bool dbLoggingActive = true;
@@ -255,7 +255,11 @@ namespace TEST_GPS_Parsing
                     {
                         gpsData.deltaCount++;
                         //locationMarkersOverlay = mapData.plotOnMap(locationMarkersOverlay);          //passes the initialised overlay to be populated
-                        
+
+                        //unlock the data to write to the DB 
+                        _waitHandleParser.Set();
+                        Console.WriteLine("Parser released lock");
+
                         //send the co-ordinates to the video output UI - keeps calling till its set
                         //pass the new instance of the overlay if it's been disposed before
                         if (parseIsRunning)
@@ -263,7 +267,7 @@ namespace TEST_GPS_Parsing
                             if (!vo.IsDisposed)
                             {
                                 vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
-                            }
+                             }
                             else if (vo_renew !=null)
                             {
                                 vo_renew.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
@@ -272,9 +276,7 @@ namespace TEST_GPS_Parsing
                         }
 
 
-                        //unlock the data to write to the DB 
-                        _waitHandleParser.Set();
-                        Console.WriteLine("Parser released lock");
+                        
 
                         Console.WriteLine("Waiting for DB write to finish");
                         if (dbLoggingActive == true)
@@ -298,7 +300,7 @@ namespace TEST_GPS_Parsing
                     //FOR SIMULATION ONLY
                     if (debug)
                     {
-                        Thread.Sleep(500);
+                        Thread.Sleep(200);
                     }
                     
                         //---------------
