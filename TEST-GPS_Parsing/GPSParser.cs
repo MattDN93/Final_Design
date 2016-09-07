@@ -14,6 +14,7 @@ namespace TEST_GPS_Parsing
 {
     public partial class GPSParser : Form
     {
+        #region Initialization and Vars
         //*********THIS VAR IS FOR TESTING FEATURES, set to false for debug features off
         bool debug = true;
         //*************************************
@@ -42,8 +43,10 @@ namespace TEST_GPS_Parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
         int duplicatePacketCounter = 1;                     //used to ensure duplicate packets aren't saved into the DB
-        //private XmlWriter fileStream;
+                                                            //private XmlWriter fileStream;
+        #endregion
 
+        #region Class Instantiation
         public GPSParser()
         {
             InitializeComponent();
@@ -81,7 +84,9 @@ namespace TEST_GPS_Parsing
             }
 
         }
+        #endregion
 
+        #region Init Panes and UI
         private bool initMappingPane()
         {
             //Set up the Mapping provider to show the maps in the pane
@@ -113,7 +118,9 @@ namespace TEST_GPS_Parsing
             stopButton.Enabled = false;
             statusTextBox.AppendText("Ready. Click the button to open a file.");
         }
+        #endregion
 
+        #region Main User Button Interaction
         private void openFileButton_Click(object sender, EventArgs e)
         {
                 //open the dialog
@@ -193,6 +200,35 @@ namespace TEST_GPS_Parsing
 
         }
 
+        //------------------Open the Video Streaming Component------------------
+        private void openPortButton_Click(object sender, EventArgs e)
+        {
+            if (vo.IsDisposed)         //if the object was created before, destroy and recreate it
+            {
+                vo_renew = new VideoOutputWindow();
+                CameraBoundsSetup cmBound = new CameraBoundsSetup(vo_renew);
+                updateUITimer.Stop();
+                status2TextBox.AppendText("Camera Bound setup window open; waiting....");
+                DialogResult cmResult = cmBound.ShowDialog();
+                updateUITimer.Start();
+            }
+            if (!vo.IsDisposed)
+            {
+                CameraBoundsSetup cmBound = new CameraBoundsSetup(vo);
+                updateUITimer.Stop();
+                status2TextBox.AppendText("Camera Bound setup window open; waiting....");
+                DialogResult cmResult = cmBound.ShowDialog();
+                updateUITimer.Start();
+            }
+
+
+
+
+        }
+        #endregion
+
+        #region Updating UI methods
+
         private void updateUITimer_Tick(object sender, EventArgs e)
         {
             if (recvRawDataWorker.IsBusy)
@@ -215,8 +251,64 @@ namespace TEST_GPS_Parsing
 
         }
 
+        //-------------------------UI update method------------------------------------------
+
+        private void updateUI(GPSPacket gpsDataForUI, string sentenceBufferForUI)
+        {
+            //This takes the gpsData object and populates all the fields with updated values (if any)
+
+            //updates the map pane overlay with location
+            locationMarkersOverlay = mapData.plotOnMap(locationMarkersOverlay);          //passes the initialised overlay to be populated
+            mapPane.Overlays.Add(locationMarkersOverlay);
+
+            //Show the buffer of the raw text file being read 
+            rawLogFileTextBox.AppendText(rawBuffer);
+            sentenceBufferForUI = "";
+            //Monitoring
+            packetIDTextBox.Text = gpsDataForUI.ID.ToString();
+            timeElapsedTextBox.Text = gpsDataForUI.timeElapsed.ToString();
+            //GPS Core Data
+            latitudeTextBox.Clear();
+            latitudeTextBox.AppendText(gpsDataForUI.latitude);
+            longitudeTextBox.Clear();
+            longitudeTextBox.AppendText(gpsDataForUI.longitude);
+            altitudeTextBox.Clear();
+            altitudeTextBox.AppendText(gpsDataForUI.altitude);
+
+            //Vehicle Properties
+            speedKnotsTextBox.Clear();
+            speedKnotsTextBox.AppendText(gpsDataForUI.grspd_k);
+            speedKphTextBox.Clear();
+            speedKphTextBox.AppendText(gpsDataForUI.grspd_kph);
+            headDegTextBox.Clear();
+            headDegTextBox.AppendText(gpsDataForUI.trkangle);
+            headCardTextBox.Clear();
+            headCardTextBox.AppendText(gpsDataForUI.cardAngle);
+
+            //Fix Information
+            satsViewTextBox.Clear();
+            satsViewTextBox.AppendText(gpsDataForUI.numsats);
+            fixqualTextBox.Clear();
+            fixqualTextBox.AppendText(gpsDataForUI.fixqual_f);
+            fixvalTextBox.Clear();
+            fixvalTextBox.AppendText(gpsDataForUI.fixtype_f);
+            accuracyTextBox.Clear();
+            accuracyTextBox.AppendText(gpsDataForUI.accuracy.ToString());
+
+            //Date and time
+            dateTextBox.Clear();
+            dateTextBox.AppendText(gpsDataForUI.date);
+
+            //do some formatting
+            timeTextBox.Clear();
+            timeTextBox.AppendText(gpsDataForUI.time);
+
+
+        }
+        #endregion
+
         //-------------------------THREADING SECTION--------------------------------
-        //-------------------------RESOURCE LOCK MANAGER----------------------------
+        #region Background Worker Thread
 
 
         //-------------------------THREAD 1: FOR BACKGROUND WORK--------------------
@@ -317,7 +409,9 @@ namespace TEST_GPS_Parsing
         
         }
 
-        //------------------------THREAD 2: FOR UPDATING THE DATABASE--------------------------------
+        #endregion
+        //------------------------THREAD 2: FOR UPDATING THE DATABASE----------------
+        #region Database Update Thread
 
         private void dbLoggingThread_DoWork(object sender, DoWorkEventArgs e)
         {
@@ -379,10 +473,25 @@ namespace TEST_GPS_Parsing
             }
             _waitHandleDatabase.Set();  //ping the main thread to keep logging since database logging is off
         }
-        
-        
 
-        //----------------------Progress Changed on thread methods-------------------------------------
+
+        //-------------------------DB update method---------------
+
+        private bool writeToDatabase(XMLNodes myXmlDb, GPSPacket gpsDataForDB)
+        {
+            //don't write semi-filled packets to the DB
+            if (duplicatePacketCounter != gpsDataForDB.packetID)
+            {
+                duplicatePacketCounter++;
+                myXmlDb.populateDbFields(gpsDataForDB);
+
+                return true;
+            }
+            return true;
+        }
+        #endregion
+
+        #region Thread Update Methods
 
         private void dbLoggingThread_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
@@ -432,144 +541,11 @@ namespace TEST_GPS_Parsing
 
            //temp.closeXmlDbFile();
         }
+        #endregion
 
-        //-------------------------UI update method------------------------------------------
+        //-------------------------End threads------------------------------------
 
-        private void updateUI(GPSPacket gpsDataForUI, string sentenceBufferForUI)
-        {
-            //This takes the gpsData object and populates all the fields with updated values (if any)
-
-            //updates the map pane overlay with location
-            locationMarkersOverlay = mapData.plotOnMap(locationMarkersOverlay);          //passes the initialised overlay to be populated
-            mapPane.Overlays.Add(locationMarkersOverlay);
-
-            //Show the buffer of the raw text file being read 
-            rawLogFileTextBox.AppendText(rawBuffer);
-            sentenceBufferForUI = "";
-            //Monitoring
-            packetIDTextBox.Text = gpsDataForUI.ID.ToString();
-            timeElapsedTextBox.Text = gpsDataForUI.timeElapsed.ToString();
-            //GPS Core Data
-            latitudeTextBox.Clear();
-            latitudeTextBox.AppendText(gpsDataForUI.latitude);
-            longitudeTextBox.Clear();
-            longitudeTextBox.AppendText(gpsDataForUI.longitude);
-            altitudeTextBox.Clear();
-            altitudeTextBox.AppendText(gpsDataForUI.altitude);
-
-            //Vehicle Properties
-            speedKnotsTextBox.Clear();
-            speedKnotsTextBox.AppendText(gpsDataForUI.grspd_k);
-            speedKphTextBox.Clear();
-            speedKphTextBox.AppendText(gpsDataForUI.grspd_kph);
-            headDegTextBox.Clear();
-            headDegTextBox.AppendText(gpsDataForUI.trkangle);
-            headCardTextBox.Clear();
-            headCardTextBox.AppendText(gpsDataForUI.cardAngle);
-
-            //Fix Information
-            satsViewTextBox.Clear();
-            satsViewTextBox.AppendText(gpsDataForUI.numsats);
-            fixqualTextBox.Clear();
-            fixqualTextBox.AppendText(gpsDataForUI.fixqual_f);
-            fixvalTextBox.Clear();
-            fixvalTextBox.AppendText(gpsDataForUI.fixtype_f);
-            accuracyTextBox.Clear();
-            accuracyTextBox.AppendText(gpsDataForUI.accuracy.ToString());
-
-            //Date and time
-            dateTextBox.Clear();
-            dateTextBox.AppendText(gpsDataForUI.date);
-
-            //do some formatting
-            timeTextBox.Clear();
-            timeTextBox.AppendText(gpsDataForUI.time);
-
-
-        }
-
-        //-------------------------Form shutdown method-----------
-        //Warns the user before shutting down the app if a process is running
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            DialogResult userQuit;
-            if (parseIsRunning == true)
-            {
-                userQuit = MessageBox.Show("Quitting while parsing is running could corrupt the database; reccommend stopping the process first. Do you still want to force quit and risk losing data?", "Be careful! Forcefully quit?", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
-                if (userQuit == DialogResult.Yes)
-                {
-                    parseIsRunning = false;
-                    statusTextBox.Clear();
-                    statusTextBox.AppendText("Stop requested, ending thread...");
-                    recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
-                    _waitHandleDatabase.Set();      //pings the parser thread to release the lock
-                    dbLoggingThread.CancelAsync(); //requests cancellation of the database thread
-                    _waitHandleParser.Set();
-                    e.Cancel = false;               //event shouldn't be cancelled i.e. we want to close the app
-                }
-                else
-                {
-                    //DO NOT close the app, return to caller
-                    e.Cancel = true;
-                    return;
-                }
-            }
-            else
-            {
-                userQuit = MessageBox.Show("Close the program?", "Are you sure?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (userQuit != DialogResult.Yes)
-                {
-                    //tells the form caller we DO NOT want to close the app
-                    e.Cancel = true;
-                    return;
-                }
-            }
-
-
-        }
-
-        //-------------------------DB update method---------------
-
-        private bool writeToDatabase(XMLNodes myXmlDb, GPSPacket gpsDataForDB)
-        {
-            //don't write semi-filled packets to the DB
-            if (duplicatePacketCounter != gpsDataForDB.packetID)
-            {
-                duplicatePacketCounter++;
-                myXmlDb.populateDbFields(gpsDataForDB);
-                
-                return true;              
-            }
-            return true;
-        }
-
-        //-------------------------End threads---------------------------------------------
-
-        //------------------Open the Video Streaming Component------------------
-        private void openPortButton_Click(object sender, EventArgs e)
-        {
-            if (vo.IsDisposed)         //if the object was created before, destroy and recreate it
-            {
-                vo_renew = new VideoOutputWindow();
-                CameraBoundsSetup cmBound = new CameraBoundsSetup(vo_renew);
-                updateUITimer.Stop();
-                status2TextBox.AppendText("Camera Bound setup window open; waiting....");
-                DialogResult cmResult = cmBound.ShowDialog();
-                updateUITimer.Start();
-            }
-            if (!vo.IsDisposed)
-            {
-                CameraBoundsSetup cmBound = new CameraBoundsSetup(vo);
-                updateUITimer.Stop();
-                status2TextBox.AppendText("Camera Bound setup window open; waiting....");
-                DialogResult cmResult = cmBound.ShowDialog();
-                updateUITimer.Start();
-            }
-            
-
-
-
-        }
+        #region UI Menu Element Methods
 
         private void trayIconParsing_MouseDoubleClick(object sender, MouseEventArgs e)
         {
@@ -742,7 +718,54 @@ namespace TEST_GPS_Parsing
             mapPane.MapProvider = GMap.NET.MapProviders.BingMapProvider.Instance;
             trayIconParsing.ShowBalloonTip(3, "Mapping Info", "Map provider switched to Bing", ToolTipIcon.Info);
         }
+        #endregion
+
+        #region Form Shutdown
+
+        //-------------------------Form shutdown method-----------
+        //Warns the user before shutting down the app if a process is running
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult userQuit;
+            if (parseIsRunning == true)
+            {
+                userQuit = MessageBox.Show("Quitting while parsing is running could corrupt the database; reccommend stopping the process first. Do you still want to force quit and risk losing data?", "Be careful! Forcefully quit?", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+                if (userQuit == DialogResult.Yes)
+                {
+                    parseIsRunning = false;
+                    statusTextBox.Clear();
+                    statusTextBox.AppendText("Stop requested, ending thread...");
+                    recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
+                    _waitHandleDatabase.Set();      //pings the parser thread to release the lock
+                    dbLoggingThread.CancelAsync(); //requests cancellation of the database thread
+                    _waitHandleParser.Set();
+                    e.Cancel = false;               //event shouldn't be cancelled i.e. we want to close the app
+                }
+                else
+                {
+                    //DO NOT close the app, return to caller
+                    e.Cancel = true;
+                    return;
+                }
+            }
+            else
+            {
+                userQuit = MessageBox.Show("Close the program?", "Are you sure?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (userQuit != DialogResult.Yes)
+                {
+                    //tells the form caller we DO NOT want to close the app
+                    e.Cancel = true;
+                    return;
+                }
+            }
 
 
+        }
+        #endregion
     }
+
+
 }
+    
+
+

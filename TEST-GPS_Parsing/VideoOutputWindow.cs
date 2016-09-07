@@ -17,6 +17,7 @@ namespace TEST_GPS_Parsing
 {
     public partial class VideoOutputWindow : Form
     {
+        #region Declaration Objects and Vars
         //-----------------Matrix and Capture Objects----------
         public Mat webcamVid;                  //create a Mat object to manipulate
         public Mat overlayVid;
@@ -56,7 +57,10 @@ namespace TEST_GPS_Parsing
         public static int DRAW_MODE_RANDOM = 0;
         public static int DRAW_MODE_ORDERED = 1;
         public static int DRAW_MODE_TRACKING = 2;
+        public static int DRAW_MODE_REVOBJTRACK = 3;
+        #endregion
 
+        #region Initializer and Setup
         public VideoOutputWindow()
         {
             InitializeComponent();
@@ -97,6 +101,7 @@ namespace TEST_GPS_Parsing
                 case 0: drawModeLabel.Text = "Random"; drawMode_Overlay = DRAW_MODE_RANDOM; break;
                 case 1: drawModeLabel.Text = "Ordered";drawMode_Overlay = DRAW_MODE_ORDERED; break;
                 case 2: drawModeLabel.Text = "Tracking";drawMode_Overlay = DRAW_MODE_TRACKING;break;
+                case 3: drawModeLabel.Text = "Object-Based Tracking";drawMode_Overlay = DRAW_MODE_REVOBJTRACK;break;
                 default:
                     break;
             }
@@ -138,7 +143,9 @@ namespace TEST_GPS_Parsing
             }
 
         }
+        #endregion
 
+        #region Frame and Overlay Methods
         //this method is called every time the IsGrabbed event is raised i.e. every time a new frame is captured
         private void parseFrames(object sender, EventArgs arg)
         {
@@ -242,6 +249,9 @@ namespace TEST_GPS_Parsing
                 type = -1;
             }
         }
+        #endregion
+
+        #region UI and Button Routines
 
         private void setTextonVideoUI(string text)
         {
@@ -362,7 +372,7 @@ namespace TEST_GPS_Parsing
             
             
         }
-
+        #endregion
 
     }
 

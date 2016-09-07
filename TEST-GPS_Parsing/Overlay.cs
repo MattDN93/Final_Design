@@ -12,6 +12,7 @@ namespace TEST_GPS_Parsing
 {
     class Overlay : VideoOutputWindow
     {
+        #region Declaration Object and Vars
         //---------marker data vars FOR DISPLAY----------
         //OpenCV requires the marker and point objects onscreen to be of INT type
         //The raw GPS coordinates are rounted to a int pixel value and stored in these 
@@ -57,7 +58,11 @@ namespace TEST_GPS_Parsing
 
         //------------Usage flags------------------------
         public bool usingCoords;
+        private double p;
+        private object q;
+        #endregion
 
+        #region Setup and Initialization
         public void setupOverlay()             //called once to initialize the overlay of points
         {
             overlayGrid = new Mat();     //sets up blank matrix of size of the video 
@@ -83,7 +88,9 @@ namespace TEST_GPS_Parsing
 
             usingCoords = false;
         }
+        #endregion
 
+        #region Setting and Scaling Co-ords
         //a method to allow the parser class to access the coords vars without race conditions
         public bool setNewCoords(double lat_forDisplay, double long_forDisplay)
         {
@@ -150,6 +157,37 @@ namespace TEST_GPS_Parsing
 
         }
 
+        /*this method takes the onscreen location of the object in question and translates it to a lat/long 
+          based on the lat/long limits specified by the user.
+             */
+        public void scaleDisplayCoordsToGpsBounds(int pix_x, int pix_y)
+        {
+            /* DEFINITIONS:
+            * UpperLeftBound[0] = latitude top left; [1] = longitude top left
+           outerLimitBound[0] = longitude top right; [1] = latitude bottom left
+
+           Formulae:   given a current (pixel x, pixel y) in (pix_x,pix_y)
+                       latTopLeft = b; longTopLeft = a
+                       delta(y) = latitude range of camera frame (calculated onetime)
+                       delta(x) = longitude range of camera framse (calculated onetime)
+                       y_pixels = image frame height; x_pixels = image frame width
+                       we want an output point (p,q) from the scaled screen version
+
+                       p = latitude = (delta(y) * pix_y)/y + b
+                       q = longitude = (delta(x) * pix_x)/x + a
+
+                       (p,q) is a (lat,long) pair
+                       p, q are doubles
+            */
+
+            p = ((dy * pix_y) / gridHeight) + ulBound[0];
+            q = ((dx * pix_x) / gridWidth) + ulBound[1];
+
+
+        }
+        #endregion
+
+        #region Drawing Onscreen Marker
         public bool drawMarker(int current_xval, int current_yval, Mat webcamVidforOverlay, bool valHasChanged)
         {
             try
@@ -228,7 +266,9 @@ namespace TEST_GPS_Parsing
 
 
         }
+        #endregion
 
+        #region Checking Bounds
         //This method checks the location of the points on the grid and displays markers if it exceeds these points
         public void checkBounds(int curr_x, int curr_y, Mat overlay)
         {
@@ -359,7 +399,9 @@ namespace TEST_GPS_Parsing
             }
 
         }
+        #endregion
 
+        #region For Simulation Only
         public void generateSimPts()
         {
             //-----------------SIMULATION OF POINTS-------------------------
@@ -389,9 +431,9 @@ namespace TEST_GPS_Parsing
           
 
         }
+        #endregion
 
 
 
-
-        }
+    }
 }

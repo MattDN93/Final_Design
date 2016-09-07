@@ -13,6 +13,7 @@ namespace TEST_GPS_Parsing
 {
     public partial class CameraBoundsSetup : Form
     {
+        #region Initialization objects and vars
         //CameraSettings camParameter = new CameraSettings();         //instantiate new camParameter object
         //video GPS coordinate extents
         private double[] upperLeftCoords = new double[2];       //[0] = latitude top left; [1] = longitude top left
@@ -32,89 +33,16 @@ namespace TEST_GPS_Parsing
         public static int DRAW_MODE_RANDOM = 0;
         public static int DRAW_MODE_ORDERED = 1;
         public static int DRAW_MODE_TRACKING = 2;
-        public
+        public static int DRAW_MODE_REVOBJTRACK = 3;
 
         public CameraBoundsSetup(VideoOutputWindow incoming_vo)
         {
             InitializeComponent();
             vo = incoming_vo;           //create a VO object for the parser to use
         }
+        #endregion 
 
-        private void setExtentsButton_Click(object sender, EventArgs e)
-        {
-            //warn user if setting not filled
-            if (drawModeChoiceComboBox.SelectedIndex == -1 || vidSourceChoiceComboBox.SelectedIndex == -1 )
-            {
-                MessageBox.Show("Please select a capture mode and/or a draw mode before continuing.", "Choose settings first!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            }
-            else
-            {
-                
-                //The index of draw mode defines the selected item. 0=Random 1=Ordered 2=Tracking
-                switch (drawModeChoiceComboBox.SelectedIndex)
-                {
-                    case 0: drawModeChoice = DRAW_MODE_RANDOM;break;
-                    case 1: drawModeChoice = DRAW_MODE_ORDERED;break;
-                    case 2: drawModeChoice = DRAW_MODE_TRACKING;break;
-                    default: drawModeChoice = -1;
-                        break;
-                }
-
-                //The index of video mode defines the selected item. 0=Video on PC 1=Webcam
-                switch (vidSourceChoiceComboBox.SelectedIndex)
-                {
-                    case 0: chooseVideoFileFialog.ShowDialog();break;                   //show user file dialog first
-                    case 1: setVideoParameters(0, drawModeChoice);break;   //using webcam so no filename needed
-                    case 2: setVideoParameters(0, drawModeChoice); break;   //using webcam and GPS values
-                    default:
-                        break;
-                }
-
-                //now start the process!
-                try
-                {
-                    bool startedOK = false;
-                    startedOK = startNewVideoConsole();
-                    if (startedOK)
-                    {
-                        this.Hide();           //close the form and open the next one
-                    }
-                    
-                }
-                catch (NotSupportedException ns)
-                {
-                    MessageBox.Show("The video stream start failed. Details: " + ns.Message, "Something happened", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-
-
-                
-            }
-        }
-
-        private void chooseVideoFileFialog_FileOk(object sender, CancelEventArgs e)
-        {
-            //set the parameters of the file and arguments we'll pass 
-            //if here, we assume the user is opening a file
-            setVideoParameters(1, drawModeChoice,chooseVideoFileFialog.FileName.ToString());
-        }
-
-        private void clearFieldsButton_Click(object sender, EventArgs e)
-        {
-            latBottomLeftTextbox.Clear();
-            latUpperLeftTextbox.Clear();
-            latUpperRightTextbox.Clear();
-            longBottomLeftTextbox.Clear();
-            longUpperLeftTextbox.Clear();
-            longUpperRightTextbox.Clear();
-
-        }
-
-        private void goBackButton_Click(object sender, EventArgs e)
-        {
-            checkFieldsTimer.Stop();        //stop and dispose the timer
-            checkFieldsTimer.Dispose();
-            this.Close();
-        }
+        #region Form load and Verify Methods
 
         private void CameraBoundsSetup_Load(object sender, EventArgs e)
         {
@@ -175,11 +103,89 @@ namespace TEST_GPS_Parsing
             latUpperRightTextbox.Text = latUpperLeftTextbox.Text;
             longBottomLeftTextbox.Text = longUpperLeftTextbox.Text;
         }
+        #endregion
+
+        #region UI and button methods
+        private void setExtentsButton_Click(object sender, EventArgs e)
+        {
+            //warn user if setting not filled
+            if (drawModeChoiceComboBox.SelectedIndex == -1 || vidSourceChoiceComboBox.SelectedIndex == -1)
+            {
+                MessageBox.Show("Please select a capture mode and/or a draw mode before continuing.", "Choose settings first!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
+            else
+            {
+
+                //The index of draw mode defines the selected item. 0=Random 1=Ordered 2=Tracking
+                switch (drawModeChoiceComboBox.SelectedIndex)
+                {
+                    case 0: drawModeChoice = DRAW_MODE_RANDOM; break;
+                    case 1: drawModeChoice = DRAW_MODE_ORDERED; break;
+                    case 2: drawModeChoice = DRAW_MODE_TRACKING; break;
+                    case 3: drawModeChoice = DRAW_MODE_REVOBJTRACK; break;
+                    default:
+                        drawModeChoice = -1;
+                        break;
+                }
+
+                //The index of video mode defines the selected item. 0=Video on PC 1=Webcam
+                switch (vidSourceChoiceComboBox.SelectedIndex)
+                {
+                    case 0: chooseVideoFileFialog.ShowDialog(); break;                   //show user file dialog first
+                    case 1: setVideoParameters(0, drawModeChoice); break;   //using webcam so no filename needed
+                    case 2: setVideoParameters(0, drawModeChoice); break;   //using webcam and GPS values
+                    default:
+                        break;
+                }
+
+                //now start the process!
+                try
+                {
+                    bool startedOK = false;
+                    startedOK = startNewVideoConsole();
+                    if (startedOK)
+                    {
+                        this.Hide();           //close the form and open the next one
+                    }
+
+                }
+                catch (NotSupportedException ns)
+                {
+                    MessageBox.Show("The video stream start failed. Details: " + ns.Message, "Something happened", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
 
 
-        //Camera modification methods---------------------------------------
 
+            }
+        }
 
+        private void chooseVideoFileFialog_FileOk(object sender, CancelEventArgs e)
+        {
+            //set the parameters of the file and arguments we'll pass 
+            //if here, we assume the user is opening a file
+            setVideoParameters(1, drawModeChoice, chooseVideoFileFialog.FileName.ToString());
+        }
+
+        private void clearFieldsButton_Click(object sender, EventArgs e)
+        {
+            latBottomLeftTextbox.Clear();
+            latUpperLeftTextbox.Clear();
+            latUpperRightTextbox.Clear();
+            longBottomLeftTextbox.Clear();
+            longUpperLeftTextbox.Clear();
+            longUpperRightTextbox.Clear();
+
+        }
+
+        private void goBackButton_Click(object sender, EventArgs e)
+        {
+            checkFieldsTimer.Stop();        //stop and dispose the timer
+            checkFieldsTimer.Dispose();
+            this.Close();
+        }
+        #endregion
+
+        #region Camera modification methods
         public bool setCameraCoordBounds(string _upperLeft0, string _upperLeft1, string _upperRight0, string _bottomLeft1)
         {
             //save the co-ordinate limits to the relative variables
@@ -243,7 +249,7 @@ namespace TEST_GPS_Parsing
             vo.fileName = filenameToOpen;       //set the filename to open on the other form
             vo.drawMode_Overlay = drawMode;             //set the draw mode on the other form
             vo.captureChoice = videoSource;     //set the video source on the other form
-            
+
             //pass parameters of the outer limits to the other UI
             vo.upperLeftBound[0] = upperLeftCoords[0];
             vo.upperLeftBound[1] = upperLeftCoords[1];
@@ -280,10 +286,12 @@ namespace TEST_GPS_Parsing
                     vo.Show();
                 }
                 return true;
-            }     
-            
+            }
+
 
         }
+        #endregion
+
 
         private void drawModeChoiceComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
