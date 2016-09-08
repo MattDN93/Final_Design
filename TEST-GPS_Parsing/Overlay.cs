@@ -187,7 +187,7 @@ namespace TEST_GPS_Parsing
         }
         #endregion
 
-        #region Drawing Onscreen Marker
+        #region Drawing Onscreen Marker (Points)
         public bool drawMarker(int current_xval, int current_yval, Mat webcamVidforOverlay, bool valHasChanged)
         {
             try
@@ -199,7 +199,9 @@ namespace TEST_GPS_Parsing
                 CvInvoke.PutText(overlayGrid, "Capture in progress. Press ESC to end.", new Point(10, 10), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(0, 0, 255), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
 
                 usingCoords = true;         //setting this to ensure the x & y values aren't touched by other thread. Bool setting is atomic
+
                 checkBounds(current_xval, current_yval, overlayGrid);       //make sure these points aren't out of bounds
+
 
                 if (valHasChanged == true)
                 {
@@ -265,6 +267,108 @@ namespace TEST_GPS_Parsing
             }
 
 
+        }
+        #endregion
+
+        #region Drawing Onscreen Marker (Polygons)
+        public bool drawPolygons(Mat webcamVidForOverlay)
+        {
+            //1. Noise removal
+            //Mat processedFrame = new Mat();         //create a new frame to process
+            Mat processedFrame = webcamVidForOverlay.Clone();
+
+            CvInvoke.CvtColor(processedFrame, processedFrame, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);     //convert to grayscale
+            Mat downSampled = new Mat();            //create a holding mat for downsampling
+            CvInvoke.PyrDown(processedFrame, downSampled);  //use pyramid downsample
+            CvInvoke.PyrUp(downSampled, processedFrame);     //upsample onto the original again
+
+            //2. Canny Edge detection
+            double thresholdLink = 120.0;           //value to force rejection/acceptance if pixel is between upper & lower thresh
+            double thresholdLow = 60.0;               //lower brightness threshold 0-> 255 where 255 = white
+            double thresholdHigh = 180;             //have a 3:1 upper:lower ratio (per Canny's paper)
+            Mat cannyResult = new Mat();            //create a holding Mat for the canny edge result
+            CvInvoke.Canny(processedFrame, cannyResult, thresholdLow, thresholdHigh);
+
+            //3. Hough Probabilistic Transform
+            //Uses probabilistic methods to determine all the polygons in the image
+            //use (rho, theta) polar coordinate plane
+            LineSegment2D[] polygonSegment = CvInvoke.HoughLinesP(
+                cannyResult,
+                1,                  //rho - distance 'vector'
+                Math.PI / 45.0,     //theta - angle 'vector'
+                20,                 //threshold for definition of 'line'
+                30,                 //minimum line width
+                10);                // gap between lines
+
+            //4. Find the contours
+            //Use a Box2D type structure list to store each instance of a found polygon
+            List<RotatedRect> rectList = new List<RotatedRect>();     //account for found rectangles
+
+            /*this object is a (x0,y0,x1,y1) vector where (x0,y0) and (x1,y1) are the respective
+            extremities of a line
+             */
+            VectorOfPoint approxContour = new VectorOfPoint();
+            using (VectorOfVectorOfPoint polyContours = new VectorOfVectorOfPoint())
+            {
+                CvInvoke.FindContours(
+                    cannyResult,        //the output of the Canny detector
+                    polyContours,       //the 2D vector of line-points
+                    null,               //not used since we don't want a hierarchy
+                    Emgu.CV.CvEnum.RetrType.List,    //retrieve ALL contours, no hierarchy
+                    Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple  //segments are compressed so only endpoints stored
+                    );
+
+                int numContours = polyContours.Size;  //add each point to an array to curve approximate
+                
+
+                for (int i = 0; i < numContours; i++)
+                {
+                    using (VectorOfPoint currentContour = polyContours[i])    //work on inner vector (i.e. the first set of points on the line)
+                    
+                        /*use ApproxPoly to find some epsilon to match all points to,
+                        Use the Ramer-Douglas-Peuker algo to simplify the currentContour curve and store it in
+                        approxContour
+                         */
+                        CvInvoke.ApproxPolyDP(
+                            currentContour,         //the current polygon
+                            approxContour,          //the resultant smoothe polygon
+                            CvInvoke.ArcLength(currentContour, true) * 0.05, //calculating epsilon by finding the arc length of start -> end
+                            true);                  //is the contour closed?
+
+                        if (approxContour.Size == 4)        //there are 4 contours -> rectangle
+                        {
+                            //for a rectangle, find internal angles, they must be 80 < angle < 100 to be a rectangle
+                            bool validRect = true;
+                            Point[] pts = approxContour.ToArray();  //make the contour into an array -> polyline
+                            LineSegment2D[] polyEdges = PointCollection.PolyLine(pts, true);
+
+                            for (int j = 0; j < polyEdges.Length; j++)  //traverse each edge and check angle
+                            {
+                                double angle = Math.Abs(
+                                   polyEdges[(j + 1) % polyEdges.Length].GetExteriorAngleDegree(polyEdges[j]));
+                                if (angle < 80 || angle > 100)
+                                {
+                                    validRect = false;
+                                    break;
+                                }
+                            }
+                            if (validRect)
+                            {
+                                rectList.Add(CvInvoke.MinAreaRect(approxContour));  //adds a rectangle to the list of them by bounding contour with a box
+                            }
+                        }
+                    
+                }
+            }
+
+            //we draw the result to OverlayGrid which is accessed by the video output methods
+            overlayGrid = webcamVidForOverlay.Clone();
+            //Now draw the found rectangles onscreen!
+            for (int i = 0; i < approxContour.Size ; i++)
+            {
+                CvInvoke.DrawContours(overlayGrid, approxContour, -1, new MCvScalar(0, 255, 0));
+            }
+            return true;
         }
         #endregion
 

@@ -160,7 +160,17 @@ namespace TEST_GPS_Parsing
                     //Now draw the markers on the overlay and display [SIMULATION VALUES HERE]
                     //this method sends a FALSE since the image updates 24+ times per second but the data only 1 per second
                     //This means the check and update of marker is only done on the TIMER TICK every 500ms, otherwise the overlay is just redrawn
-                    bool returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, false);
+                    bool returnVal = false;
+                    if (drawMode_Overlay != DRAW_MODE_REVOBJTRACK)
+                    {
+                        returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, false);     //draw marker from external input of coords
+                    }
+                    else
+                    {
+                        returnVal = ol_mark.drawPolygons(webcamVid);                                //draw marker from onscreen tracking
+                    } 
+
+
                     if (returnVal == true)
                     {
                         overlayVideoFramesBox.Image = ol_mark.overlayGrid;
@@ -216,15 +226,36 @@ namespace TEST_GPS_Parsing
                         }
                         
                     }
-                    bool returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, true);
+                    //now we draw the marker with the updated point coords
+                    bool returnVal = false;
+                    if (drawMode_Overlay != DRAW_MODE_REVOBJTRACK)
+                    {
+                        returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, true);     //draw marker from external input of coords
+                    }
+                    else
+                    {
+                        returnVal = ol_mark.drawPolygons(webcamVid);                                //draw marker from onscreen tracking
+                    }
+
+
                     if (returnVal == true && isStreaming)              //if the marker routine returned OK, draw the result in the video window
                     {
                             overlayVideoFramesBox.Image = ol_mark.overlayGrid;                       
                     }
                 }
                 else
-                {   //this is just a normaltimer tick and it's likely values haven't  changed. Thus just redraw the overlay without recalc
-                    bool returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, false);
+                {
+                    //this is just a normaltimer tick and it's likely values haven't  changed. Thus just redraw the overlay without recalc
+                    bool returnVal = false;
+                    if (drawMode_Overlay != DRAW_MODE_REVOBJTRACK)
+                    {
+                        returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, false);     //draw marker from external input of coords
+                    }
+                    else
+                    {
+                        returnVal = ol_mark.drawPolygons(webcamVid);                                //draw marker from onscreen tracking
+                    }
+
                     if (returnVal == true && isStreaming)              //if the marker routine returned OK, draw the result in the video window
                     {
                         overlayVideoFramesBox.Image = ol_mark.overlayGrid;
