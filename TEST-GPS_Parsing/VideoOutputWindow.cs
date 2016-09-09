@@ -234,7 +234,7 @@ namespace TEST_GPS_Parsing
                     }
                     else
                     {
-                        returnVal = ol_mark.drawPolygons(webcamVid);                                //draw marker from onscreen tracking
+                        //returnVal = ol_mark.drawPolygons(webcamVid);                                //draw marker from onscreen tracking
                     }
 
 
@@ -253,7 +253,7 @@ namespace TEST_GPS_Parsing
                     }
                     else
                     {
-                        returnVal = ol_mark.drawPolygons(webcamVid);                                //draw marker from onscreen tracking
+                        ////returnVal = ol_mark.drawPolygons(webcamVid);                                //draw marker from onscreen tracking
                     }
 
                     if (returnVal == true && isStreaming)              //if the marker routine returned OK, draw the result in the video window
