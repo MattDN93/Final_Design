@@ -40,7 +40,9 @@ namespace TEST_GPS_Parsing
         public double dy;                          //delta_Y from Video output class
         public double[] ulBound = new double[2];         //[0] = latitude top left; [1] = longitude top left
         public double[] olBound = new double[2];        //[0] = longitude top right; [1] = latitude bottom left
-
+        private double p;                               //(p,q) is the (lat,long) pair when scaling up onscreen coords with object track mode
+        private double q;
+         
         //---------overlay structures--------
         public Mat overlayGrid;        //"background" grid overlay matrix
 
@@ -58,8 +60,7 @@ namespace TEST_GPS_Parsing
 
         //------------Usage flags------------------------
         public bool usingCoords;
-        private double p;
-        private object q;
+
         #endregion
 
         #region Setup and Initialization
@@ -115,6 +116,8 @@ namespace TEST_GPS_Parsing
                 return true;
             }
         }
+
+
 
         //this method clears the overlay object and removes the displayed points from the screen
         public void clearScreen()
@@ -374,6 +377,16 @@ namespace TEST_GPS_Parsing
                                 CvInvoke.Circle(overlayGrid, rectCentre, 5, new MCvScalar(0, 150, 105), -1, Emgu.CV.CvEnum.LineType.AntiAlias);
                                 string centreString = "(" + rectCentre.X + "," + rectCentre.Y + ")";
                                 CvInvoke.PutText(overlayGrid, centreString, new Point(rectCentre.X + 2,rectCentre.Y + 2), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(0, 150, 105), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
+
+                                //pass the centre of the current rectangle's co-ords to the display & scaling methods
+                                scaleDisplayCoordsToGpsBounds(rectCentre.X, rectCentre.Y);
+                                //this method sets (p,q) as (lat,long) so we allocate these vars to the UI display vars
+
+                                usingCoords = true;             //set this to prevent race conditions
+                                current_pointGPS_lat = p;
+                                current_pointGPS_long = q;
+                                usingCoords = false;
+
                             }
 
 
