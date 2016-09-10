@@ -350,25 +350,33 @@ namespace TEST_GPS_Parsing
                             {
                                 double angle = Math.Abs(
                                    polyEdges[(j + 1) % polyEdges.Length].GetExteriorAngleDegree(polyEdges[j]));
-
                                 if (angle < 80 || angle > 100)
                                 {
                                     validRect = false;
                                     break;
                                 }
+
                             }
+
                             if (validRect)
                             {
                                 //if valid, travers the current array of edges and draw them to the screen
-                                for (int j = 0; j < pts.Length; j++) 
+                                for (int k = 0; k < pts.Length; k++)
                                 {
                                     CvInvoke.Polylines(overlayGrid, pts, true, new MCvScalar(0, 255, 0));
                                 }
+
+                                //find the centre of this rectangle & draw it onscreen
+                                Point rectCentre = getCentre(approxContour);
+                                CvInvoke.Circle(overlayGrid, rectCentre, 5, new MCvScalar(0, 150, 105), -1, Emgu.CV.CvEnum.LineType.AntiAlias);
+                                string centreString = "(" + rectCentre.X + "," + rectCentre.Y + ")";
+                                CvInvoke.PutText(overlayGrid, centreString, new Point(rectCentre.X + 2,rectCentre.Y + 2), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(0, 150, 105), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
                             }
+
 
                         }//approxSize == 4
 
-                      }//vector currentCOntour
+                    }//vector currentCOntour
 
                 }   //end numContours
 
@@ -380,6 +388,30 @@ namespace TEST_GPS_Parsing
             
 
             
+        }
+
+        //finds the centre of the rectangle in question - only called if a rectangle has been found i.e. pts0-4 exist
+        private Point getCentre(VectorOfPoint contour)
+        {
+            ////find the centre of the vector distance between pts 2 and 0, and 1 and 3
+            ////this centre is the rectangle centre
+            //double centreVal1 = 0.5 * (Math.Sqrt(Math.Pow((pts[2].Y - pts[0].Y), 2) + Math.Pow((pts[2].X - pts[0].X), 2)));
+            //double centreVal2 = 0.5 * (Math.Sqrt(Math.Pow((pts[3].Y - pts[1].Y), 2) + Math.Pow((pts[3].X - pts[1].X), 2)));
+
+            //double centreHyp = Math.Round((centreVal1 + centreVal2) / 2.0);
+
+            //get the moments of the contour
+            MCvMoments contourMoments =  CvInvoke.Moments(contour);
+
+            /*The moments returned are used to find the centre (x,y) co-ords
+                x = m10/m00
+                y = m01/m00
+             */
+            int centre_x = Convert.ToInt32(contourMoments.M10 / contourMoments.M00);
+            int centre_y = Convert.ToInt32(contourMoments.M01 / contourMoments.M00);
+
+            Point centre = new Point(centre_x, centre_y);
+            return centre;
         }
         #endregion
 
