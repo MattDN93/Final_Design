@@ -195,7 +195,16 @@ namespace TEST_GPS_Parsing
         {
             try
             {
-                overlayGrid = webcamVidforOverlay.Clone();      //clone the incoming frame onto the overlay
+                if (captureChoice == DRAW_MODE_REVOBJTRACK)
+                {
+                    current_xval = x;
+                    current_yval = y;
+                }
+                else
+                {
+                    overlayGrid = webcamVidforOverlay.Clone();      //clone the incoming frame onto the overlay
+                }
+                
 
                 //write static text over video
                 //void putText(Mat& img, const string& text, Point org, int fontFace, double fontScale, new MCvScalar color, int thickness=1, int lineType=8, bool bottomLeftOrigin=false )
@@ -204,6 +213,12 @@ namespace TEST_GPS_Parsing
                 usingCoords = true;         //setting this to ensure the x & y values aren't touched by other thread. Bool setting is atomic
 
                 checkBounds(current_xval, current_yval, overlayGrid);       //make sure these points aren't out of bounds
+
+                //prevent a mess onscreen by clearing the markers every 200
+                if (points.Count > 200)
+                {
+                    points.Clear();
+                }
 
 
                 if (valHasChanged == true)
@@ -218,7 +233,6 @@ namespace TEST_GPS_Parsing
                     points.Add(current_point);            //push back the current point into the vector
 
                 }
-
 
                 /*This loop does all of the above:
                     -draws the circle for each point in the vector
@@ -383,8 +397,17 @@ namespace TEST_GPS_Parsing
                                 //this method sets (p,q) as (lat,long) so we allocate these vars to the UI display vars
 
                                 usingCoords = true;             //set this to prevent race conditions
-                                current_pointGPS_lat = p;
+                                current_pointGPS_lat = p;       //set these to separate coords which will be used to display the lat/long on the left UI
                                 current_pointGPS_long = q;
+
+                                x = rectCentre.X;               //set so that the drawMarker method can display the trail of points onscreen
+                                y = rectCentre.Y;
+
+                                //TEST
+                                drawMarker(x, y, overlayGrid, true);
+                                //END TEST
+
+
                                 usingCoords = false;
 
                             }
