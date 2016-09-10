@@ -358,7 +358,10 @@ namespace TEST_GPS_Parsing
 
                             }
 
-                            if (validRect)
+                            //find the area of the polygon to avoid false positives with very small areas
+                            double polygonArea = CvInvoke.ContourArea(approxContour);
+
+                            if (validRect && polygonArea > 250.0)
                             {
                                 //if valid, travers the current array of edges and draw them to the screen
                                 for (int k = 0; k < pts.Length; k++)

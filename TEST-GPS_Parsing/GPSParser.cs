@@ -524,15 +524,23 @@ namespace TEST_GPS_Parsing
                 _waitHandleParser.Set();        //parser informs the waiting db thread lock is released so it can close the file
             }
 
-            statusTextBox.Clear();
-            statusTextBox.AppendText("GPS parsing complete or interrupted.");
-            rawLogFileTextBox.Text = "";
-            stopButton.Enabled = false;
-            startButton.Enabled = true;
-            openFileButton.Enabled = true;
-            parseIsRunning = false;
-            trayIconParsing.Text = "Logging stopped.";
-            trayIconParsing.ShowBalloonTip(5, "GPS Logging stopped", "Logging stopped or interrupted. Open a new file to restart logging.", ToolTipIcon.Error);
+            try
+            {
+                statusTextBox.Clear();
+                statusTextBox.AppendText("GPS parsing complete or interrupted.");
+                rawLogFileTextBox.Text = "";
+                stopButton.Enabled = false;
+                startButton.Enabled = true;
+                openFileButton.Enabled = true;
+                parseIsRunning = false;
+                trayIconParsing.Text = "Logging stopped.";
+                trayIconParsing.ShowBalloonTip(5, "GPS Logging stopped", "Logging stopped or interrupted. Open a new file to restart logging.", ToolTipIcon.Error);
+            }
+            catch (ObjectDisposedException)
+            {
+                parseIsRunning = false;
+            }
+           
         }
 
         private void dbLoggingThread_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
