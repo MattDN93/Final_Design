@@ -56,6 +56,8 @@ namespace TEST_GPS_Parsing
         public int randCountTime { get; private set; }
         public int x { get; private set; }
         public int y { get; private set; }
+        public bool displayCoordTextOnscreen { get; set; }
+
         Random randPointGenerator;
 
         //------------Usage flags------------------------
@@ -247,28 +249,31 @@ namespace TEST_GPS_Parsing
 
                     //----------------Draw circle marker--------
                     //void circle(Mat& img, Point center, int radius, const Scalar& color, int thickness = 1, int lineType = 8, int shift = 0)
-                    CvInvoke.Circle(overlayGrid, points[i], 5, new MCvScalar(0, 0, 255), -1, Emgu.CV.CvEnum.LineType.EightConnected, 0);
+                    CvInvoke.Circle(overlayGrid, points[i], 2, new MCvScalar(0, 0, 255), -1, Emgu.CV.CvEnum.LineType.EightConnected, 0);
 
                     //----------------Draw label next to current point
                     //void putText(Mat& img, const string& text, Point org, int fontFace, double fontScale, new MCvScalar color, int thickness=1, int lineType=8, bool bottomLeftOrigin=false )
                     //build a string with the current co-ords
 
-                    curr_posInfoString = "";        //clear previous string contents
-
-                    //IMPORTANT: Co-ords are calculated on x and y offset in (x,y) but DISPLAYED as (lat(y),long(x))
-                    curr_posInfoString = "Pt:" + i + "(" + points[i].Y + "," + points[i].X + ")";
-                    CvInvoke.PutText(overlayGrid, curr_posInfoString, points[i], Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(0, 0, 255), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
-
-                    //----------------Draw joining line-----------
-                    //Setting the below co-ords means you join lines between the CURRENT x_val and the LAST marker_x 
-                    //args (line(Mat& img, Point pt1, Point pt2, const Scalar& color, int thickness=1, int lineType=8, int shift=0))
-                    //colour is Scalar(B,G,R)
-                    if (i >= 1)
+                    
+                    if (displayCoordTextOnscreen == true)  //only draw (x,y) co-ords with non-object tracking modes
                     {
-                        CvInvoke.Line(overlayGrid, points[i], points[i - 1], new MCvScalar(0, 0, 255), 2, Emgu.CV.CvEnum.LineType.EightConnected, 0);
+                        curr_posInfoString = "";        //clear previous string contents
+                        //IMPORTANT: Co-ords are calculated on x and y offset in (x,y) but DISPLAYED as (lat(y),long(x))
+                        curr_posInfoString = "Pt:" + i + "(" + points[i].Y + "," + points[i].X + ")";
+                        CvInvoke.PutText(overlayGrid, curr_posInfoString, points[i], Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(0, 0, 255), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
                     }
 
-                }
+                        //----------------Draw joining line-----------
+                        //Setting the below co-ords means you join lines between the CURRENT x_val and the LAST marker_x 
+                        //args (line(Mat& img, Point pt1, Point pt2, const Scalar& color, int thickness=1, int lineType=8, int shift=0))
+                        //colour is Scalar(B,G,R)
+                        if (i >= 1)
+                        {
+                            CvInvoke.Line(overlayGrid, points[i], points[i - 1], new MCvScalar(0, 0, 255), 1, Emgu.CV.CvEnum.LineType.EightConnected, 0);
+                        }
+
+                    }
 
                 //this is the value stored from the last call
                 marker_x = current_xval;
@@ -288,7 +293,7 @@ namespace TEST_GPS_Parsing
         #endregion
 
         #region Drawing Onscreen Marker (Polygons)
-        public bool drawPolygons(Mat webcamVidForOverlay)
+        public bool drawPolygons(Mat webcamVidForOverlay, bool onscreenPolyhasChanged = false)
         {
             //1. Noise removal
             //Mat processedFrame = new Mat();         //create a new frame to process
@@ -300,9 +305,9 @@ namespace TEST_GPS_Parsing
             CvInvoke.PyrUp(downSampled, processedFrame);     //upsample onto the original again
 
             //2. Canny Edge detection
-            double thresholdLink = 120.0;           //value to force rejection/acceptance if pixel is between upper & lower thresh
-            double thresholdLow = 50.0;               //lower brightness threshold 0-> 255 where 255 = white
-            double thresholdHigh = 150;             //have a 3:1 upper:lower ratio (per Canny's paper)
+            double thresholdLink = 80.0;           //value to force rejection/acceptance if pixel is between upper & lower thresh
+            double thresholdLow = 40.0;               //lower brightness threshold 0-> 255 where 255 = white
+            double thresholdHigh = 120;             //have a 3:1 upper:lower ratio (per Canny's paper)
             Mat cannyResult = new Mat();            //create a holding Mat for the canny edge result
             CvInvoke.Canny(processedFrame, cannyResult, thresholdLow, thresholdHigh);
 
@@ -404,14 +409,22 @@ namespace TEST_GPS_Parsing
                                 y = rectCentre.Y;
 
                                 //TEST
-                                drawMarker(x, y, overlayGrid, true);
-                                //END TEST
+                                if (onscreenPolyhasChanged)
+                                {
+                                    drawMarker(x, y, overlayGrid, true);   //draw this point update it 
+                                }
+                                else
+                                {
+                                    drawMarker(x, y, overlayGrid, false);   //draw this point but don't update it yet
+                                }
 
+                                //END TEST
 
                                 usingCoords = false;
 
                             }
 
+                            
 
                         }//approxSize == 4
 

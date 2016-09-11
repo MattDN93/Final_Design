@@ -131,6 +131,16 @@ namespace TEST_GPS_Parsing
                 ol_mark.gridHeight = vidPixelHeight;
                 ol_mark.dx = delta_x;
                 ol_mark.dy = delta_y;
+
+                if (drawMode_Overlay == DRAW_MODE_REVOBJTRACK)      //the (x,y) coords aren't drawn onscreen if using the object based tracking
+                {
+                    ol_mark.displayCoordTextOnscreen = false;
+                }
+                else
+                {
+                    ol_mark.displayCoordTextOnscreen = true;
+                }
+                
                 for (int i = 0; i <= 1; i++)
                 {
                     ol_mark.ulBound[i] = upperLeftBound[i];
@@ -140,6 +150,8 @@ namespace TEST_GPS_Parsing
                 camStreamCapture.Start();                           //immediately start capturing
                 isStreaming = true;
                 startCaptureButton.Text = "Stop Capture";
+
+                valHasChanged = false;
             }
 
         }
@@ -167,7 +179,14 @@ namespace TEST_GPS_Parsing
                     }
                     else
                     {
-                        returnVal = ol_mark.drawPolygons(webcamVid);                                //draw marker from onscreen tracking
+                        if (valHasChanged)                                          //as long as timer tick, update the marker - gives persistence of markers without cluttering screen
+                        {
+                            returnVal = ol_mark.drawPolygons(webcamVid, true);
+                        }
+                        else
+                        {
+                            returnVal = ol_mark.drawPolygons(webcamVid, false);                                //draw marker from onscreen tracking
+                        }
                     } 
 
 
@@ -208,6 +227,8 @@ namespace TEST_GPS_Parsing
                     ol_mark.generateSimPts();
                 }*/
 
+                valHasChanged = !valHasChanged;                 //swap the states of the valHasChanged
+
                 if (incoming_lat != 0.0 && incoming_long != 0.0)    //this means that this method was called from the parser not by the timer
                 {
                     bool varsInUse = false;
@@ -234,7 +255,6 @@ namespace TEST_GPS_Parsing
                     }
                     else
                     {
-                        ////returnVal = ol_mark.drawPolygons(webcamVid);                                //draw marker from onscreen tracking
                         ////returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, ol_mark.overlayGrid, true);          //x and y here are set from the drawPolygon method
                     }
 
@@ -254,7 +274,7 @@ namespace TEST_GPS_Parsing
                     }
                     else
                     {
-                        ////returnVal = ol_mark.drawPolygons(webcamVid);                                //draw marker from onscreen tracking
+                        ////returnVal = ol_mark.drawPolygons(webcamVid, true);                                //draw marker from onscreen tracking
                         ////returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, ol_mark.overlayGrid, false);
                     }
 
