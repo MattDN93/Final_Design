@@ -20,7 +20,6 @@ namespace TEST_GPS_Parsing
         //*************************************
         public string inputLogFilename;
         bool dbLoggingActive = true;
-        bool newLogEveryStart = true;                 //TRUE = makes new file every time start is clicked; FALSE = once per session
         bool parseIsRunning = false;                  //bool to denote whether the parser is in progress or not.
         private static int resourceInUse= 0;          //Flag to manage threads and resource locks  
 
@@ -43,7 +42,10 @@ namespace TEST_GPS_Parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
         int duplicatePacketCounter = 1;                     //used to ensure duplicate packets aren't saved into the DB
-                                                            //private XmlWriter fileStream;
+
+        public bool newLogEveryStart { get; private set; }
+
+        //private XmlWriter fileStream;
         #endregion
 
         #region Class Instantiation

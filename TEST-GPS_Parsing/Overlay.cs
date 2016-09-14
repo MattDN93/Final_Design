@@ -349,7 +349,7 @@ namespace TEST_GPS_Parsing
                     using (VectorOfPoint currentContour = polyContours[i])    //work on inner vector (i.e. the first set of points on the line)
                     { 
                     //Now draw the found rectangles onscreen!
-                    CvInvoke.DrawContours(overlayGrid, polyContours, -1, new MCvScalar(150, 105, 0), 1, Emgu.CV.CvEnum.LineType.EightConnected, null);
+                    //CvInvoke.DrawContours(overlayGrid, polyContours, -1, new MCvScalar(150, 105, 0), 1, Emgu.CV.CvEnum.LineType.EightConnected, null);
 
                     /*use ApproxPoly to find some epsilon to match all points to,
                     Use the Ramer-Douglas-Peuker algo to simplify the currentContour curve and store it in

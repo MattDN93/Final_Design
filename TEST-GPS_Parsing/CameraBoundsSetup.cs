@@ -52,6 +52,13 @@ namespace TEST_GPS_Parsing
 
         private void checkFieldsTimer_Tick(object sender, EventArgs e)
         {
+
+            //check default camera status and display on UI
+            if (vo != null)
+            {
+                centreCamStatusLabel.Text = "Ready / Available";
+            }
+
             
             if (longUpperLeftTextbox.Text == "" || latUpperLeftTextbox.Text == "" || latBottomLeftTextbox.Text == "" || longUpperRightTextbox.Text == "" )
             {
@@ -111,12 +118,13 @@ namespace TEST_GPS_Parsing
             //warn user if setting not filled
             if (drawModeChoiceComboBox.SelectedIndex == -1 || vidSourceChoiceComboBox.SelectedIndex == -1)
             {
-                MessageBox.Show("Please select a capture mode and/or a draw mode before continuing.", "Choose settings first!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("Please select a capture mode and/or a draw mode before continuing.",
+                    "Choose settings first!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation,MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
             }
             else
             {
 
-                //The index of draw mode defines the selected item. 0=Random 1=Ordered 2=Tracking
+                //The index of draw mode defines the selected item. 0=Random 1=Ordered 2=Tracking 3=object tracking onscreen
                 switch (drawModeChoiceComboBox.SelectedIndex)
                 {
                     case 0: drawModeChoice = DRAW_MODE_RANDOM; break;
@@ -133,7 +141,7 @@ namespace TEST_GPS_Parsing
                 {
                     case 0: chooseVideoFileFialog.ShowDialog(); break;                   //show user file dialog first
                     case 1: setVideoParameters(0, drawModeChoice); break;   //using webcam so no filename needed
-                    case 2: setVideoParameters(0, drawModeChoice); break;   //using webcam and GPS values
+                    case 2: setVideoParameters(1, drawModeChoice); break;   //using webcam and GPS values
                     default:
                         break;
                 }
@@ -151,7 +159,8 @@ namespace TEST_GPS_Parsing
                 }
                 catch (NotSupportedException ns)
                 {
-                    MessageBox.Show("The video stream start failed. Details: " + ns.Message, "Something happened", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("The video stream start failed. Details: " + ns.Message,
+                        "Something happened", MessageBoxButtons.OK, MessageBoxIcon.Error,MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
                 }
 
 
@@ -258,7 +267,8 @@ namespace TEST_GPS_Parsing
 
             if (vo.Visible == true)
             {
-                MessageBox.Show("Only one instance of the video capture window may be open at a time. Close the other first.", "Instance already running!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Only one instance of the video capture window may be open at a time. Close the other first.", 
+                    "Instance already running!", MessageBoxButtons.OK, MessageBoxIcon.Warning,MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
                 return false;
             }
             else
@@ -281,7 +291,7 @@ namespace TEST_GPS_Parsing
                     vo.upperLeftBound[1] = upperLeftCoords[1];
                     vo.outerLimitBound[0] = outerLimitCoords[0];
                     vo.outerLimitBound[1] = outerLimitCoords[1];
-                    vo.TopMost = true;      //set the window to the top and make it visible
+                    vo.Focus();      //set the window to the top and make it visible
                     vo.Visible = true;
                     vo.Show();
                 }

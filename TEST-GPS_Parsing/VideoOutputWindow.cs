@@ -22,6 +22,8 @@ namespace TEST_GPS_Parsing
         public Mat webcamVid;                  //create a Mat object to manipulate
         public Mat overlayVid;
         private Capture camStreamCapture = null;       //the OpenCV capture stream
+        private Capture cscLeft = null;         //left and right capture objects
+        private Capture cscRight = null;            
         private Overlay ol_mark;                //object for the overlay of points
 
         protected string latitudeOutOfRangeOverlayMessage = "";      //strings for the overlay class to write into
@@ -61,24 +63,46 @@ namespace TEST_GPS_Parsing
         #endregion
 
         #region Initializer and Setup
-        public VideoOutputWindow()
+        public VideoOutputWindow()                              //this is called before the window is even launched
         {
             InitializeComponent();
-            CvInvoke.UseOpenCL = false;
+
+        }
+
+        public void initCamStreams()
+        {
+            //tries to initialise the default camera and the first adjacent left and right
+            
             try
             {
+                //initialise the default camera
                 camStreamCapture = new Capture();               //instantiate new capture object
                 camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
                 webcamVid = new Mat();                          //create the webcam mat object
+
+                //try initialise the left & right cameras - Android in this test
+                cscLeft = new Capture("http://192.168.0.4:8080/video");
+                cscRight = new Capture(CaptureType.Android);
+            }
+            catch (NullReferenceException nr)
+            {
+
+                throw nr;
+            }
+
+        }
+
+        private void VideoOutputWindow_Load(object sender, EventArgs e)
+        {
+            CvInvoke.UseOpenCL = false;
+            try
+            {
+                initCamStreams();
             }
             catch (NullReferenceException excpt)
             {
                 MessageBox.Show(excpt.Message);
             }
-        }
-
-        private void VideoOutputWindow_Load(object sender, EventArgs e)
-        {
             //recreate the objects if they were disposed by the last call
             if (camStreamCapture == null || webcamVid == null)
             {
@@ -199,7 +223,7 @@ namespace TEST_GPS_Parsing
             }
             catch (Exception e)
             {
-                MessageBox.Show("Capturing failed. Reason: " + e.Message, "Something happened!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Capturing failed. Reason: " + e.Message, "Something happened!", MessageBoxButtons.OK, MessageBoxIcon.Error,MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
                 isStreaming = false;
                 startCaptureButton.Text = "(Re)Start Capture";
                 ReleaseData();      //something failed so release the data
@@ -383,7 +407,8 @@ namespace TEST_GPS_Parsing
                     }
                     catch (Exception re)
                     {
-                        MessageBox.Show("Capturing still failed. Try again later. Reason: " + re.Message, "Something happened!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Capturing still failed. Try again later. Reason: " + re.Message, "Something happened!", 
+                            MessageBoxButtons.OK, MessageBoxIcon.Error,MessageBoxDefaultButton.Button1 ,(MessageBoxOptions)0x40000);
                         isStreaming = false;
                         startCaptureButton.Text = "(Re)Start Capture";
                         ReleaseData();      //something failed so release the data
@@ -414,7 +439,9 @@ namespace TEST_GPS_Parsing
         {
             if (isStreaming)
             {
-                MessageBox.Show("Capture is still in progress. Stop it first then close this window.", "Stop capture first!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Capture is still in progress. Stop it first then close this window.",
+                    "Stop capture first!", MessageBoxButtons.OK, MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
                 e.Cancel = true;        //stop the form closing
             }
             else
