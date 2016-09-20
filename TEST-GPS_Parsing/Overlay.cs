@@ -46,6 +46,12 @@ namespace TEST_GPS_Parsing
         //---------overlay structures--------
         public Mat overlayGrid;        //"background" grid overlay matrix
 
+        //---------flags for switching cam---
+        public int camSwitchStatus = -1;
+        static int GO_CAM_LEFT = 0;
+        static int GO_CAM_RIGHT = 1;
+        static int STAY_CAM_CURRENT = 2;
+
 
         //---------strings for OSD------------
         string curr_posInfoString;
@@ -214,7 +220,8 @@ namespace TEST_GPS_Parsing
 
                 usingCoords = true;         //setting this to ensure the x & y values aren't touched by other thread. Bool setting is atomic
 
-                checkBounds(current_xval, current_yval, overlayGrid);       //make sure these points aren't out of bounds
+                //analyse the results and set the variable to allow the video output window to switch the camera feed if needed
+                camSwitchStatus = checkBounds(current_xval, current_yval, overlayGrid);       //make sure these points aren't out of bounds             
 
                 //prevent a mess onscreen by clearing the markers every 200
                 if (points.Count > 200)
@@ -469,7 +476,8 @@ namespace TEST_GPS_Parsing
 
         #region Checking Bounds
         //This method checks the location of the points on the grid and displays markers if it exceeds these points
-        public void checkBounds(int curr_x, int curr_y, Mat overlay)
+        //it returns a value indicating if the current feed should be switched or not
+        public int checkBounds(int curr_x, int curr_y, Mat overlay)
         {
             //the overlay grid gives us the size of the video so that we can determine where the limits are
             //Overlay.cols = number of x-colums (pixels) in the image
@@ -524,6 +532,10 @@ namespace TEST_GPS_Parsing
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(40, 40), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
                     latitudeOutOfRangeOverlayMessage = "Latitude Out Of Range: " + curr_y.ToString();
                     longitudeOutOfRangeOverlayMessage = "Longitude Out Of Range:" + curr_x.ToString();
+
+                    //send back command to switch left
+                    return GO_CAM_LEFT;
+
                 }
                 else if (curr_y > 0 && curr_y < yLimit)
                 {
@@ -532,6 +544,10 @@ namespace TEST_GPS_Parsing
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(40, curr_y), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
                     latitudeOutOfRangeOverlayMessage = "Latitude in range - Switch Cam Left";
                     longitudeOutOfRangeOverlayMessage = "Longitude " + curr_x.ToString() + " OOR - Switch Cam Left";
+
+                    //send back command to switch left
+                    return GO_CAM_LEFT;
+
                 }
                 else if (curr_y > yLimit)
                 {
@@ -540,6 +556,9 @@ namespace TEST_GPS_Parsing
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(40, yLimit - 40), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
                     latitudeOutOfRangeOverlayMessage = "Latitude Out Of Range: " + curr_y.ToString();
                     longitudeOutOfRangeOverlayMessage = "Longitude Out Of Range:" + curr_x.ToString();
+
+                    //send back command to switch left
+                    return GO_CAM_LEFT;
                 }
 
             }
@@ -552,6 +571,9 @@ namespace TEST_GPS_Parsing
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(curr_x, 40), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
                     latitudeOutOfRangeOverlayMessage = "Latitude out of range";
                     longitudeOutOfRangeOverlayMessage = "Longitude " + curr_y.ToString() + " in range above";
+
+                    //send back command to stay on current frame
+                    return STAY_CAM_CURRENT;
                 }
                 else if (curr_y > yLimit)
                 {
@@ -560,6 +582,9 @@ namespace TEST_GPS_Parsing
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(curr_x, yLimit - 40), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
                     latitudeOutOfRangeOverlayMessage = "Latitude out of range";
                     longitudeOutOfRangeOverlayMessage = "Longitude " + curr_y.ToString() + " in range below";
+
+                    //send back command to stay on current frame
+                    return STAY_CAM_CURRENT;
                 }
             }
             else if (curr_x > xLimit)                   //narrow to F,G,H
@@ -571,6 +596,9 @@ namespace TEST_GPS_Parsing
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(xLimit - 100, 50), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
                     latitudeOutOfRangeOverlayMessage = "Latitude Out Of Range: " + curr_y.ToString();
                     longitudeOutOfRangeOverlayMessage = "Longitude Out Of Range:" + curr_x.ToString();
+
+                    //send back command to switch right
+                    return GO_CAM_RIGHT;
                 }
                 else if (curr_y > 0 && curr_y < yLimit)
                 {
@@ -579,6 +607,9 @@ namespace TEST_GPS_Parsing
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(xLimit - 100, curr_y), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
                     latitudeOutOfRangeOverlayMessage = "Latitude in range - Switch Cam Right";
                     longitudeOutOfRangeOverlayMessage = "Longitude " + curr_x.ToString() + " OOR - Switch Cam Right";
+
+                    //send back command to switch right
+                    return GO_CAM_RIGHT;
                 }
                 else if (curr_y > yLimit)
                 {
@@ -587,16 +618,20 @@ namespace TEST_GPS_Parsing
                     CvInvoke.PutText(overlayGrid, "Offscreen here", new Point(xLimit - 100, yLimit - 40), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
                     latitudeOutOfRangeOverlayMessage = "Latitude Out Of Range: " + curr_y.ToString();
                     longitudeOutOfRangeOverlayMessage = "Longitude Out Of Range:" + curr_x.ToString();
+
+                    //send back command to switch right
+                    return GO_CAM_RIGHT;
                 }
                 else
                 {
                     //clear the out of range messages since nothing was out of range
                     longitudeOutOfRangeOverlayMessage = "";
-                    latitudeOutOfRangeOverlayMessage = ""; 
+                    latitudeOutOfRangeOverlayMessage = "";
+                    return STAY_CAM_CURRENT; 
                 }
 
             }
-
+            return STAY_CAM_CURRENT;      //not out of bounds anywhere
         }
         #endregion
 

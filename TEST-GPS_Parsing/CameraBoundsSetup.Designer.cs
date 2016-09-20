@@ -316,7 +316,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(157, 338);
+            this.label8.Location = new System.Drawing.Point(102, 338);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(52, 17);
             this.label8.TabIndex = 14;
@@ -326,7 +326,7 @@
             // 
             this.leftCamStatusLabel.AutoSize = true;
             this.leftCamStatusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.leftCamStatusLabel.Location = new System.Drawing.Point(167, 365);
+            this.leftCamStatusLabel.Location = new System.Drawing.Point(102, 365);
             this.leftCamStatusLabel.Name = "leftCamStatusLabel";
             this.leftCamStatusLabel.Size = new System.Drawing.Size(26, 17);
             this.leftCamStatusLabel.TabIndex = 15;
@@ -336,7 +336,7 @@
             // 
             this.centreCamStatusLabel.AutoSize = true;
             this.centreCamStatusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.centreCamStatusLabel.Location = new System.Drawing.Point(578, 245);
+            this.centreCamStatusLabel.Location = new System.Drawing.Point(549, 249);
             this.centreCamStatusLabel.Name = "centreCamStatusLabel";
             this.centreCamStatusLabel.Size = new System.Drawing.Size(26, 17);
             this.centreCamStatusLabel.TabIndex = 16;
@@ -356,7 +356,7 @@
             // 
             this.rightCamStatusLabel.AutoSize = true;
             this.rightCamStatusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rightCamStatusLabel.Location = new System.Drawing.Point(933, 365);
+            this.rightCamStatusLabel.Location = new System.Drawing.Point(881, 365);
             this.rightCamStatusLabel.Name = "rightCamStatusLabel";
             this.rightCamStatusLabel.Size = new System.Drawing.Size(26, 17);
             this.rightCamStatusLabel.TabIndex = 19;
@@ -365,7 +365,7 @@
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(923, 338);
+            this.label13.Location = new System.Drawing.Point(881, 338);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(52, 17);
             this.label13.TabIndex = 18;

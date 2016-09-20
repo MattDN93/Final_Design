@@ -21,9 +21,10 @@ namespace TEST_GPS_Parsing
         //-----------------Matrix and Capture Objects----------
         public Mat webcamVid;                  //create a Mat object to manipulate
         public Mat overlayVid;
-        private Capture camStreamCapture = null;       //the OpenCV capture stream
-        private Capture cscLeft = null;         //left and right capture objects
-        private Capture cscRight = null;            
+        private Capture camStreamCapture = null;        //the current OpenCV capture stream
+        public Capture cscLeft = null;                  //left camera capture
+        public Capture cscRight = null;                 //right camera capture
+        public Capture cscCentre = null;                //centre camera capture 
         private Overlay ol_mark;                //object for the overlay of points
 
         protected string latitudeOutOfRangeOverlayMessage = "";      //strings for the overlay class to write into
@@ -75,14 +76,15 @@ namespace TEST_GPS_Parsing
             
             try
             {
-                //initialise the default camera
-                camStreamCapture = new Capture();               //instantiate new capture object
+                //initialise the centre, left and right camera objects - set as needed
+                cscCentre = new Capture(1);                                     //CENTRE CAMERA FRAME
+                cscLeft = new Capture("http://192.168.0.10:8080/video");        //LEFT CAMERA FRAME
+                cscRight = new Capture(0);                                      //RIGHT CAMERA FRAME
+
+                camStreamCapture = cscCentre;                   //initially set the centre cam to the current 
                 camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
                 webcamVid = new Mat();                          //create the webcam mat object
 
-                //try initialise the left & right cameras - Android in this test
-                cscLeft = new Capture("http://192.168.0.4:8080/video");
-                cscRight = new Capture(CaptureType.Android);
             }
             catch (NullReferenceException nr)
             {
@@ -97,18 +99,21 @@ namespace TEST_GPS_Parsing
             CvInvoke.UseOpenCL = false;
             try
             {
-                initCamStreams();
+                if (camStreamCapture == null)
+                {
+                    initCamStreams();
+                }
+                
             }
             catch (NullReferenceException excpt)
             {
                 MessageBox.Show(excpt.Message);
             }
+
             //recreate the objects if they were disposed by the last call
             if (camStreamCapture == null || webcamVid == null)
             {
-                camStreamCapture = new Capture();               //instantiate new capture object
-                camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
-                webcamVid = new Mat();                          //create the webcam mat object
+                initCamStreams();
             }
 
             //the drawMode, fileName and videoSource are set by the other form
@@ -188,8 +193,24 @@ namespace TEST_GPS_Parsing
             //Mat webcamVid = new Mat();
             try
             {
-                if (!rawVideoFramesBox.IsDisposed)      //make sure not to grab a frame if the window is closig
+                if (!rawVideoFramesBox.IsDisposed && isStreaming)      //make sure not to grab a frame if the window is closig
                 {
+                    //set camStreamCapture (the central selected camera) to the correct cam (switch if needed) based on co-ord bound checks
+                    //only switch capture objects if a GPS value has been updated!
+                    if (valHasChanged)
+                    {
+                        switch (ol_mark.camSwitchStatus)
+                        {
+                            case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
+                            case 0: screenStateSwitch(0); break;  //switch the current camera to the left
+                            case 1: screenStateSwitch(1); break; //switch the current camera to the right
+                            case 2: break;      //the feed need not be changed from the current one (since the value is in this screen)
+                            default:
+                                break;
+                        }
+                    }
+                    
+
                     camStreamCapture.Retrieve(webcamVid, 0);    //grab a frame and store to webcamVid matrix
                     rawVideoFramesBox.Image = webcamVid;        //display on-screen
 
@@ -232,13 +253,57 @@ namespace TEST_GPS_Parsing
 
         }
 
+        private void screenStateSwitch(int switchCase)
+        {
+            if (isStreaming)
+            {
+                //switchCase = 0 => switch left; switchCase = 1 => switch right
+
+                if (switchCase == 0)        //means a switch left is requested
+                {
+                    if (camStreamCapture.Equals(cscLeft))    //if the current frame is already set to the left
+                    {
+                        return;     //keep leftmost camera frame
+                    }
+                    else if (camStreamCapture.Equals(cscCentre)) //if the current frame is set to the centre camera
+                    {
+                        cscCentre = camStreamCapture;       //set the current stream to centre
+                        camStreamCapture = cscLeft;         //switch camera left by one screen
+                    }
+                    else if (camStreamCapture.Equals(cscRight))
+                    {
+                        cscRight = camStreamCapture;        //set the current stream to right
+                        camStreamCapture = cscCentre;       //switch camera left by one screen to centre
+                    }
+                }
+                else if (switchCase == 1)       //means a switch right is requested
+                {
+
+                    if (camStreamCapture.Equals(cscRight))    //if the current frame is already set to the right
+                    {
+                        return;     //keep leftmost camera frame
+                    }
+                    else if (camStreamCapture.Equals(cscCentre)) //if the current frame is set to the centre camera
+                    {
+                        cscCentre = camStreamCapture;       //set current stream to centre
+                        camStreamCapture = cscRight;         //switch camera right by one screen
+                    }
+                    else if (camStreamCapture.Equals(cscLeft))
+                    {
+                        cscLeft = camStreamCapture;
+                        camStreamCapture = cscCentre;       //switch camera right by one screen to centre
+                    }
+                }
+            }
+
+        }
+
         //This recalculates the incoming datapoints once every 500ms since GPS data only arrives that often
         private void refreshOverlay_Tick(object sender, EventArgs e)
         {
 
                 overlayTick();      //call the overlay update without passing GPS coords
            
-
         }
 
         public void overlayTick(double incoming_lat= 0.0, double incoming_long = 0.0)
@@ -390,10 +455,11 @@ namespace TEST_GPS_Parsing
         {
                 if (isStreaming)
                 {  //stop the capture
+                    isStreaming = false;
                     startCaptureButton.Text = "Start Capture";
                     camStreamCapture.Pause();
                     ol_mark.clearScreen();      //remove the marker and lines off the screen.
-                    isStreaming = false;
+                    
                 }
                 else
                 {
@@ -418,14 +484,13 @@ namespace TEST_GPS_Parsing
 
         }
 
-        private void ReleaseData()
+        public void ReleaseData()
         {
-            if (camStreamCapture != null)
-            {
-                camStreamCapture.Dispose();
-                rawVideoFramesBox.Dispose();
-                //this.Dispose();
-            }
+            if (camStreamCapture != null) { camStreamCapture.Dispose();}
+            if (cscLeft != null) { cscLeft.Dispose(); }
+            if (cscRight != null) { cscRight.Dispose(); }
+
+            rawVideoFramesBox.Dispose();
                 
         }
 
@@ -447,7 +512,8 @@ namespace TEST_GPS_Parsing
             else
             {
                 this.Visible = false;
-                ReleaseData();      //try to release the capture
+                this.Dispose();
+                //ReleaseData();      //try to release the capture
             }
             
             

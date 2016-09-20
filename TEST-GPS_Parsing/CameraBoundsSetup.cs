@@ -48,18 +48,22 @@ namespace TEST_GPS_Parsing
         {
             //checkFieldsTimer = new Timer(); //instantiate the timer
             checkFieldsTimer.Start();       //start the timer to check status of the entry of points
+            vo.initCamStreams();
         }
 
         private void checkFieldsTimer_Tick(object sender, EventArgs e)
         {
 
             //check default camera status and display on UI
-            if (vo != null)
-            {
-                centreCamStatusLabel.Text = "Ready / Available";
-            }
+            if (vo != null)         {    centreCamStatusLabel.Text = "Ready / Available";           }
+            else                    {    centreCamStatusLabel.Text = "Not Available";               }
+            if (vo.cscLeft != null && vo.cscLeft.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) {    leftCamStatusLabel.Text = "Ready / Available";             }
+            else                    {    leftCamStatusLabel.Text = "Not Available";  }
+            if (vo.cscRight != null && vo.cscRight.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) {    rightCamStatusLabel.Text = "Ready / Available";            }
+            else                    {    rightCamStatusLabel.Text = "Not Available"; }
 
-            
+
+
             if (longUpperLeftTextbox.Text == "" || latUpperLeftTextbox.Text == "" || latBottomLeftTextbox.Text == "" || longUpperRightTextbox.Text == "" )
             {
                 setExtentsButton.Enabled = false;      //keep disabled until all fields are filled so they can't start prematurely
@@ -190,6 +194,7 @@ namespace TEST_GPS_Parsing
         {
             checkFieldsTimer.Stop();        //stop and dispose the timer
             checkFieldsTimer.Dispose();
+            vo.ReleaseData();               //dispose of the capture methods
             this.Close();
         }
         #endregion
