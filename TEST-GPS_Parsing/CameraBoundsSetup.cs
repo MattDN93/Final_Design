@@ -55,7 +55,7 @@ namespace TEST_GPS_Parsing
         {
 
             //check default camera status and display on UI
-            if (vo != null)         {    centreCamStatusLabel.Text = "Ready / Available";           }
+            if (vo != null && vo.cscCentre.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0)       {    centreCamStatusLabel.Text = "Ready / Available";           }
             else                    {    centreCamStatusLabel.Text = "Not Available";               }
             if (vo.cscLeft != null && vo.cscLeft.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) {    leftCamStatusLabel.Text = "Ready / Available";             }
             else                    {    leftCamStatusLabel.Text = "Not Available";  }
@@ -287,18 +287,18 @@ namespace TEST_GPS_Parsing
                 }
                 catch (ObjectDisposedException d)
                 {
-                    vo.fileName = filenameToOpen;       //set the filename to open on the other form
-                    vo.drawMode_Overlay = drawMode;             //set the draw mode on the other form
-                    vo.captureChoice = videoSource;     //set the video source on the other form
+                    //vo.fileName = filenameToOpen;       //set the filename to open on the other form
+                    //vo.drawMode_Overlay = drawMode;             //set the draw mode on the other form
+                    //vo.captureChoice = videoSource;     //set the video source on the other form
 
-                    //pass parameters of the outer limits to the other UI
-                    vo.upperLeftBound[0] = upperLeftCoords[0];
-                    vo.upperLeftBound[1] = upperLeftCoords[1];
-                    vo.outerLimitBound[0] = outerLimitCoords[0];
-                    vo.outerLimitBound[1] = outerLimitCoords[1];
-                    vo.Focus();      //set the window to the top and make it visible
-                    vo.Visible = true;
-                    vo.Show();
+                    ////pass parameters of the outer limits to the other UI
+                    //vo.upperLeftBound[0] = upperLeftCoords[0];
+                    //vo.upperLeftBound[1] = upperLeftCoords[1];
+                    //vo.outerLimitBound[0] = outerLimitCoords[0];
+                    //vo.outerLimitBound[1] = outerLimitCoords[1];
+                    //vo.Focus();      //set the window to the top and make it visible
+                    //vo.Visible = true;
+                    //vo.Show();
                 }
                 return true;
             }

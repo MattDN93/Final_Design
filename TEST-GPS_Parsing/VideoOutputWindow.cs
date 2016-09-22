@@ -46,7 +46,8 @@ namespace TEST_GPS_Parsing
         protected int vidPixelHeight;
 
         //-----------------Camera GPS boundary variables--------
-               
+        //vector of vectors allows upperLeftBound & outerLimitBound to exist for all camera frames
+
         public double[] upperLeftBound = new double[2];         //[0] = latitude top left; [1] = longitude top left
         public double[] outerLimitBound = new double[2];        //[0] = longitude top right; [1] = latitude bottom left
         public double delta_y;                                  //range of latitude in camera frame
@@ -73,12 +74,12 @@ namespace TEST_GPS_Parsing
         public void initCamStreams()
         {
             //tries to initialise the default camera and the first adjacent left and right
-            
+
             try
             {
                 //initialise the centre, left and right camera objects - set as needed
-                cscCentre = new Capture(1);                                     //CENTRE CAMERA FRAME
-                cscLeft = new Capture(2);                                       //LEFT CAMERA FRAME
+                cscCentre = new Capture(2);                                     //CENTRE CAMERA FRAME
+                cscLeft = new Capture(1);                                       //LEFT CAMERA FRAME
                 cscRight = new Capture(0);                                      //RIGHT CAMERA FRAME
 
                 camStreamCapture = cscCentre;                   //initially set the centre cam to the current 
@@ -103,11 +104,12 @@ namespace TEST_GPS_Parsing
                 {
                     initCamStreams();
                 }
-                
+
             }
             catch (NullReferenceException excpt)
             {
-                MessageBox.Show(excpt.Message);
+                MessageBox.Show("A capture open error occurred: " + excpt.Message);
+                return;
             }
 
             //recreate the objects if they were disposed by the last call
@@ -115,6 +117,24 @@ namespace TEST_GPS_Parsing
             {
                 initCamStreams();
             }
+
+            //Checks if the minimum number of cameras are available
+            if (cscLeft.GetCaptureProperty(CapProp.FrameHeight) == 0 ||
+                cscRight.GetCaptureProperty(CapProp.FrameHeight) == 0 ||
+                cscCentre.GetCaptureProperty(CapProp.FrameHeight) == 0)
+            {
+                DialogResult continueAnyway = MessageBox.Show("Error - at least 3 cameras must be operational for this program to work optimally. If you choose to continue, you might encounter unexpected problems. Continue without 3 cameras?", "Camera Load error!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (continueAnyway == DialogResult.No)
+                {
+                    isStreaming = false;
+                    this.Visible = false;
+                    this.Dispose();
+                    //ReleaseData();
+                    return;
+                }
+
+            }
+            
 
             //the drawMode, fileName and videoSource are set by the other form
             //evaluates what the user chose from the bounds setup box
@@ -139,7 +159,7 @@ namespace TEST_GPS_Parsing
             frameHeightLabel.Text = vidPixelHeight.ToString();      //get the video parameters
             frameWidthLabel.Text = vidPixelWidth.ToString();
 
-            //display the limits set on previous window
+            //display the limits set on previous window for the current camera (assumed to be the centre)
             //upperLeftBound[0] = latitude top left; [1] = longitude top left
             //OuterLimitBound[0] = longitude top right; [1] = latitude bottom left
             latTopLeftLabel.Text = upperLeftBound[0].ToString();
@@ -208,15 +228,15 @@ namespace TEST_GPS_Parsing
                             default:
                                 break;
                         }
-                        ol_mark.camSwitchStatus = 2;        //reset to stay on current
+                        ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
                     }
                     
 
                     camStreamCapture.Retrieve(webcamVid, 0);    //grab a frame and store to webcamVid matrix
                     rawVideoFramesBox.Image = webcamVid;        //display on-screen
 
-                    //Now draw the markers on the overlay and display [SIMULATION VALUES HERE]
-                    //this method sends a FALSE since the image updates 24+ times per second but the data only 1 per second
+                    //Now draw the markers on the overlay and display 
+                    //this method sends a FALSE since the image updates 24+ times per second but the data only arrives ~once per second from GPS
                     //This means the check and update of marker is only done on the TIMER TICK every 500ms, otherwise the overlay is just redrawn
                     bool returnVal = false;
                     if (drawMode_Overlay != DRAW_MODE_REVOBJTRACK)
@@ -268,32 +288,54 @@ namespace TEST_GPS_Parsing
                     }
                     else if (camStreamCapture.Equals(cscCentre)) //if the current frame is set to the centre camera
                     {
+                        //----------------Capture object switch--------------
                         cscCentre = camStreamCapture;       //set the current stream to centre
                         camStreamCapture = cscLeft;         //switch camera left by one screen
+                        
+                        //----------------Coordinate bounds switch-----------
+
                     }
                     else if (camStreamCapture.Equals(cscRight))
                     {
+                        //----------------Capture object switch--------------
                         cscRight = camStreamCapture;        //set the current stream to right
                         camStreamCapture = cscCentre;       //switch camera left by one screen to centre
+
+                        //----------------Coordinate bounds switch-----------
+
                     }
+
+
+
+
                 }
                 else if (switchCase == 1)       //means a switch right is requested
                 {
 
                     if (camStreamCapture.Equals(cscRight))    //if the current frame is already set to the right
                     {
-                        return;     //keep leftmost camera frame
+                        return;     //keep rightmost camera frame
                     }
                     else if (camStreamCapture.Equals(cscCentre)) //if the current frame is set to the centre camera
                     {
+                        //----------------Capture object switch--------------
                         cscCentre = camStreamCapture;       //set current stream to centre
                         camStreamCapture = cscRight;         //switch camera right by one screen
+
+                        //----------------Coordinate bounds switch-----------
+
                     }
-                    else if (camStreamCapture.Equals(cscLeft))
+                    else if (camStreamCapture.Equals(cscLeft)) //if curent frame is set to the left
                     {
+                        //----------------Capture object switch--------------
                         cscLeft = camStreamCapture;
                         camStreamCapture = cscCentre;       //switch camera right by one screen to centre
+
+                        //----------------Coordinate bounds switch-----------
+
                     }
+
+
                 }
             }
             switchCase = 2;        //set back to "current"
@@ -311,16 +353,10 @@ namespace TEST_GPS_Parsing
         {
             if (ol_mark != null)
             {
-                //SIMULATION - enable to generate random points
-                /*if (isStreaming)
-                {
-                    ol_mark.generateSimPts();
-                }*/
 
-                valHasChanged = !valHasChanged;                 //swap the states of the valHasChanged
-
-                if (incoming_lat != 0.0 && incoming_long != 0.0)    //this means that this method was called from the parser not by the timer
+                if (incoming_lat != 0.0 && incoming_long != 0.0)    //this means that this method was called from the parser not by the timer above (so value has changed)
                 {
+                    valHasChanged = true;       //we're deceiving new data from the parser
                     bool varsInUse = false;
                     while (!varsInUse)
                     {
@@ -343,12 +379,6 @@ namespace TEST_GPS_Parsing
                     {
                         returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, true);     //draw marker from external input of coords
                     }
-                    else
-                    {
-                        ////returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, ol_mark.overlayGrid, true);          //x and y here are set from the drawPolygon method
-                    }
-
-
                     if (returnVal == true && isStreaming)              //if the marker routine returned OK, draw the result in the video window
                     {
                             overlayVideoFramesBox.Image = ol_mark.overlayGrid;                       
@@ -356,7 +386,8 @@ namespace TEST_GPS_Parsing
                 }
                 else
                 {
-                    //this is just a normaltimer tick and it's likely values haven't  changed. Thus just redraw the overlay without recalc
+                    valHasChanged = false;
+                    //this is just a normaltimer tick from the refreshOverlay_Tick method and it's likely values haven't  changed. Thus just redraw the overlay without recalc
                     bool returnVal = false;
                     if (drawMode_Overlay != DRAW_MODE_REVOBJTRACK)
                     {
