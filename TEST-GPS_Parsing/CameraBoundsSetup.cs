@@ -1,33 +1,42 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
+using Emgu.Util;
 
 namespace TEST_GPS_Parsing
 {
     public partial class CameraBoundsSetup : Form
     {
         #region Initialization objects and vars
-        //CameraSettings camParameter = new CameraSettings();         //instantiate new camParameter object
         //video GPS coordinate extents
         private double[] upperLeftCoords = new double[2];       //[0] = latitude top left; [1] = longitude top left
         private double[] outerLimitCoords = new double[2];      //[0] = longitude top right; [1] = latitude bottom left
         int drawModeChoice = -1;
 
-        //video parameters
+        //----------COPY OF VIDEO PARAMETERS--------------
+        /*
+         These parameters are local to this class instance, they are requested by the video output class
+         at call, where this class sets up all the functions, and copies them back to the video output
+         before being disposed.
+
+         This can happen as many times as needed to update the camera data / settings
+
+             */
         //The index of video mode defines the selected item. 0=Video on PC 1=Webcam
         //The index of draw mode defines the selected item. 0=Random 1=Ordered 2=Tracking
-        public int videoSource;
-        public int drawMode;
-        public string filenameToOpen;
+        public int videoSource_CB;
+        public int drawMode_CB;
+        public string filenameToOpen_CB;
 
-        VideoOutputWindow vo;
+        //-----------Capture Var Copies--------------------
+        public Capture cscCentre_CB;
+        public Capture cscLeft_CB;
+        public Capture cscRight_CB;
+        public Capture camStreamCapture_CB;
 
         //-------SIMULATION
         public static int DRAW_MODE_RANDOM = 0;
@@ -35,10 +44,10 @@ namespace TEST_GPS_Parsing
         public static int DRAW_MODE_TRACKING = 2;
         public static int DRAW_MODE_REVOBJTRACK = 3;
 
+
         public CameraBoundsSetup(VideoOutputWindow incoming_vo)
         {
             InitializeComponent();
-            vo = incoming_vo;           //create a VO object for the parser to use
         }
         #endregion 
 
@@ -48,20 +57,44 @@ namespace TEST_GPS_Parsing
         {
             //checkFieldsTimer = new Timer(); //instantiate the timer
             checkFieldsTimer.Start();       //start the timer to check status of the entry of points
-            vo.initCamStreams();
         }
 
         private void checkFieldsTimer_Tick(object sender, EventArgs e)
         {
+            //if user has chosen internal cameras, try to connect them automagically
+            if (vidSourceChoiceComboBox.SelectedIndex == 1)
+            {
+                //disable IP cam setting section
+                checkIpAddrButton.Enabled = false;
+                camLeftIpTextBox.Enabled = false;
+                camRightIpTextBox.Enabled = false;
+                camLeftIpTextBox.Enabled = false;
+
+                //disable this if using local cams since they'll refresh automagically :P
+                refreshStatusButton.Enabled = false;
+
+                //if any capture objects haven't been setup yet, run the init routine
+                if (cscCentre_CB == null || cscLeft_CB == null || cscRight_CB == null)
+                {
+                    initCamStreams();
+                }
+            }
+            else if (vidSourceChoiceComboBox.SelectedIndex == 2)
+            {
+                //TODO: Implement IP camera initialisation
+                checkIpAddrButton.Enabled = true;
+                camLeftIpTextBox.Enabled = true;
+                camRightIpTextBox.Enabled = true;
+                camLeftIpTextBox.Enabled = true;
+            }
 
             //check default camera status and display on UI
-            if (vo != null && vo.cscCentre.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0)       {    centreCamStatusLabel.Text = "Ready / Available";           }
-            else                    {    centreCamStatusLabel.Text = "Not Available";               }
-            if (vo.cscLeft != null && vo.cscLeft.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) {    leftCamStatusLabel.Text = "Ready / Available";             }
-            else                    {    leftCamStatusLabel.Text = "Not Available";  }
-            if (vo.cscRight != null && vo.cscRight.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) {    rightCamStatusLabel.Text = "Ready / Available";            }
-            else                    {    rightCamStatusLabel.Text = "Not Available"; }
-
+            if (cscCentre_CB != null && cscCentre_CB.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) { centreCamStatusLabel.Text = "Ready / Available"; }
+            else { centreCamStatusLabel.Text = "Not Available"; }
+            if (cscLeft_CB != null && cscLeft_CB.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) { leftCamStatusLabel.Text = "Ready / Available"; }
+            else { leftCamStatusLabel.Text = "Not Available"; }
+            if (cscRight_CB != null && cscRight_CB.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) { rightCamStatusLabel.Text = "Ready / Available"; }
+            else { rightCamStatusLabel.Text = "Not Available"; }
 
 
             if (longUpperLeftTextbox.Text == "" || latUpperLeftTextbox.Text == "" || latBottomLeftTextbox.Text == "" || longUpperRightTextbox.Text == "" )
@@ -116,6 +149,42 @@ namespace TEST_GPS_Parsing
         }
         #endregion
 
+        #region Initialise camera streams
+        public void initCamStreams()
+        {
+            //tries to initialise the default camera and the first adjacent left and right
+
+            try
+            {
+                //initialise the centre, left and right camera objects - set as needed
+                cscCentre_CB = new Capture(2);                                     //CENTRE CAMERA FRAME
+                cscLeft_CB = new Capture(1);                                       //LEFT CAMERA FRAME
+                cscRight_CB = new Capture(0);                                      //RIGHT CAMERA FRAME               
+
+                if (cscCentre_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
+                {
+                    camStreamCapture_CB = cscCentre_CB;                   //initially set the centre cam to the current
+                }
+                else if (cscLeft_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
+                {
+                    camStreamCapture_CB = cscLeft_CB;                     //set initial frame to left cam if centre is not setup
+                }
+                else if (cscRight_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
+                {
+                    camStreamCapture_CB = cscRight_CB;                    //set initial frame to the right camera if centre & left not setup
+                }
+
+
+            }
+            catch (NullReferenceException nr)
+            {
+
+                throw nr;
+            }
+
+        }
+        #endregion
+
         #region UI and button methods
         private void setExtentsButton_Click(object sender, EventArgs e)
         {
@@ -154,14 +223,14 @@ namespace TEST_GPS_Parsing
                 try
                 {
                     bool startedOK = false;
-                    startedOK = startNewVideoConsole();
+                    //startedOK = startNewVideoConsole();
                     if (startedOK)
                     {
                         this.Hide();           //close the form and open the next one
                     }
                     else
                     {
-                        vo.ReleaseData();               //dispose of the capture methods
+                        //vo.ReleaseData();               //dispose of the capture methods
                         this.Dispose();
                     }
 
@@ -199,7 +268,7 @@ namespace TEST_GPS_Parsing
         {
             checkFieldsTimer.Stop();        //stop and dispose the timer
             checkFieldsTimer.Dispose();
-            vo.ReleaseData();               //dispose of the capture methods
+            //vo.ReleaseData();               //dispose of the capture methods
             this.Close();
         }
         #endregion
@@ -240,8 +309,8 @@ namespace TEST_GPS_Parsing
         {
             if (_videoSource > -1)
             {
-                videoSource = _videoSource;
-                drawMode = _drawMode;
+                videoSource_CB = _videoSource;
+                drawMode_CB = _drawMode;
             }
             else
             {
@@ -253,68 +322,87 @@ namespace TEST_GPS_Parsing
             //only set the filename if the source is PC video
             if (_videoSource == 1)
             {
-                filenameToOpen = _filenameToOpen;
+                filenameToOpen_CB = _filenameToOpen;
             }
             else
             {
-                filenameToOpen = "false";
+                filenameToOpen_CB = "false";
             }
 
             Console.Write("Set video parameters successfully.");
         }
 
-        public bool startNewVideoConsole()
-        {
-            vo.fileName = filenameToOpen;       //set the filename to open on the other form
-            vo.drawMode_Overlay = drawMode;             //set the draw mode on the other form
-            vo.captureChoice = videoSource;     //set the video source on the other form
+        //public bool startNewVideoConsole()
+        //{
+        //    vo.fileName = filenameToOpen_CB;       //set the filename to open on the other form
+        //    vo.drawMode_Overlay = drawMode_CB;             //set the draw mode on the other form
+        //    vo.captureChoice = videoSource_CB;     //set the video source on the other form
 
-            //pass parameters of the outer limits to the other UI
-            vo.upperLeftBound[0] = upperLeftCoords[0];
-            vo.upperLeftBound[1] = upperLeftCoords[1];
-            vo.outerLimitBound[0] = outerLimitCoords[0];
-            vo.outerLimitBound[1] = outerLimitCoords[1];
+        //    //pass parameters of the outer limits to the other UI
+        //    vo.upperLeftBound[0] = upperLeftCoords[0];
+        //    vo.upperLeftBound[1] = upperLeftCoords[1];
+        //    vo.outerLimitBound[0] = outerLimitCoords[0];
+        //    vo.outerLimitBound[1] = outerLimitCoords[1];
 
-            if (vo.Visible == true)
-            {
-                MessageBox.Show("Only one instance of the video capture window may be open at a time. Close the other first.", 
-                    "Instance already running!", MessageBoxButtons.OK, MessageBoxIcon.Warning,MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
-                return false;
-            }
-            else
-            {
-                try
-                {
-                    vo.TopMost = true;      //set the window to the top and make it visible
-                    vo.Visible = true;
-                    vo.Show();
+        //    if (vo.Visible == true)
+        //    {
+        //        MessageBox.Show("Only one instance of the video capture window may be open at a time. Close the other first.", 
+        //            "Instance already running!", MessageBoxButtons.OK, MessageBoxIcon.Warning,MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
+        //        return false;
+        //    }
+        //    else
+        //    {
+        //        try
+        //        {
+        //            vo.TopMost = true;      //set the window to the top and make it visible
+        //            vo.Visible = true;
+        //            vo.Show();
 
-                }
-                catch (ObjectDisposedException d)
-                {
-                    return false;
-                    //vo.fileName = filenameToOpen;       //set the filename to open on the other form
-                    //vo.drawMode_Overlay = drawMode;             //set the draw mode on the other form
-                    //vo.captureChoice = videoSource;     //set the video source on the other form
+        //        }
+        //        catch (ObjectDisposedException d)
+        //        {
+        //            return false;
+        //            //vo.fileName = filenameToOpen;       //set the filename to open on the other form
+        //            //vo.drawMode_Overlay = drawMode;             //set the draw mode on the other form
+        //            //vo.captureChoice = videoSource;     //set the video source on the other form
 
-                    ////pass parameters of the outer limits to the other UI
-                    //vo.upperLeftBound[0] = upperLeftCoords[0];
-                    //vo.upperLeftBound[1] = upperLeftCoords[1];
-                    //vo.outerLimitBound[0] = outerLimitCoords[0];
-                    //vo.outerLimitBound[1] = outerLimitCoords[1];
-                    //vo.Focus();      //set the window to the top and make it visible
-                    //vo.Visible = true;
-                    //vo.Show();
-                }
-                return true;
-            }
+        //            ////pass parameters of the outer limits to the other UI
+        //            //vo.upperLeftBound[0] = upperLeftCoords[0];
+        //            //vo.upperLeftBound[1] = upperLeftCoords[1];
+        //            //vo.outerLimitBound[0] = outerLimitCoords[0];
+        //            //vo.outerLimitBound[1] = outerLimitCoords[1];
+        //            //vo.Focus();      //set the window to the top and make it visible
+        //            //vo.Visible = true;
+        //            //vo.Show();
+        //        }
+        //        return true;
+        //    }
 
 
-        }
+        //}
         #endregion
 
 
         private void drawModeChoiceComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void coordsHelpLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            // 0 = help with coords setup
+            setupHelpPane shp = new setupHelpPane(0);
+            shp.ShowDialog();
+        }
+
+        private void cameraHelpLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            // 1 = help with camera setup
+            setupHelpPane shp = new setupHelpPane(1);
+            shp.ShowDialog();
+        }
+
+        private void rightCamStatusLabel_Click(object sender, EventArgs e)
         {
 
         }

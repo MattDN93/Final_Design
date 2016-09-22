@@ -22,9 +22,9 @@ namespace TEST_GPS_Parsing
         public Mat webcamVid;                  //create a Mat object to manipulate
         public Mat overlayVid;
         private Capture camStreamCapture = null;        //the current OpenCV capture stream
-        public Capture cscLeft = null;                  //left camera capture
-        public Capture cscRight = null;                 //right camera capture
-        public Capture cscCentre = null;                //centre camera capture 
+        private Capture cscLeft = null;                  //left camera capture
+        private Capture cscRight = null;                 //right camera capture
+        private Capture cscCentre = null;                //centre camera capture 
         private Overlay ol_mark;                //object for the overlay of points
 
         protected string latitudeOutOfRangeOverlayMessage = "";      //strings for the overlay class to write into
@@ -35,9 +35,9 @@ namespace TEST_GPS_Parsing
 
 
         //-----------------User options and parameters---------
-        public int captureChoice;              //user's selection of which capture to use
-        public int drawMode_Overlay;
-        public string fileName;
+        private int captureChoice;              //user's selection of which capture to use
+        private int drawMode_Overlay;
+        private string fileName;
 
         //-----------------Status flags and parameters----------
         protected bool capStartSuccess;           //whether the capture was opened OK
@@ -74,42 +74,6 @@ namespace TEST_GPS_Parsing
             InitializeComponent();
         }
 
-        public void initCamStreams()
-        {
-            //tries to initialise the default camera and the first adjacent left and right
-
-            try
-            {
-                //initialise the centre, left and right camera objects - set as needed
-                cscCentre = new Capture(2);                                     //CENTRE CAMERA FRAME
-                cscLeft = new Capture(1);                                       //LEFT CAMERA FRAME
-                cscRight = new Capture(0);                                      //RIGHT CAMERA FRAME               
-
-                if (cscCentre.GetCaptureProperty(CapProp.FrameHeight) != 0)
-                {
-                    camStreamCapture = cscCentre;                   //initially set the centre cam to the current
-                }
-                else if (cscLeft.GetCaptureProperty(CapProp.FrameHeight) != 0)
-                {
-                    camStreamCapture = cscLeft;                     //set initial frame to left cam if centre is not setup
-                }
-                else if (cscRight.GetCaptureProperty(CapProp.FrameHeight) != 0)
-                {
-                    camStreamCapture = cscRight;                    //set initial frame to the right camera if centre & left not setup
-                }
-
-                camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
-                webcamVid = new Mat();                          //create the webcam mat object
-
-            }
-            catch (NullReferenceException nr)
-            {
-
-                throw nr;
-            }
-
-        }
-
         private void VideoOutputWindow_Load(object sender, EventArgs e)
         {
             //wait for user to setup bounds before allowing capture to start
@@ -126,6 +90,19 @@ namespace TEST_GPS_Parsing
 
         private void receiveSetupInfo()
         {
+            /*the setup parameters have been set by the CameraBOunds Setup window 
+                *The parameters are copied across before the window is disposed.
+                *Any further use of the variables are the ones local to this class
+            New parameters can be requested anytime by reopening the window and re-copying the data
+             
+             */
+
+            //TODO: get setup variable's data herre
+            camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
+            webcamVid = new Mat();                          //create the webcam mat object
+
+
+
             CvInvoke.UseOpenCL = false;
             try
             {
@@ -372,9 +349,7 @@ namespace TEST_GPS_Parsing
         //This recalculates the incoming datapoints once every 500ms since GPS data only arrives that often
         private void refreshOverlay_Tick(object sender, EventArgs e)
         {
-
-                overlayTick();      //call the overlay update without passing GPS coords
-           
+                overlayTick();      //call the overlay update without passing GPS coords    
         }
 
         public void overlayTick(double incoming_lat= 0.0, double incoming_long = 0.0)
@@ -459,7 +434,7 @@ namespace TEST_GPS_Parsing
         {
             if (setup == null)      //this is the first time the setup window has been opened
             {
-                setup = new CameraBoundsSetup(this);      //pass itself as an object to manipulate
+                this.setup = new CameraBoundsSetup(this);      //pass itself as an object to manipulate
                 DialogResult setupResult = setup.ShowDialog();             //pass the videoOutput object to allow settings to be set and passed back
 
                 //respond based on the result of the dialog
@@ -467,6 +442,7 @@ namespace TEST_GPS_Parsing
                 {
                     //TODO: Implement setup routines and UI update
                     startCaptureButton.Enabled = true;
+                    
                 }
                 else if (setupResult == DialogResult.Cancel)        //if setup process was prematurely cancelled
                 {
