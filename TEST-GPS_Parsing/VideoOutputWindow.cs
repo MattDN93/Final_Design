@@ -78,7 +78,7 @@ namespace TEST_GPS_Parsing
             {
                 //initialise the centre, left and right camera objects - set as needed
                 cscCentre = new Capture(1);                                     //CENTRE CAMERA FRAME
-                cscLeft = new Capture("http://192.168.0.10:8080/video");        //LEFT CAMERA FRAME
+                cscLeft = new Capture(2);                                       //LEFT CAMERA FRAME
                 cscRight = new Capture(0);                                      //RIGHT CAMERA FRAME
 
                 camStreamCapture = cscCentre;                   //initially set the centre cam to the current 
@@ -202,12 +202,13 @@ namespace TEST_GPS_Parsing
                         switch (ol_mark.camSwitchStatus)
                         {
                             case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
-                            case 0: screenStateSwitch(0); break;  //switch the current camera to the left
-                            case 1: screenStateSwitch(1); break; //switch the current camera to the right
+                            case 0: screenStateSwitch(0); webcamVid = new Mat(); break;  //switch the current camera to the left
+                            case 1: screenStateSwitch(1); webcamVid = new Mat(); break; //switch the current camera to the right
                             case 2: break;      //the feed need not be changed from the current one (since the value is in this screen)
                             default:
                                 break;
                         }
+                        ol_mark.camSwitchStatus = 2;        //reset to stay on current
                     }
                     
 
@@ -295,7 +296,7 @@ namespace TEST_GPS_Parsing
                     }
                 }
             }
-
+            switchCase = 2;        //set back to "current"
         }
 
         //This recalculates the incoming datapoints once every 500ms since GPS data only arrives that often
@@ -458,6 +459,9 @@ namespace TEST_GPS_Parsing
                     isStreaming = false;
                     startCaptureButton.Text = "Start Capture";
                     camStreamCapture.Pause();
+                    cscLeft.Pause();
+                    cscRight.Pause();
+                    cscCentre.Pause();
                     ol_mark.clearScreen();      //remove the marker and lines off the screen.
                     
                 }
@@ -468,6 +472,9 @@ namespace TEST_GPS_Parsing
                     try
                     {
                     camStreamCapture.Start();
+                    cscLeft.Start();
+                    cscRight.Start();
+                    cscCentre.Start();
                     isStreaming = true;
                     
                     }
@@ -489,7 +496,7 @@ namespace TEST_GPS_Parsing
             if (camStreamCapture != null) { camStreamCapture.Dispose();}
             if (cscLeft != null) { cscLeft.Dispose(); }
             if (cscRight != null) { cscRight.Dispose(); }
-
+            if (cscCentre != null) { cscCentre.Dispose(); }
             rawVideoFramesBox.Dispose();
                 
         }
