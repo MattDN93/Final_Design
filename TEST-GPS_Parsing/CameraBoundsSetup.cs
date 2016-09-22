@@ -159,6 +159,11 @@ namespace TEST_GPS_Parsing
                     {
                         this.Hide();           //close the form and open the next one
                     }
+                    else
+                    {
+                        vo.ReleaseData();               //dispose of the capture methods
+                        this.Dispose();
+                    }
 
                 }
                 catch (NotSupportedException ns)
@@ -287,6 +292,7 @@ namespace TEST_GPS_Parsing
                 }
                 catch (ObjectDisposedException d)
                 {
+                    return false;
                     //vo.fileName = filenameToOpen;       //set the filename to open on the other form
                     //vo.drawMode_Overlay = drawMode;             //set the draw mode on the other form
                     //vo.captureChoice = videoSource;     //set the video source on the other form

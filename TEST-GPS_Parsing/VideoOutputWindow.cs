@@ -80,9 +80,21 @@ namespace TEST_GPS_Parsing
                 //initialise the centre, left and right camera objects - set as needed
                 cscCentre = new Capture(2);                                     //CENTRE CAMERA FRAME
                 cscLeft = new Capture(1);                                       //LEFT CAMERA FRAME
-                cscRight = new Capture(0);                                      //RIGHT CAMERA FRAME
+                cscRight = new Capture(0);                                      //RIGHT CAMERA FRAME               
 
-                camStreamCapture = cscCentre;                   //initially set the centre cam to the current 
+                if (cscCentre.GetCaptureProperty(CapProp.FrameHeight) != 0)
+                {
+                    camStreamCapture = cscCentre;                   //initially set the centre cam to the current
+                }
+                else if (cscLeft.GetCaptureProperty(CapProp.FrameHeight) != 0)
+                {
+                    camStreamCapture = cscLeft;                     //set initial frame to left cam if centre is not setup
+                }
+                else if (cscRight.GetCaptureProperty(CapProp.FrameHeight) != 0)
+                {
+                    camStreamCapture = cscRight;                    //set initial frame to the right camera if centre & left not setup
+                }
+
                 camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
                 webcamVid = new Mat();                          //create the webcam mat object
 
@@ -128,9 +140,7 @@ namespace TEST_GPS_Parsing
                 {
                     isStreaming = false;
                     this.Visible = false;
-                    this.Dispose();
-                    //ReleaseData();
-                    return;
+                    this.Dispose();                                       
                 }
 
             }
