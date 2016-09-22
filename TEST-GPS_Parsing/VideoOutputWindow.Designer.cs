@@ -71,6 +71,9 @@
             this.label18 = new System.Windows.Forms.Label();
             this.label19 = new System.Windows.Forms.Label();
             this.label20 = new System.Windows.Forms.Label();
+            this.setupCaptureButton = new System.Windows.Forms.Button();
+            this.setupInstructLabel = new System.Windows.Forms.Label();
+            this.pausedCaptureLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.rawVideoFramesBox)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.overlayVideoFramesBox)).BeginInit();
@@ -109,9 +112,9 @@
             // 
             // startCaptureButton
             // 
-            this.startCaptureButton.Location = new System.Drawing.Point(9, 18);
+            this.startCaptureButton.Location = new System.Drawing.Point(113, 18);
             this.startCaptureButton.Name = "startCaptureButton";
-            this.startCaptureButton.Size = new System.Drawing.Size(185, 23);
+            this.startCaptureButton.Size = new System.Drawing.Size(89, 23);
             this.startCaptureButton.TabIndex = 4;
             this.startCaptureButton.Text = "Start Capture";
             this.startCaptureButton.UseVisualStyleBackColor = true;
@@ -223,6 +226,7 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.setupCaptureButton);
             this.groupBox2.Controls.Add(this.startCaptureButton);
             this.groupBox2.Location = new System.Drawing.Point(9, 10);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(2);
@@ -512,11 +516,42 @@
             this.label20.TabIndex = 22;
             this.label20.Text = "(0,y)";
             // 
+            // setupCaptureButton
+            // 
+            this.setupCaptureButton.Location = new System.Drawing.Point(14, 18);
+            this.setupCaptureButton.Name = "setupCaptureButton";
+            this.setupCaptureButton.Size = new System.Drawing.Size(89, 23);
+            this.setupCaptureButton.TabIndex = 5;
+            this.setupCaptureButton.Text = "Setup Capture";
+            this.setupCaptureButton.UseVisualStyleBackColor = true;
+            this.setupCaptureButton.Click += new System.EventHandler(this.setupCaptureButton_Click);
+            // 
+            // setupInstructLabel
+            // 
+            this.setupInstructLabel.AutoSize = true;
+            this.setupInstructLabel.Location = new System.Drawing.Point(591, 357);
+            this.setupInstructLabel.Name = "setupInstructLabel";
+            this.setupInstructLabel.Size = new System.Drawing.Size(455, 13);
+            this.setupInstructLabel.TabIndex = 23;
+            this.setupInstructLabel.Text = "Please choose \"Setup Capture\" to configure parameters, then choose \"Start capture" +
+    "\" to begin.";
+            // 
+            // pausedCaptureLabel
+            // 
+            this.pausedCaptureLabel.AutoSize = true;
+            this.pausedCaptureLabel.Location = new System.Drawing.Point(691, 378);
+            this.pausedCaptureLabel.Name = "pausedCaptureLabel";
+            this.pausedCaptureLabel.Size = new System.Drawing.Size(259, 13);
+            this.pausedCaptureLabel.TabIndex = 24;
+            this.pausedCaptureLabel.Text = "Capture is paused. Choose \'start capture\' to continue.";
+            // 
             // VideoOutputWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1343, 754);
+            this.Controls.Add(this.pausedCaptureLabel);
+            this.Controls.Add(this.setupInstructLabel);
             this.Controls.Add(this.label20);
             this.Controls.Add(this.label19);
             this.Controls.Add(this.label18);
@@ -595,5 +630,8 @@
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.Button setupCaptureButton;
+        private System.Windows.Forms.Label setupInstructLabel;
+        private System.Windows.Forms.Label pausedCaptureLabel;
     }
 }

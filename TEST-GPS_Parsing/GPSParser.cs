@@ -21,6 +21,7 @@ namespace TEST_GPS_Parsing
         public string inputLogFilename;
         bool dbLoggingActive = true;
         bool parseIsRunning = false;                  //bool to denote whether the parser is in progress or not.
+        bool videoOutputRunning = false;                //bool to check if the vo object has been created or not
         private static int resourceInUse= 0;          //Flag to manage threads and resource locks  
 
         /*IMPORTANT: These wait handles are for the mutex locks on the multithreading
@@ -36,7 +37,7 @@ namespace TEST_GPS_Parsing
         GPSPacket gpsData = new GPSPacket();          //global GPS data packet for UI display                                                     
         Mapping mapData = new Mapping();              //set up a new mapping object for mapping function access
         GMapOverlay locationMarkersOverlay;           //overlay for the location markers on map
-        VideoOutputWindow vo = new VideoOutputWindow();
+        VideoOutputWindow vo;                         //object for the video output window
         VideoOutputWindow vo_renew;
         string sentenceBuffer;                        //global buffer to read incoming data used for parsing
         string rawBuffer;                             //not used for parsing , but for display only
@@ -118,6 +119,7 @@ namespace TEST_GPS_Parsing
             //openLogDialog = new OpenFileDialog();     //create new instance of the openFileDialog object
             startButton.Enabled = false;
             stopButton.Enabled = false;
+            statusTextBox.BackColor = System.Drawing.Color.LemonChiffon;
             statusTextBox.AppendText("Ready. Click the button to open a file.");
         }
         #endregion
@@ -205,23 +207,24 @@ namespace TEST_GPS_Parsing
         //------------------Open the Video Streaming Component------------------
         private void openPortButton_Click(object sender, EventArgs e)
         {
-            if (vo.IsDisposed)         //if the object was created before, destroy and recreate it
-            {
-                vo_renew = new VideoOutputWindow();
-                CameraBoundsSetup cmBound = new CameraBoundsSetup(vo_renew);
-                updateUITimer.Stop();
-                status2TextBox.AppendText("Camera Bound setup window open; waiting....");
-                DialogResult cmResult = cmBound.ShowDialog();
+            //if (vo.IsDisposed)         //if the object was created before, destroy and recreate it
+            //{
+            //    vo_renew = new VideoOutputWindow();
+            //    CameraBoundsSetup cmBound = new CameraBoundsSetup(vo_renew);
+            //    updateUITimer.Stop();
+            //    status2TextBox.AppendText("Camera Bound setup window open; waiting....");
+            //    DialogResult cmResult = cmBound.ShowDialog();
+            //    updateUITimer.Start();
+            //}
+            //if (!vo.IsDisposed)
+            //{
+                //CameraBoundsSetup cmBound = new CameraBoundsSetup(vo);
+                vo = new VideoOutputWindow();
+            videoOutputRunning = true; //used to inform the parser it can send co-ords to the video method now
+                vo.Show();
+                //DialogResult cmResult = cmBound.ShowDialog();
                 updateUITimer.Start();
-            }
-            if (!vo.IsDisposed)
-            {
-                CameraBoundsSetup cmBound = new CameraBoundsSetup(vo);
-                updateUITimer.Stop();
-                status2TextBox.AppendText("Camera Bound setup window open; waiting....");
-                DialogResult cmResult = cmBound.ShowDialog();
-                updateUITimer.Start();
-            }
+            //}
 
 
 
@@ -236,6 +239,11 @@ namespace TEST_GPS_Parsing
             if (recvRawDataWorker.IsBusy)
             {
                 gpsData.timeElapsed++; //update the running timer only if parsing is active
+                if (!videoOutputRunning)
+                {
+                    statusTextBox.BackColor = System.Drawing.Color.Orange;
+                    statusTextBox.Text = "Warning: Video capture not set up yet!";
+                }
             }
 
             //also check on status of database logging requirement
@@ -358,14 +366,22 @@ namespace TEST_GPS_Parsing
                         //pass the new instance of the overlay if it's been disposed before
                         if (parseIsRunning)
                         {
-                            if (!vo.IsDisposed)
+                            try
                             {
-                                vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
-                             }
-                            else if (vo_renew !=null)
-                            {
-                                vo_renew.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
+                                if (!vo.IsDisposed)
+                                {
+                                    vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
+                                }
+                                else if (vo_renew != null)
+                                {
+                                    vo_renew.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
+                                }
                             }
+                            catch (NullReferenceException)
+                            {
+                                videoOutputRunning = false;
+                            }
+
                             
                         }
 
@@ -506,7 +522,17 @@ namespace TEST_GPS_Parsing
             {
                 //check the status of the system each time a new sentence received and inform the user
                 statusTextBox.Clear();
-                statusTextBox.AppendText("Parsing in progress. No errors.");
+                if (videoOutputRunning)
+                {
+                    statusTextBox.BackColor = System.Drawing.Color.ForestGreen;
+                    statusTextBox.AppendText("Parsing in progress. No errors.");
+                }
+                else
+                {
+                    statusTextBox.BackColor = System.Drawing.Color.LightGoldenrodYellow;
+                    statusTextBox.AppendText("Parsing in progress with warning...");
+                }
+                
 
                 //function called to get all the incoming data and refresh the UI
                 updateUI(gpsData, sentenceBuffer);

@@ -30,6 +30,10 @@ namespace TEST_GPS_Parsing
         protected string latitudeOutOfRangeOverlayMessage = "";      //strings for the overlay class to write into
         protected string longitudeOutOfRangeOverlayMessage = "";     //if a variable is offscreen
 
+        //-----------------Capture setup object----------------
+        public CameraBoundsSetup setup;                 //uninitialized cam bounds setup object
+
+
         //-----------------User options and parameters---------
         public int captureChoice;              //user's selection of which capture to use
         public int drawMode_Overlay;
@@ -68,7 +72,6 @@ namespace TEST_GPS_Parsing
         public VideoOutputWindow()                              //this is called before the window is even launched
         {
             InitializeComponent();
-
         }
 
         public void initCamStreams()
@@ -109,6 +112,20 @@ namespace TEST_GPS_Parsing
 
         private void VideoOutputWindow_Load(object sender, EventArgs e)
         {
+            //wait for user to setup bounds before allowing capture to start
+            startCaptureButton.Enabled = false;
+            status1TextBox.Text = "Click 'Setup Capture' to begin.";
+            overlayVideoFramesBox.Visible = false;
+            setupInstructLabel.Visible = true;
+            pausedCaptureLabel.Visible = false;
+
+        }
+        #endregion
+
+        #region Update Info from bounds setup form
+
+        private void receiveSetupInfo()
+        {
             CvInvoke.UseOpenCL = false;
             try
             {
@@ -140,27 +157,28 @@ namespace TEST_GPS_Parsing
                 {
                     isStreaming = false;
                     this.Visible = false;
-                    this.Dispose();                                       
+                    this.Dispose();
                 }
 
             }
-            
+
 
             //the drawMode, fileName and videoSource are set by the other form
             //evaluates what the user chose from the bounds setup box
             switch (captureChoice)
             {
-                case 0: videoModeLabel.Text = "Live Video";break;
-                case 1: videoModeLabel.Text = "Recorded Video";break;
-                default: videoModeLabel.Text = "None Set";
+                case 0: videoModeLabel.Text = "Live Video"; break;
+                case 1: videoModeLabel.Text = "Recorded Video"; break;
+                default:
+                    videoModeLabel.Text = "None Set";
                     break;
             }
             switch (drawMode_Overlay)
             {
                 case 0: drawModeLabel.Text = "Random"; drawMode_Overlay = DRAW_MODE_RANDOM; break;
-                case 1: drawModeLabel.Text = "Ordered";drawMode_Overlay = DRAW_MODE_ORDERED; break;
-                case 2: drawModeLabel.Text = "Tracking";drawMode_Overlay = DRAW_MODE_TRACKING;break;
-                case 3: drawModeLabel.Text = "Object-Based Tracking";drawMode_Overlay = DRAW_MODE_REVOBJTRACK;break;
+                case 1: drawModeLabel.Text = "Ordered"; drawMode_Overlay = DRAW_MODE_ORDERED; break;
+                case 2: drawModeLabel.Text = "Tracking"; drawMode_Overlay = DRAW_MODE_TRACKING; break;
+                case 3: drawModeLabel.Text = "Object-Based Tracking"; drawMode_Overlay = DRAW_MODE_REVOBJTRACK; break;
                 default:
                     break;
             }
@@ -199,7 +217,7 @@ namespace TEST_GPS_Parsing
                 {
                     ol_mark.displayCoordTextOnscreen = true;
                 }
-                
+
                 for (int i = 0; i <= 1; i++)
                 {
                     ol_mark.ulBound[i] = upperLeftBound[i];
@@ -212,8 +230,8 @@ namespace TEST_GPS_Parsing
 
                 valHasChanged = false;
             }
-
         }
+
         #endregion
 
         #region Frame and Overlay Methods
@@ -437,6 +455,46 @@ namespace TEST_GPS_Parsing
 
         #region UI and Button Routines
 
+        private void setupCaptureButton_Click(object sender, EventArgs e)
+        {
+            if (setup == null)      //this is the first time the setup window has been opened
+            {
+                setup = new CameraBoundsSetup(this);      //pass itself as an object to manipulate
+                DialogResult setupResult = setup.ShowDialog();             //pass the videoOutput object to allow settings to be set and passed back
+
+                //respond based on the result of the dialog
+                if (setupResult == DialogResult.OK)
+                {
+                    //TODO: Implement setup routines and UI update
+                    startCaptureButton.Enabled = true;
+                }
+                else if (setupResult == DialogResult.Cancel)        //if setup process was prematurely cancelled
+                {
+                    status1TextBox.Clear();
+                    status1TextBox.Text = "Setup was cancelled.";
+                    startCaptureButton.Enabled = false;         //first time setup, require settings before capture
+                    setup = null;                               //clear object because it wasn't setup properly
+                }
+            }
+            else
+            {
+                //this isn't the first time this session that the user is opening the setting form
+                DialogResult setupResult = setup.ShowDialog();
+                if (setupResult == DialogResult.OK)
+                {
+                    //TODO: Implement setup routines and UI update
+                    startCaptureButton.Enabled = true;
+                }
+                else if (setupResult == DialogResult.Cancel)        //if setup process was prematurely cancelled
+                {
+                    status1TextBox.Clear();
+                    status1TextBox.Text = "Setup was cancelled. Using previous settings.";
+                    startCaptureButton.Enabled = true;              //we'll use previously entered settings
+                }
+
+            }
+        }
+
         private void setTextonVideoUI(string text)
         {
             //Update the UI with information -check threadsafe since the other thread might be using it
@@ -499,6 +557,7 @@ namespace TEST_GPS_Parsing
                 {  //stop the capture
                     isStreaming = false;
                     startCaptureButton.Text = "Start Capture";
+                pausedCaptureLabel.Visible = true;
                     camStreamCapture.Pause();
                     cscLeft.Pause();
                     cscRight.Pause();
@@ -508,7 +567,11 @@ namespace TEST_GPS_Parsing
                 }
                 else
                 {
-                    //start the capture
+                //start the capture
+
+                overlayVideoFramesBox.Visible = true;   //show the output frames box
+                setupInstructLabel.Visible = false;     //hide the setup instruction label
+                pausedCaptureLabel.Visible = false;     //hide the paused label (for if capture was already on)
                     startCaptureButton.Text = "Stop Capture";
                     try
                     {
@@ -567,6 +630,7 @@ namespace TEST_GPS_Parsing
             
         }
         #endregion
+
 
     }
 
