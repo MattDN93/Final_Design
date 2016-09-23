@@ -88,7 +88,7 @@ namespace TEST_GPS_Parsing
 
         #region Update Info from bounds setup form
 
-        private void receiveSetupInfo()
+        private bool receiveSetupInfo()
         {
             /*the setup parameters have been set by the CameraBOunds Setup window 
                 *The parameters are copied across before the window is disposed.
@@ -97,116 +97,42 @@ namespace TEST_GPS_Parsing
              
              */
 
-            //TODO: get setup variable's data herre
-            camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
-            webcamVid = new Mat();                          //create the webcam mat object
-
-
-
             CvInvoke.UseOpenCL = false;
             try
             {
-                if (camStreamCapture == null)
-                {
-                    //initCamStreams();
-                }
+                //TODO: get setup variable's data here
+                //---------get capture properties------
+                drawMode_Overlay = setup.drawMode_CB;
+                captureChoice = setup.videoSource_CB;
+                fileName = setup.filenameToOpen_CB;
 
+                //---------get capture objects---------
+                cscCentre = setup.cscCentre_CB;
+                cscLeft = setup.cscLeft_CB;
+                cscRight = setup.cscRight_CB;
+                camStreamCapture = setup.camStreamCapture_CB;
+
+                //---------get capture extents---------
+                for (int i = 0; i <= 1; i++)
+                {
+                    upperLeftBound[i] = setup.upperLeftCoords_CB[i];
+                    outerLimitBound[i] = setup.outerLimitCoords_CB[i];
+                }
+                //---------update the UI one time with info--
+                oneTimeDisplaySetup();
+
+                //use the class-local methods now
+                camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
+                webcamVid = new Mat();                          //create the webcam mat object
+
+                return true;
             }
             catch (NullReferenceException excpt)
             {
                 MessageBox.Show("A capture open error occurred: " + excpt.Message);
-                return;
+                return false;
             }
-
-            //recreate the objects if they were disposed by the last call
-            if (camStreamCapture == null || webcamVid == null)
-            {
-                //initCamStreams();
-            }
-
-            //Checks if the minimum number of cameras are available
-            if (cscLeft.GetCaptureProperty(CapProp.FrameHeight) == 0 ||
-                cscRight.GetCaptureProperty(CapProp.FrameHeight) == 0 ||
-                cscCentre.GetCaptureProperty(CapProp.FrameHeight) == 0)
-            {
-                DialogResult continueAnyway = MessageBox.Show("Error - at least 3 cameras must be operational for this program to work optimally. If you choose to continue, you might encounter unexpected problems. Continue without 3 cameras?", "Camera Load error!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (continueAnyway == DialogResult.No)
-                {
-                    isStreaming = false;
-                    this.Visible = false;
-                    this.Dispose();
-                }
-
-            }
-
-
-            //the drawMode, fileName and videoSource are set by the other form
-            //evaluates what the user chose from the bounds setup box
-            switch (captureChoice)
-            {
-                case 0: videoModeLabel.Text = "Live Video"; break;
-                case 1: videoModeLabel.Text = "Recorded Video"; break;
-                default:
-                    videoModeLabel.Text = "None Set";
-                    break;
-            }
-            switch (drawMode_Overlay)
-            {
-                case 0: drawModeLabel.Text = "Random"; drawMode_Overlay = DRAW_MODE_RANDOM; break;
-                case 1: drawModeLabel.Text = "Ordered"; drawMode_Overlay = DRAW_MODE_ORDERED; break;
-                case 2: drawModeLabel.Text = "Tracking"; drawMode_Overlay = DRAW_MODE_TRACKING; break;
-                case 3: drawModeLabel.Text = "Object-Based Tracking"; drawMode_Overlay = DRAW_MODE_REVOBJTRACK; break;
-                default:
-                    break;
-            }
-
-            getVideoInfo();                                         //call video info function
-            frameHeightLabel.Text = vidPixelHeight.ToString();      //get the video parameters
-            frameWidthLabel.Text = vidPixelWidth.ToString();
-
-            //display the limits set on previous window for the current camera (assumed to be the centre)
-            //upperLeftBound[0] = latitude top left; [1] = longitude top left
-            //OuterLimitBound[0] = longitude top right; [1] = latitude bottom left
-            latTopLeftLabel.Text = upperLeftBound[0].ToString();
-            longTopLeftLabel.Text = upperLeftBound[1].ToString();
-            longTopRightLabel.Text = outerLimitBound[0].ToString();
-            latBotLeftLabel.Text = outerLimitBound[1].ToString();
-
-            //calculate the camera frame coordinate range - assume African co-ords; latitude always <0 longitude always >0
-            delta_y = Math.Abs(outerLimitBound[1] - upperLeftBound[0]);
-            delta_x = outerLimitBound[0] - upperLeftBound[1];
-
-            if (camStreamCapture != null)
-            {
-                //ASSIGN THESE LIMITS TO THE OVERLAY CLASS TO WORK WITH THEM THERE
-                ol_mark = new Overlay();                            //init the overlay object
-                ol_mark.setupOverlay();                             //setup the overlay
-                ol_mark.gridWidth = vidPixelWidth;                  //pass these variables to the other class
-                ol_mark.gridHeight = vidPixelHeight;
-                ol_mark.dx = delta_x;
-                ol_mark.dy = delta_y;
-
-                if (drawMode_Overlay == DRAW_MODE_REVOBJTRACK)      //the (x,y) coords aren't drawn onscreen if using the object based tracking
-                {
-                    ol_mark.displayCoordTextOnscreen = false;
-                }
-                else
-                {
-                    ol_mark.displayCoordTextOnscreen = true;
-                }
-
-                for (int i = 0; i <= 1; i++)
-                {
-                    ol_mark.ulBound[i] = upperLeftBound[i];
-                    ol_mark.olBound[i] = outerLimitBound[i];
-                }
-
-                camStreamCapture.Start();                           //immediately start capturing
-                isStreaming = true;
-                startCaptureButton.Text = "Stop Capture";
-
-                valHasChanged = false;
-            }
+            
         }
 
         #endregion
@@ -428,48 +354,67 @@ namespace TEST_GPS_Parsing
         }
         #endregion
 
-        #region UI and Button Routines
+        #region UI and Button Routines - Setup Button
 
         private void setupCaptureButton_Click(object sender, EventArgs e)
         {
-            if (setup == null)      //this is the first time the setup window has been opened
-            {
+            //We assume that clicking the setup capture button resets all video preferences
+
+            ReleaseData();              //dispose of any previous capture objects
+            isStreaming = false;        
+
                 this.setup = new CameraBoundsSetup(this);      //pass itself as an object to manipulate
                 DialogResult setupResult = setup.ShowDialog();             //pass the videoOutput object to allow settings to be set and passed back
 
                 //respond based on the result of the dialog
-                if (setupResult == DialogResult.OK)
+                if (setupResult == DialogResult.OK || setupResult == DialogResult.Yes)
                 {
-                    //TODO: Implement setup routines and UI update
-                    startCaptureButton.Enabled = true;
+                    //get the new data from the setup UI
+                    bool receivedOK = receiveSetupInfo();
+                    if (receivedOK)
+                    {
+                        startCaptureButton.Enabled = true;
+                        setup.Close();
+                        setup.Dispose();        //dispose of setup
+                    }
+                    else
+                    {
+                        startCaptureButton.Enabled = false;
+                        MessageBox.Show("One or more camera setup parameters weren't saved correctly. Please launch setup again.", "Camera setup error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    
                     
                 }
-                else if (setupResult == DialogResult.Cancel)        //if setup process was prematurely cancelled
+                else if (setupResult == DialogResult.Cancel || setupResult == DialogResult.No)        //if setup process was prematurely cancelled
                 {
                     status1TextBox.Clear();
                     status1TextBox.Text = "Setup was cancelled.";
                     startCaptureButton.Enabled = false;         //first time setup, require settings before capture
                     setup = null;                               //clear object because it wasn't setup properly
                 }
-            }
-            else
-            {
-                //this isn't the first time this session that the user is opening the setting form
-                DialogResult setupResult = setup.ShowDialog();
-                if (setupResult == DialogResult.OK)
-                {
-                    //TODO: Implement setup routines and UI update
-                    startCaptureButton.Enabled = true;
-                }
-                else if (setupResult == DialogResult.Cancel)        //if setup process was prematurely cancelled
-                {
-                    status1TextBox.Clear();
-                    status1TextBox.Text = "Setup was cancelled. Using previous settings.";
-                    startCaptureButton.Enabled = true;              //we'll use previously entered settings
-                }
 
-            }
+            //}
+            //else
+            //{
+            //    //this isn't the first time this session that the user is opening the setting form
+            //    DialogResult setupResult = setup.ShowDialog();
+            //    if (setupResult == DialogResult.OK)
+            //    {
+            //        //TODO: Implement setup routines and UI update
+            //        startCaptureButton.Enabled = true;
+            //    }
+            //    else if (setupResult == DialogResult.Cancel)        //if setup process was prematurely cancelled
+            //    {
+            //        status1TextBox.Clear();
+            //        status1TextBox.Text = "Setup was cancelled. Using previous settings.";
+            //        startCaptureButton.Enabled = true;              //we'll use previously entered settings
+            //    }
+
+            //}
         }
+        #endregion
+
+        #region Setting text on Video UI & capture start
 
         private void setTextonVideoUI(string text)
         {
@@ -527,57 +472,129 @@ namespace TEST_GPS_Parsing
 
         }
 
-        private void startCaptureButton_Click(object sender, EventArgs e)
+
+
+        private void oneTimeDisplaySetup()
         {
-                if (isStreaming)
-                {  //stop the capture
-                    isStreaming = false;
-                    startCaptureButton.Text = "Start Capture";
-                pausedCaptureLabel.Visible = true;
-                    camStreamCapture.Pause();
-                    cscLeft.Pause();
-                    cscRight.Pause();
-                    cscCentre.Pause();
-                    ol_mark.clearScreen();      //remove the marker and lines off the screen.
-                    
-                }
+            //the drawMode, fileName and videoSource are copied from the other form
+            //evaluates what the user chose from the bounds setup box
+            switch (captureChoice)
+            {
+                case 0: videoModeLabel.Text = "Live Video"; break;
+                case 1: videoModeLabel.Text = "Recorded Video"; break;
+                default:
+                    videoModeLabel.Text = "None Set";
+                    break;
+            }
+            switch (drawMode_Overlay)
+            {
+                case 0: drawModeLabel.Text = "Random"; drawMode_Overlay = DRAW_MODE_RANDOM; break;
+                case 1: drawModeLabel.Text = "Ordered"; drawMode_Overlay = DRAW_MODE_ORDERED; break;
+                case 2: drawModeLabel.Text = "Tracking"; drawMode_Overlay = DRAW_MODE_TRACKING; break;
+                case 3: drawModeLabel.Text = "Object-Based Tracking"; drawMode_Overlay = DRAW_MODE_REVOBJTRACK; break;
+                default:
+                    break;
+            }
+
+            getVideoInfo();                                         //call video info function
+            frameHeightLabel.Text = vidPixelHeight.ToString();      //get the video parameters
+            frameWidthLabel.Text = vidPixelWidth.ToString();
+
+            //display the limits set on previous window for the current camera (assumed to be the centre)
+            //upperLeftBound[0] = latitude top left; [1] = longitude top left
+            //OuterLimitBound[0] = longitude top right; [1] = latitude bottom left
+            latTopLeftLabel.Text = upperLeftBound[0].ToString();
+            longTopLeftLabel.Text = upperLeftBound[1].ToString();
+            longTopRightLabel.Text = outerLimitBound[0].ToString();
+            latBotLeftLabel.Text = outerLimitBound[1].ToString();
+
+            //calculate the camera frame coordinate range - assume African co-ords; latitude always <0 longitude always >0
+            delta_y = Math.Abs(outerLimitBound[1] - upperLeftBound[0]);
+            delta_x = outerLimitBound[0] - upperLeftBound[1];
+
+            if (camStreamCapture != null)
+            {
+                //ASSIGN THESE LIMITS TO THE OVERLAY CLASS TO WORK WITH THEM THERE
+                ol_mark = new Overlay();                            //init the overlay object
+                ol_mark.setupOverlay();                             //setup the overlay
+                ol_mark.gridWidth = vidPixelWidth;                  //pass these variables to the other class
+                ol_mark.gridHeight = vidPixelHeight;
+                ol_mark.dx = delta_x;
+                ol_mark.dy = delta_y;
+
+                if (drawMode_Overlay == DRAW_MODE_REVOBJTRACK)      //the (x,y) coords aren't drawn onscreen if using the object based tracking
+                {
+                    ol_mark.displayCoordTextOnscreen = false;
+                } 
                 else
                 {
-                //start the capture
+                    ol_mark.displayCoordTextOnscreen = true;
+                }
 
+                for (int i = 0; i <= 1; i++)
+                {
+                    ol_mark.ulBound[i] = upperLeftBound[i];
+                    ol_mark.olBound[i] = outerLimitBound[i];
+                }
+
+            }
+        }
+
+        private void startCaptureButton_Click(object sender, EventArgs e)
+        {
+            if (isStreaming)
+            {  //stop the capture
+                isStreaming = false;
+                setupCaptureButton.Enabled = true;
+                startCaptureButton.Text = "Start Capture";
+                pausedCaptureLabel.Visible = true;
+                camStreamCapture.Pause();
+                cscLeft.Pause();
+                cscRight.Pause();
+                cscCentre.Pause();
+                ol_mark.clearScreen();      //remove the marker and lines off the screen.
+                    
+            }
+            else
+            {
+                //start the capture
                 overlayVideoFramesBox.Visible = true;   //show the output frames box
                 setupInstructLabel.Visible = false;     //hide the setup instruction label
                 pausedCaptureLabel.Visible = false;     //hide the paused label (for if capture was already on)
-                    startCaptureButton.Text = "Stop Capture";
-                    try
-                    {
-                    camStreamCapture.Start();
-                    cscLeft.Start();
-                    cscRight.Start();
-                    cscCentre.Start();
-                    isStreaming = true;
+                setupCaptureButton.Enabled = false;     //don't allow settings to be changed during capture
+                startCaptureButton.Text = "Stop Capture";
+                try
+                {
+                   camStreamCapture.Start();
+                   cscLeft.Start();
+                   cscRight.Start();
+                   cscCentre.Start();
+                   isStreaming = true;
                     
-                    }
-                    catch (Exception re)
-                    {
-                        MessageBox.Show("Capturing still failed. Try again later. Reason: " + re.Message, "Something happened!", 
-                            MessageBoxButtons.OK, MessageBoxIcon.Error,MessageBoxDefaultButton.Button1 ,(MessageBoxOptions)0x40000);
-                        isStreaming = false;
-                        startCaptureButton.Text = "(Re)Start Capture";
-                        ReleaseData();      //something failed so release the data
-                        return;
-                    }
                 }
+                catch (Exception re)
+                {
+                   MessageBox.Show("Capturing still failed. Try again later. Reason: " + re.Message, "Something happened!", 
+                                MessageBoxButtons.OK, MessageBoxIcon.Error,MessageBoxDefaultButton.Button1 ,(MessageBoxOptions)0x40000);
+                   isStreaming = false;
+                   startCaptureButton.Text = "(Re)Start Capture";
+                   ReleaseData();      //something failed so release the data
+                   return;
+                 }
+              }
 
         }
 
+        #endregion
+
+        #region Close & release methods 
         public void ReleaseData()
         {
             if (camStreamCapture != null) { camStreamCapture.Dispose();}
             if (cscLeft != null) { cscLeft.Dispose(); }
             if (cscRight != null) { cscRight.Dispose(); }
             if (cscCentre != null) { cscCentre.Dispose(); }
-            rawVideoFramesBox.Dispose();
+            //rawVideoFramesBox.Dispose();
                 
         }
 
@@ -598,9 +615,10 @@ namespace TEST_GPS_Parsing
             }
             else
             {
+                isStreaming = false;
                 this.Visible = false;
                 this.Dispose();
-                //ReleaseData();      //try to release the capture
+                ReleaseData();      //try to release the capture
             }
             
             

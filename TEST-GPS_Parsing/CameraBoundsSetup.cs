@@ -12,11 +12,8 @@ namespace TEST_GPS_Parsing
     public partial class CameraBoundsSetup : Form
     {
         #region Initialization objects and vars
-        //video GPS coordinate extents
-        private double[] upperLeftCoords_CB = new double[2];       //[0] = latitude top left; [1] = longitude top left
-        private double[] outerLimitCoords_CB = new double[2];      //[0] = longitude top right; [1] = latitude bottom left
-
-        //----------COPY OF VIDEO PARAMETERS--------------
+       
+        //==========COPY OF VIDEO PARAMETERS===============
         /*
          These parameters are local to this class instance, they are requested by the video output class
          at call, where this class sets up all the functions, and copies them back to the video output
@@ -36,6 +33,12 @@ namespace TEST_GPS_Parsing
         public Capture cscLeft_CB;
         public Capture cscRight_CB;
         public Capture camStreamCapture_CB;
+
+        //video GPS coordinate extents
+        public double[] upperLeftCoords_CB = new double[2];       //[0] = latitude top left; [1] = longitude top left
+        public double[] outerLimitCoords_CB = new double[2];      //[0] = longitude top right; [1] = latitude bottom left
+
+        //==========END COPY OF VIDEO PARAMETERS=============
 
         //-------SIMULATION
         public static int DRAW_MODE_RANDOM = 0;
@@ -101,12 +104,13 @@ namespace TEST_GPS_Parsing
             }
 
             //check default camera status and display on UI
+            camView2StatusTextBox.Clear();
             if (cscCentre_CB != null && cscCentre_CB.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) { centreCamStatusLabel.Text = "Ready / Available"; }
-            else { centreCamStatusLabel.Text = "Not Available"; camViewStatusTextBox.Text = "Not all cameras available."; }
+            else { centreCamStatusLabel.Text = "Not Available"; camView2StatusTextBox.AppendText(" Centre Cam not available |"); }
             if (cscLeft_CB != null && cscLeft_CB.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) { leftCamStatusLabel.Text = "Ready / Available"; }
-            else { leftCamStatusLabel.Text = "Not Available"; camViewStatusTextBox.Text = "Not all cameras available."; }
+            else { leftCamStatusLabel.Text = "Not Available"; camView2StatusTextBox.AppendText(" Left Cam not available |"); }
             if (cscRight_CB != null && cscRight_CB.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) { rightCamStatusLabel.Text = "Ready / Available"; }
-            else { rightCamStatusLabel.Text = "Not Available"; camViewStatusTextBox.Text = "Not all cameras available."; }
+            else { rightCamStatusLabel.Text = "Not Available"; camView2StatusTextBox.AppendText(" Right Cam not available."); }
 
 
             if (longUpperLeftTextbox.Text == "" || latUpperLeftTextbox.Text == "" || latBottomLeftTextbox.Text == "" || longUpperRightTextbox.Text == "" )
@@ -226,14 +230,7 @@ namespace TEST_GPS_Parsing
         #region UI and button methods
         private void setExtentsButton_Click(object sender, EventArgs e)
         {
-            //warn user if setting not filled
-            if (drawModeChoiceComboBox.SelectedIndex == -1 || vidSourceChoiceComboBox.SelectedIndex == -1)
-            {
-             //   MessageBox.Show("Please select a capture mode and/or a draw mode before continuing.",
-             //       "Choose settings first!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation,MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
-            }
-            else
-            {
+            checkReadiness();
 
                 //The index of draw mode defines the selected item. 0=Random 1=Ordered 2=Tracking 3=object tracking onscreen
                 switch (drawModeChoiceComboBox.SelectedIndex)
@@ -257,20 +254,19 @@ namespace TEST_GPS_Parsing
                         break;
                 }
 
-                //now start the process!
-                try
+
+            //Checks if the minimum number of cameras are available
+            if (cscLeft_CB.GetCaptureProperty(CapProp.FrameHeight) == 0 ||
+                cscRight_CB.GetCaptureProperty(CapProp.FrameHeight) == 0 ||
+                cscCentre_CB.GetCaptureProperty(CapProp.FrameHeight) == 0)
+            {
+                MessageBox.Show("Error - at least 3 cameras must be operational for this program to work optimally. If you choose to continue, you might encounter unexpected problems. Continue without 3 cameras?", "Camera Load error!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            }
+
+            //now start the process!
+            try
                 {
-                    bool startedOK = false;
-                    //startedOK = startNewVideoConsole();
-                    if (startedOK)
-                    {
-                        this.Hide();           //close the form and open the next one
-                    }
-                    else
-                    {
-                        //vo.ReleaseData();               //dispose of the capture methods
-                        this.Dispose();
-                    }
 
                 }
                 catch (NotSupportedException ns)
@@ -281,24 +277,24 @@ namespace TEST_GPS_Parsing
 
 
 
-            }
+            
         }
 
         private void checkReadiness()
         {
             //if choosing internal cams & those aren't setup OR when choosing IP and THOSE aren't ready
             //disable the start button
-            if (!coordsReady    ||
-                (vidSourceChoiceComboBox.SelectedIndex == 1 && !camTrackReady) 
-                                ||
-                (vidSourceChoiceComboBox.SelectedIndex == 2 && !ipCamReady)  )
-            {
-                setExtentsButton.Enabled = false;
-            }
-            else
+            if (coordsReady && 
+                (vidSourceChoiceComboBox.SelectedIndex == 1 && camTrackReady)
+                ||
+                (vidSourceChoiceComboBox.SelectedIndex == 2 && ipCamReady)
+                )
             {
                 setExtentsButton.Enabled = true;
             }
+            else
+            {
+                setExtentsButton.Enabled = false;            }
         }
 
         private void chooseVideoFileFialog_FileOk(object sender, CancelEventArgs e)

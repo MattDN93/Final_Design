@@ -87,6 +87,7 @@
             this.longUpperLeftTextbox = new System.Windows.Forms.TextBox();
             this.coordsHelpLink = new System.Windows.Forms.LinkLabel();
             this.label1 = new System.Windows.Forms.Label();
+            this.camView2StatusTextBox = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox8.SuspendLayout();
@@ -173,7 +174,7 @@
             // 
             // camViewStatusTextBox
             // 
-            this.camViewStatusTextBox.Location = new System.Drawing.Point(51, 60);
+            this.camViewStatusTextBox.Location = new System.Drawing.Point(68, 51);
             this.camViewStatusTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.camViewStatusTextBox.Name = "camViewStatusTextBox";
             this.camViewStatusTextBox.ReadOnly = true;
@@ -183,7 +184,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(7, 63);
+            this.label4.Location = new System.Drawing.Point(15, 64);
             this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(40, 13);
@@ -211,6 +212,7 @@
             // groupBox2
             // 
             this.groupBox2.BackColor = System.Drawing.Color.MistyRose;
+            this.groupBox2.Controls.Add(this.camView2StatusTextBox);
             this.groupBox2.Controls.Add(this.label22);
             this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Controls.Add(this.camViewStatusTextBox);
@@ -226,7 +228,7 @@
             // 
             this.label22.AutoSize = true;
             this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label22.Location = new System.Drawing.Point(7, 23);
+            this.label22.Location = new System.Drawing.Point(19, 17);
             this.label22.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(396, 26);
@@ -739,6 +741,15 @@
             this.label1.TabIndex = 7;
             this.label1.Text = "Insert the GPS co-ordinate extents of the main frame in the appropriate boxes.";
             // 
+            // camView2StatusTextBox
+            // 
+            this.camView2StatusTextBox.Location = new System.Drawing.Point(68, 75);
+            this.camView2StatusTextBox.Margin = new System.Windows.Forms.Padding(2);
+            this.camView2StatusTextBox.Name = "camView2StatusTextBox";
+            this.camView2StatusTextBox.ReadOnly = true;
+            this.camView2StatusTextBox.Size = new System.Drawing.Size(352, 20);
+            this.camView2StatusTextBox.TabIndex = 28;
+            // 
             // CameraBoundsSetup
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -839,5 +850,6 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.TextBox camView2StatusTextBox;
     }
 }
