@@ -549,9 +549,6 @@ namespace TEST_GPS_Parsing
                 startCaptureButton.Text = "Start Capture";
                 pausedCaptureLabel.Visible = true;
                 camStreamCapture.Pause();
-                cscLeft.Pause();
-                cscRight.Pause();
-                cscCentre.Pause();
                 ol_mark.clearScreen();      //remove the marker and lines off the screen.
                     
             }
@@ -566,9 +563,6 @@ namespace TEST_GPS_Parsing
                 try
                 {
                    camStreamCapture.Start();
-                   cscLeft.Start();
-                   cscRight.Start();
-                   cscCentre.Start();
                    isStreaming = true;
                     
                 }
