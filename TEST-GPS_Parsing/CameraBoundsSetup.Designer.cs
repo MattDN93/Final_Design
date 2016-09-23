@@ -29,13 +29,6 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.longUpperLeftTextbox = new System.Windows.Forms.TextBox();
-            this.longUpperRightTextbox = new System.Windows.Forms.TextBox();
-            this.latUpperLeftTextbox = new System.Windows.Forms.TextBox();
-            this.latBottomLeftTextbox = new System.Windows.Forms.TextBox();
-            this.latUpperRightTextbox = new System.Windows.Forms.TextBox();
-            this.longBottomLeftTextbox = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -45,33 +38,11 @@
             this.camViewStatusTextBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.checkFieldsTimer = new System.Windows.Forms.Timer(this.components);
-            this.label7 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.drawModeChoiceComboBox = new System.Windows.Forms.ComboBox();
-            this.vidSourceChoiceComboBox = new System.Windows.Forms.ComboBox();
             this.chooseVideoFileFialog = new System.Windows.Forms.OpenFileDialog();
-            this.label8 = new System.Windows.Forms.Label();
-            this.leftCamStatusLabel = new System.Windows.Forms.Label();
-            this.centreCamStatusLabel = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.rightCamStatusLabel = new System.Windows.Forms.Label();
-            this.label13 = new System.Windows.Forms.Label();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.groupBox6 = new System.Windows.Forms.GroupBox();
-            this.label16 = new System.Windows.Forms.Label();
-            this.label17 = new System.Windows.Forms.Label();
-            this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.label14 = new System.Windows.Forms.Label();
-            this.label15 = new System.Windows.Forms.Label();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.label12 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.coordsHelpLink = new System.Windows.Forms.LinkLabel();
             this.coordEntryHelp = new System.Windows.Forms.HelpProvider();
             this.label9 = new System.Windows.Forms.Label();
-            this.groupBox7 = new System.Windows.Forms.GroupBox();
-            this.label23 = new System.Windows.Forms.Label();
-            this.label18 = new System.Windows.Forms.Label();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label22 = new System.Windows.Forms.Label();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
             this.camRightIpTextBox = new System.Windows.Forms.TextBox();
@@ -82,91 +53,51 @@
             this.label20 = new System.Windows.Forms.Label();
             this.label21 = new System.Windows.Forms.Label();
             this.checkIpAddrButton = new System.Windows.Forms.Button();
+            this.label18 = new System.Windows.Forms.Label();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.refreshStatusButton = new System.Windows.Forms.Button();
+            this.label8 = new System.Windows.Forms.Label();
+            this.leftCamStatusLabel = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
+            this.centreCamStatusLabel = new System.Windows.Forms.Label();
+            this.rightCamStatusLabel = new System.Windows.Forms.Label();
             this.cameraHelpLink = new System.Windows.Forms.LinkLabel();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.label22 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.vidSourceChoiceComboBox = new System.Windows.Forms.ComboBox();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.label23 = new System.Windows.Forms.Label();
+            this.drawModeChoiceComboBox = new System.Windows.Forms.ComboBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.label16 = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
+            this.latBottomLeftTextbox = new System.Windows.Forms.TextBox();
+            this.longBottomLeftTextbox = new System.Windows.Forms.TextBox();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.label14 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.longUpperRightTextbox = new System.Windows.Forms.TextBox();
+            this.latUpperRightTextbox = new System.Windows.Forms.TextBox();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.latUpperLeftTextbox = new System.Windows.Forms.TextBox();
+            this.longUpperLeftTextbox = new System.Windows.Forms.TextBox();
+            this.coordsHelpLink = new System.Windows.Forms.LinkLabel();
+            this.label1 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.groupBox8.SuspendLayout();
+            this.groupBox10.SuspendLayout();
+            this.groupBox9.SuspendLayout();
+            this.groupBox7.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox6.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.groupBox4.SuspendLayout();
-            this.groupBox7.SuspendLayout();
-            this.groupBox8.SuspendLayout();
-            this.groupBox10.SuspendLayout();
-            this.groupBox9.SuspendLayout();
-            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // longUpperLeftTextbox
-            // 
-            this.longUpperLeftTextbox.BackColor = System.Drawing.Color.Green;
-            this.longUpperLeftTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.longUpperLeftTextbox.Location = new System.Drawing.Point(97, 21);
-            this.longUpperLeftTextbox.Margin = new System.Windows.Forms.Padding(2);
-            this.longUpperLeftTextbox.Name = "longUpperLeftTextbox";
-            this.longUpperLeftTextbox.Size = new System.Drawing.Size(96, 20);
-            this.longUpperLeftTextbox.TabIndex = 1;
-            // 
-            // longUpperRightTextbox
-            // 
-            this.longUpperRightTextbox.BackColor = System.Drawing.Color.Green;
-            this.longUpperRightTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.longUpperRightTextbox.Location = new System.Drawing.Point(96, 21);
-            this.longUpperRightTextbox.Margin = new System.Windows.Forms.Padding(2);
-            this.longUpperRightTextbox.Name = "longUpperRightTextbox";
-            this.longUpperRightTextbox.Size = new System.Drawing.Size(96, 20);
-            this.longUpperRightTextbox.TabIndex = 2;
-            // 
-            // latUpperLeftTextbox
-            // 
-            this.latUpperLeftTextbox.BackColor = System.Drawing.Color.Blue;
-            this.latUpperLeftTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.latUpperLeftTextbox.Location = new System.Drawing.Point(97, 49);
-            this.latUpperLeftTextbox.Margin = new System.Windows.Forms.Padding(2);
-            this.latUpperLeftTextbox.Name = "latUpperLeftTextbox";
-            this.latUpperLeftTextbox.Size = new System.Drawing.Size(96, 20);
-            this.latUpperLeftTextbox.TabIndex = 3;
-            // 
-            // latBottomLeftTextbox
-            // 
-            this.latBottomLeftTextbox.BackColor = System.Drawing.Color.Blue;
-            this.latBottomLeftTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.latBottomLeftTextbox.Location = new System.Drawing.Point(97, 24);
-            this.latBottomLeftTextbox.Margin = new System.Windows.Forms.Padding(2);
-            this.latBottomLeftTextbox.Name = "latBottomLeftTextbox";
-            this.latBottomLeftTextbox.Size = new System.Drawing.Size(96, 20);
-            this.latBottomLeftTextbox.TabIndex = 4;
-            // 
-            // latUpperRightTextbox
-            // 
-            this.latUpperRightTextbox.Location = new System.Drawing.Point(96, 49);
-            this.latUpperRightTextbox.Margin = new System.Windows.Forms.Padding(2);
-            this.latUpperRightTextbox.Name = "latUpperRightTextbox";
-            this.latUpperRightTextbox.ReadOnly = true;
-            this.latUpperRightTextbox.Size = new System.Drawing.Size(96, 20);
-            this.latUpperRightTextbox.TabIndex = 5;
-            // 
-            // longBottomLeftTextbox
-            // 
-            this.longBottomLeftTextbox.Location = new System.Drawing.Point(97, 52);
-            this.longBottomLeftTextbox.Margin = new System.Windows.Forms.Padding(2);
-            this.longBottomLeftTextbox.Name = "longBottomLeftTextbox";
-            this.longBottomLeftTextbox.ReadOnly = true;
-            this.longBottomLeftTextbox.Size = new System.Drawing.Size(96, 20);
-            this.longBottomLeftTextbox.TabIndex = 6;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(19, 22);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(372, 13);
-            this.label1.TabIndex = 7;
-            this.label1.Text = "Insert the GPS co-ordinate extents of the main frame in the appropriate boxes.";
             // 
             // label2
             // 
@@ -181,6 +112,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.BackColor = System.Drawing.Color.RosyBrown;
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.goBackButton);
             this.groupBox1.Controls.Add(this.clearFieldsButton);
@@ -263,245 +195,10 @@
             this.checkFieldsTimer.Interval = 1000;
             this.checkFieldsTimer.Tick += new System.EventHandler(this.checkFieldsTimer_Tick);
             // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(6, 42);
-            this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(75, 13);
-            this.label7.TabIndex = 3;
-            this.label7.Text = "Choose mode:";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(7, 49);
-            this.label6.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(110, 13);
-            this.label6.TabIndex = 2;
-            this.label6.Text = "Choose video source:";
-            // 
-            // drawModeChoiceComboBox
-            // 
-            this.drawModeChoiceComboBox.FormattingEnabled = true;
-            this.drawModeChoiceComboBox.Items.AddRange(new object[] {
-            "Random",
-            "Ordered",
-            "Tracking",
-            "Object-Based Tracking"});
-            this.drawModeChoiceComboBox.Location = new System.Drawing.Point(85, 39);
-            this.drawModeChoiceComboBox.Margin = new System.Windows.Forms.Padding(2);
-            this.drawModeChoiceComboBox.Name = "drawModeChoiceComboBox";
-            this.drawModeChoiceComboBox.Size = new System.Drawing.Size(121, 21);
-            this.drawModeChoiceComboBox.TabIndex = 1;
-            this.drawModeChoiceComboBox.Text = "Choose draw mode...";
-            this.drawModeChoiceComboBox.SelectedIndexChanged += new System.EventHandler(this.drawModeChoiceComboBox_SelectedIndexChanged);
-            // 
-            // vidSourceChoiceComboBox
-            // 
-            this.vidSourceChoiceComboBox.FormattingEnabled = true;
-            this.vidSourceChoiceComboBox.Items.AddRange(new object[] {
-            "Video file on PC",
-            "Locally-Attached Cam",
-            "IP Cameras"});
-            this.vidSourceChoiceComboBox.Location = new System.Drawing.Point(119, 46);
-            this.vidSourceChoiceComboBox.Margin = new System.Windows.Forms.Padding(2);
-            this.vidSourceChoiceComboBox.Name = "vidSourceChoiceComboBox";
-            this.vidSourceChoiceComboBox.Size = new System.Drawing.Size(108, 21);
-            this.vidSourceChoiceComboBox.TabIndex = 0;
-            this.vidSourceChoiceComboBox.Text = "Choose a source...";
-            // 
             // chooseVideoFileFialog
             // 
             this.chooseVideoFileFialog.Filter = "Video Files | *.avi, *.mp4, *.mpeg, *.mpg, *.wmv, *.mkv, *.mov | All files | *.*";
             this.chooseVideoFileFialog.FileOk += new System.ComponentModel.CancelEventHandler(this.chooseVideoFileFialog_FileOk);
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(6, 23);
-            this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(61, 13);
-            this.label8.TabIndex = 14;
-            this.label8.Text = "Status Left:";
-            // 
-            // leftCamStatusLabel
-            // 
-            this.leftCamStatusLabel.AutoSize = true;
-            this.leftCamStatusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.leftCamStatusLabel.Location = new System.Drawing.Point(93, 23);
-            this.leftCamStatusLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.leftCamStatusLabel.Name = "leftCamStatusLabel";
-            this.leftCamStatusLabel.Size = new System.Drawing.Size(21, 13);
-            this.leftCamStatusLabel.TabIndex = 15;
-            this.leftCamStatusLabel.Text = "__";
-            // 
-            // centreCamStatusLabel
-            // 
-            this.centreCamStatusLabel.AutoSize = true;
-            this.centreCamStatusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.centreCamStatusLabel.Location = new System.Drawing.Point(93, 49);
-            this.centreCamStatusLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.centreCamStatusLabel.Name = "centreCamStatusLabel";
-            this.centreCamStatusLabel.Size = new System.Drawing.Size(21, 13);
-            this.centreCamStatusLabel.TabIndex = 16;
-            this.centreCamStatusLabel.Text = "__";
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.BackColor = System.Drawing.Color.Transparent;
-            this.label11.Location = new System.Drawing.Point(6, 49);
-            this.label11.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(74, 13);
-            this.label11.TabIndex = 17;
-            this.label11.Text = "Status Centre:";
-            // 
-            // rightCamStatusLabel
-            // 
-            this.rightCamStatusLabel.AutoSize = true;
-            this.rightCamStatusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rightCamStatusLabel.Location = new System.Drawing.Point(93, 74);
-            this.rightCamStatusLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.rightCamStatusLabel.Name = "rightCamStatusLabel";
-            this.rightCamStatusLabel.Size = new System.Drawing.Size(21, 13);
-            this.rightCamStatusLabel.TabIndex = 19;
-            this.rightCamStatusLabel.Text = "__";
-            this.rightCamStatusLabel.Click += new System.EventHandler(this.rightCamStatusLabel_Click);
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(7, 74);
-            this.label13.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(68, 13);
-            this.label13.TabIndex = 18;
-            this.label13.Text = "Status Right:";
-            // 
-            // groupBox3
-            // 
-            this.groupBox3.BackColor = System.Drawing.Color.PeachPuff;
-            this.groupBox3.Controls.Add(this.groupBox6);
-            this.groupBox3.Controls.Add(this.groupBox5);
-            this.groupBox3.Controls.Add(this.groupBox4);
-            this.groupBox3.Controls.Add(this.coordsHelpLink);
-            this.groupBox3.Controls.Add(this.label1);
-            this.groupBox3.Location = new System.Drawing.Point(12, 36);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(420, 228);
-            this.groupBox3.TabIndex = 20;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Step 1: Camera Co-Ordinate Bounds";
-            // 
-            // groupBox6
-            // 
-            this.groupBox6.Controls.Add(this.label16);
-            this.groupBox6.Controls.Add(this.label17);
-            this.groupBox6.Controls.Add(this.latBottomLeftTextbox);
-            this.groupBox6.Controls.Add(this.longBottomLeftTextbox);
-            this.groupBox6.Location = new System.Drawing.Point(6, 136);
-            this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(200, 86);
-            this.groupBox6.TabIndex = 23;
-            this.groupBox6.TabStop = false;
-            this.groupBox6.Text = "Bottom Left Camera Bounds";
-            // 
-            // label16
-            // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(7, 55);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(74, 13);
-            this.label16.TabIndex = 9;
-            this.label16.Text = "Latitude (N/S)";
-            // 
-            // label17
-            // 
-            this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(6, 27);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(86, 13);
-            this.label17.TabIndex = 8;
-            this.label17.Text = "Longitude (E/W)";
-            // 
-            // groupBox5
-            // 
-            this.groupBox5.Controls.Add(this.label14);
-            this.groupBox5.Controls.Add(this.label15);
-            this.groupBox5.Controls.Add(this.longUpperRightTextbox);
-            this.groupBox5.Controls.Add(this.latUpperRightTextbox);
-            this.groupBox5.Location = new System.Drawing.Point(212, 44);
-            this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(200, 86);
-            this.groupBox5.TabIndex = 22;
-            this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "Upper Right Camera Bounds";
-            // 
-            // label14
-            // 
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(6, 52);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(74, 13);
-            this.label14.TabIndex = 7;
-            this.label14.Text = "Latitude (N/S)";
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(5, 24);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(86, 13);
-            this.label15.TabIndex = 6;
-            this.label15.Text = "Longitude (E/W)";
-            // 
-            // groupBox4
-            // 
-            this.groupBox4.Controls.Add(this.label12);
-            this.groupBox4.Controls.Add(this.label10);
-            this.groupBox4.Controls.Add(this.latUpperLeftTextbox);
-            this.groupBox4.Controls.Add(this.longUpperLeftTextbox);
-            this.groupBox4.Location = new System.Drawing.Point(6, 44);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(200, 86);
-            this.groupBox4.TabIndex = 21;
-            this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "Upper-Left Camera Bounds";
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(7, 52);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(74, 13);
-            this.label12.TabIndex = 5;
-            this.label12.Text = "Latitude (N/S)";
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(6, 24);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(86, 13);
-            this.label10.TabIndex = 4;
-            this.label10.Text = "Longitude (E/W)";
-            // 
-            // coordsHelpLink
-            // 
-            this.coordsHelpLink.AutoSize = true;
-            this.coordsHelpLink.Location = new System.Drawing.Point(217, 164);
-            this.coordsHelpLink.Name = "coordsHelpLink";
-            this.coordsHelpLink.Size = new System.Drawing.Size(194, 26);
-            this.coordsHelpLink.TabIndex = 20;
-            this.coordsHelpLink.TabStop = true;
-            this.coordsHelpLink.Text = "Not sure how to enter the co-ordinates?\r\nClick here for help!";
-            this.coordsHelpLink.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.coordsHelpLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.coordsHelpLink_LinkClicked);
             // 
             // label9
             // 
@@ -511,44 +208,38 @@
             this.label9.Size = new System.Drawing.Size(0, 13);
             this.label9.TabIndex = 21;
             // 
-            // groupBox7
+            // groupBox2
             // 
-            this.groupBox7.BackColor = System.Drawing.Color.LemonChiffon;
-            this.groupBox7.Controls.Add(this.label23);
-            this.groupBox7.Controls.Add(this.drawModeChoiceComboBox);
-            this.groupBox7.Controls.Add(this.label7);
-            this.groupBox7.Location = new System.Drawing.Point(12, 270);
-            this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(420, 123);
-            this.groupBox7.TabIndex = 22;
-            this.groupBox7.TabStop = false;
-            this.groupBox7.Text = "Step 3: Choose Tracking Method";
+            this.groupBox2.BackColor = System.Drawing.Color.MistyRose;
+            this.groupBox2.Controls.Add(this.label22);
+            this.groupBox2.Controls.Add(this.label4);
+            this.groupBox2.Controls.Add(this.camViewStatusTextBox);
+            this.groupBox2.Controls.Add(this.groupBox1);
+            this.groupBox2.Location = new System.Drawing.Point(12, 399);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(806, 100);
+            this.groupBox2.TabIndex = 24;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Step 4: Confirm and start";
             // 
-            // label23
+            // label22
             // 
-            this.label23.AutoSize = true;
-            this.label23.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label23.Location = new System.Drawing.Point(106, 19);
-            this.label23.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(197, 13);
-            this.label23.TabIndex = 24;
-            this.label23.Text = "Choose a tracking mode required below.";
-            // 
-            // label18
-            // 
-            this.label18.AutoSize = true;
-            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label18.Location = new System.Drawing.Point(48, 21);
-            this.label18.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(285, 13);
-            this.label18.TabIndex = 24;
-            this.label18.Text = "The program will try to connect to the camera\'s listed below";
+            this.label22.AutoSize = true;
+            this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label22.Location = new System.Drawing.Point(7, 23);
+            this.label22.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(396, 26);
+            this.label22.TabIndex = 27;
+            this.label22.Text = "Please confirm settings in the previous steps and ensure the status below is read" +
+    "y. \r\nThen click \"Start Video Capture\" to begin, or any other button to clear fie" +
+    "lds / quit.";
             // 
             // groupBox8
             // 
             this.groupBox8.BackColor = System.Drawing.Color.Honeydew;
+            this.groupBox8.BackgroundImage = global::TEST_GPS_Parsing.Properties.Resources.security_camera;
+            this.groupBox8.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.groupBox8.Controls.Add(this.groupBox10);
             this.groupBox8.Controls.Add(this.label18);
             this.groupBox8.Controls.Add(this.groupBox9);
@@ -564,6 +255,7 @@
             // 
             // groupBox10
             // 
+            this.groupBox10.BackColor = System.Drawing.Color.Transparent;
             this.groupBox10.Controls.Add(this.camRightIpTextBox);
             this.groupBox10.Controls.Add(this.camCentreIpTextBox);
             this.groupBox10.Controls.Add(this.camLeftIpTextBox);
@@ -603,16 +295,18 @@
             // label19
             // 
             this.label19.AutoSize = true;
+            this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label19.Location = new System.Drawing.Point(7, 80);
             this.label19.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(61, 13);
+            this.label19.Size = new System.Drawing.Size(73, 13);
             this.label19.TabIndex = 21;
             this.label19.Text = "Status Left:";
             // 
             // label5
             // 
             this.label5.AutoSize = true;
+            this.label5.BackColor = System.Drawing.Color.WhiteSmoke;
             this.label5.Location = new System.Drawing.Point(22, 19);
             this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label5.Name = "label5";
@@ -627,20 +321,22 @@
             // 
             this.label20.AutoSize = true;
             this.label20.BackColor = System.Drawing.Color.Transparent;
+            this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label20.Location = new System.Drawing.Point(7, 106);
             this.label20.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(74, 13);
+            this.label20.Size = new System.Drawing.Size(88, 13);
             this.label20.TabIndex = 22;
             this.label20.Text = "Status Centre:";
             // 
             // label21
             // 
             this.label21.AutoSize = true;
+            this.label21.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label21.Location = new System.Drawing.Point(8, 131);
             this.label21.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(68, 13);
+            this.label21.Size = new System.Drawing.Size(81, 13);
             this.label21.TabIndex = 23;
             this.label21.Text = "Status Right:";
             // 
@@ -653,8 +349,21 @@
             this.checkIpAddrButton.Text = "Check IP addresses";
             this.checkIpAddrButton.UseVisualStyleBackColor = true;
             // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label18.Location = new System.Drawing.Point(48, 21);
+            this.label18.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(285, 13);
+            this.label18.TabIndex = 24;
+            this.label18.Text = "The program will try to connect to the camera\'s listed below";
+            // 
             // groupBox9
             // 
+            this.groupBox9.BackColor = System.Drawing.Color.Transparent;
             this.groupBox9.Controls.Add(this.refreshStatusButton);
             this.groupBox9.Controls.Add(this.label8);
             this.groupBox9.Controls.Add(this.leftCamStatusLabel);
@@ -678,6 +387,74 @@
             this.refreshStatusButton.Text = "Refresh Status";
             this.refreshStatusButton.UseVisualStyleBackColor = true;
             // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(6, 23);
+            this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(73, 13);
+            this.label8.TabIndex = 14;
+            this.label8.Text = "Status Left:";
+            // 
+            // leftCamStatusLabel
+            // 
+            this.leftCamStatusLabel.AutoSize = true;
+            this.leftCamStatusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.leftCamStatusLabel.Location = new System.Drawing.Point(93, 23);
+            this.leftCamStatusLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.leftCamStatusLabel.Name = "leftCamStatusLabel";
+            this.leftCamStatusLabel.Size = new System.Drawing.Size(21, 13);
+            this.leftCamStatusLabel.TabIndex = 15;
+            this.leftCamStatusLabel.Text = "__";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.BackColor = System.Drawing.Color.Transparent;
+            this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label11.Location = new System.Drawing.Point(6, 49);
+            this.label11.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(88, 13);
+            this.label11.TabIndex = 17;
+            this.label11.Text = "Status Centre:";
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label13.Location = new System.Drawing.Point(7, 74);
+            this.label13.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(81, 13);
+            this.label13.TabIndex = 18;
+            this.label13.Text = "Status Right:";
+            // 
+            // centreCamStatusLabel
+            // 
+            this.centreCamStatusLabel.AutoSize = true;
+            this.centreCamStatusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.centreCamStatusLabel.Location = new System.Drawing.Point(93, 49);
+            this.centreCamStatusLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.centreCamStatusLabel.Name = "centreCamStatusLabel";
+            this.centreCamStatusLabel.Size = new System.Drawing.Size(21, 13);
+            this.centreCamStatusLabel.TabIndex = 16;
+            this.centreCamStatusLabel.Text = "__";
+            // 
+            // rightCamStatusLabel
+            // 
+            this.rightCamStatusLabel.AutoSize = true;
+            this.rightCamStatusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rightCamStatusLabel.Location = new System.Drawing.Point(93, 74);
+            this.rightCamStatusLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.rightCamStatusLabel.Name = "rightCamStatusLabel";
+            this.rightCamStatusLabel.Size = new System.Drawing.Size(21, 13);
+            this.rightCamStatusLabel.TabIndex = 19;
+            this.rightCamStatusLabel.Text = "__";
+            this.rightCamStatusLabel.Click += new System.EventHandler(this.rightCamStatusLabel_Click);
+            // 
             // cameraHelpLink
             // 
             this.cameraHelpLink.AutoSize = true;
@@ -690,32 +467,279 @@
             this.cameraHelpLink.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.cameraHelpLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.cameraHelpLink_LinkClicked);
             // 
-            // groupBox2
+            // label6
             // 
-            this.groupBox2.BackColor = System.Drawing.Color.MistyRose;
-            this.groupBox2.Controls.Add(this.label22);
-            this.groupBox2.Controls.Add(this.label4);
-            this.groupBox2.Controls.Add(this.camViewStatusTextBox);
-            this.groupBox2.Controls.Add(this.groupBox1);
-            this.groupBox2.Location = new System.Drawing.Point(12, 399);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(806, 100);
-            this.groupBox2.TabIndex = 24;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Step 4: Confirm and start";
+            this.label6.AutoSize = true;
+            this.label6.BackColor = System.Drawing.Color.Transparent;
+            this.label6.Location = new System.Drawing.Point(7, 49);
+            this.label6.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(110, 13);
+            this.label6.TabIndex = 2;
+            this.label6.Text = "Choose video source:";
             // 
-            // label22
+            // vidSourceChoiceComboBox
             // 
-            this.label22.AutoSize = true;
-            this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label22.Location = new System.Drawing.Point(7, 23);
-            this.label22.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(396, 26);
-            this.label22.TabIndex = 27;
-            this.label22.Text = "Please confirm settings in the previous steps and ensure the status below is read" +
-    "y. \r\nThen click \"Start Video Capture\" to begin, or any other button to clear fie" +
-    "lds / quit.";
+            this.vidSourceChoiceComboBox.FormattingEnabled = true;
+            this.vidSourceChoiceComboBox.Items.AddRange(new object[] {
+            "Video file on PC",
+            "Locally-Attached Cam",
+            "Networked Cameras"});
+            this.vidSourceChoiceComboBox.Location = new System.Drawing.Point(119, 46);
+            this.vidSourceChoiceComboBox.Margin = new System.Windows.Forms.Padding(2);
+            this.vidSourceChoiceComboBox.Name = "vidSourceChoiceComboBox";
+            this.vidSourceChoiceComboBox.Size = new System.Drawing.Size(108, 21);
+            this.vidSourceChoiceComboBox.TabIndex = 0;
+            this.vidSourceChoiceComboBox.Text = "Choose a source...";
+            // 
+            // groupBox7
+            // 
+            this.groupBox7.BackColor = System.Drawing.Color.LemonChiffon;
+            this.groupBox7.BackgroundImage = global::TEST_GPS_Parsing.Properties.Resources.tracking;
+            this.groupBox7.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.groupBox7.Controls.Add(this.label23);
+            this.groupBox7.Controls.Add(this.drawModeChoiceComboBox);
+            this.groupBox7.Controls.Add(this.label7);
+            this.groupBox7.Location = new System.Drawing.Point(12, 270);
+            this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Size = new System.Drawing.Size(420, 123);
+            this.groupBox7.TabIndex = 22;
+            this.groupBox7.TabStop = false;
+            this.groupBox7.Text = "Step 3: Choose Tracking Method";
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label23.Location = new System.Drawing.Point(106, 19);
+            this.label23.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(197, 13);
+            this.label23.TabIndex = 24;
+            this.label23.Text = "Choose a tracking mode required below.";
+            // 
+            // drawModeChoiceComboBox
+            // 
+            this.drawModeChoiceComboBox.FormattingEnabled = true;
+            this.drawModeChoiceComboBox.Items.AddRange(new object[] {
+            "Random",
+            "Ordered",
+            "Tracking",
+            "Object-Based Tracking"});
+            this.drawModeChoiceComboBox.Location = new System.Drawing.Point(85, 39);
+            this.drawModeChoiceComboBox.Margin = new System.Windows.Forms.Padding(2);
+            this.drawModeChoiceComboBox.Name = "drawModeChoiceComboBox";
+            this.drawModeChoiceComboBox.Size = new System.Drawing.Size(121, 21);
+            this.drawModeChoiceComboBox.TabIndex = 1;
+            this.drawModeChoiceComboBox.Text = "Choose draw mode...";
+            this.drawModeChoiceComboBox.SelectedIndexChanged += new System.EventHandler(this.drawModeChoiceComboBox_SelectedIndexChanged);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(6, 42);
+            this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(75, 13);
+            this.label7.TabIndex = 3;
+            this.label7.Text = "Choose mode:";
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.BackColor = System.Drawing.Color.PeachPuff;
+            this.groupBox3.BackgroundImage = global::TEST_GPS_Parsing.Properties.Resources.worldBack;
+            this.groupBox3.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.groupBox3.Controls.Add(this.groupBox6);
+            this.groupBox3.Controls.Add(this.groupBox5);
+            this.groupBox3.Controls.Add(this.groupBox4);
+            this.groupBox3.Controls.Add(this.coordsHelpLink);
+            this.groupBox3.Controls.Add(this.label1);
+            this.groupBox3.Location = new System.Drawing.Point(12, 36);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(420, 228);
+            this.groupBox3.TabIndex = 20;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Step 1: Camera Co-Ordinate Bounds";
+            // 
+            // groupBox6
+            // 
+            this.groupBox6.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox6.Controls.Add(this.label16);
+            this.groupBox6.Controls.Add(this.label17);
+            this.groupBox6.Controls.Add(this.latBottomLeftTextbox);
+            this.groupBox6.Controls.Add(this.longBottomLeftTextbox);
+            this.groupBox6.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.groupBox6.Location = new System.Drawing.Point(6, 136);
+            this.groupBox6.Name = "groupBox6";
+            this.groupBox6.Size = new System.Drawing.Size(200, 86);
+            this.groupBox6.TabIndex = 23;
+            this.groupBox6.TabStop = false;
+            this.groupBox6.Text = "Bottom Left Camera Bounds";
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(7, 55);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(74, 13);
+            this.label16.TabIndex = 9;
+            this.label16.Text = "Latitude (N/S)";
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(6, 27);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(86, 13);
+            this.label17.TabIndex = 8;
+            this.label17.Text = "Longitude (E/W)";
+            // 
+            // latBottomLeftTextbox
+            // 
+            this.latBottomLeftTextbox.BackColor = System.Drawing.Color.Blue;
+            this.latBottomLeftTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.latBottomLeftTextbox.Location = new System.Drawing.Point(97, 24);
+            this.latBottomLeftTextbox.Margin = new System.Windows.Forms.Padding(2);
+            this.latBottomLeftTextbox.Name = "latBottomLeftTextbox";
+            this.latBottomLeftTextbox.Size = new System.Drawing.Size(96, 20);
+            this.latBottomLeftTextbox.TabIndex = 4;
+            // 
+            // longBottomLeftTextbox
+            // 
+            this.longBottomLeftTextbox.Location = new System.Drawing.Point(97, 52);
+            this.longBottomLeftTextbox.Margin = new System.Windows.Forms.Padding(2);
+            this.longBottomLeftTextbox.Name = "longBottomLeftTextbox";
+            this.longBottomLeftTextbox.ReadOnly = true;
+            this.longBottomLeftTextbox.Size = new System.Drawing.Size(96, 20);
+            this.longBottomLeftTextbox.TabIndex = 6;
+            // 
+            // groupBox5
+            // 
+            this.groupBox5.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox5.Controls.Add(this.label14);
+            this.groupBox5.Controls.Add(this.label15);
+            this.groupBox5.Controls.Add(this.longUpperRightTextbox);
+            this.groupBox5.Controls.Add(this.latUpperRightTextbox);
+            this.groupBox5.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.groupBox5.Location = new System.Drawing.Point(212, 44);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(200, 86);
+            this.groupBox5.TabIndex = 22;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Upper Right Camera Bounds";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(6, 52);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(74, 13);
+            this.label14.TabIndex = 7;
+            this.label14.Text = "Latitude (N/S)";
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(5, 24);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(86, 13);
+            this.label15.TabIndex = 6;
+            this.label15.Text = "Longitude (E/W)";
+            // 
+            // longUpperRightTextbox
+            // 
+            this.longUpperRightTextbox.BackColor = System.Drawing.Color.Green;
+            this.longUpperRightTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.longUpperRightTextbox.Location = new System.Drawing.Point(96, 21);
+            this.longUpperRightTextbox.Margin = new System.Windows.Forms.Padding(2);
+            this.longUpperRightTextbox.Name = "longUpperRightTextbox";
+            this.longUpperRightTextbox.Size = new System.Drawing.Size(96, 20);
+            this.longUpperRightTextbox.TabIndex = 2;
+            // 
+            // latUpperRightTextbox
+            // 
+            this.latUpperRightTextbox.Location = new System.Drawing.Point(96, 49);
+            this.latUpperRightTextbox.Margin = new System.Windows.Forms.Padding(2);
+            this.latUpperRightTextbox.Name = "latUpperRightTextbox";
+            this.latUpperRightTextbox.ReadOnly = true;
+            this.latUpperRightTextbox.Size = new System.Drawing.Size(96, 20);
+            this.latUpperRightTextbox.TabIndex = 5;
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox4.Controls.Add(this.label12);
+            this.groupBox4.Controls.Add(this.label10);
+            this.groupBox4.Controls.Add(this.latUpperLeftTextbox);
+            this.groupBox4.Controls.Add(this.longUpperLeftTextbox);
+            this.groupBox4.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.groupBox4.Location = new System.Drawing.Point(6, 44);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(200, 86);
+            this.groupBox4.TabIndex = 21;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Upper-Left Camera Bounds";
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(7, 52);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(74, 13);
+            this.label12.TabIndex = 5;
+            this.label12.Text = "Latitude (N/S)";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(6, 24);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(86, 13);
+            this.label10.TabIndex = 4;
+            this.label10.Text = "Longitude (E/W)";
+            // 
+            // latUpperLeftTextbox
+            // 
+            this.latUpperLeftTextbox.BackColor = System.Drawing.Color.Blue;
+            this.latUpperLeftTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.latUpperLeftTextbox.Location = new System.Drawing.Point(97, 49);
+            this.latUpperLeftTextbox.Margin = new System.Windows.Forms.Padding(2);
+            this.latUpperLeftTextbox.Name = "latUpperLeftTextbox";
+            this.latUpperLeftTextbox.Size = new System.Drawing.Size(96, 20);
+            this.latUpperLeftTextbox.TabIndex = 3;
+            // 
+            // longUpperLeftTextbox
+            // 
+            this.longUpperLeftTextbox.BackColor = System.Drawing.Color.Green;
+            this.longUpperLeftTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.longUpperLeftTextbox.Location = new System.Drawing.Point(97, 21);
+            this.longUpperLeftTextbox.Margin = new System.Windows.Forms.Padding(2);
+            this.longUpperLeftTextbox.Name = "longUpperLeftTextbox";
+            this.longUpperLeftTextbox.Size = new System.Drawing.Size(96, 20);
+            this.longUpperLeftTextbox.TabIndex = 1;
+            // 
+            // coordsHelpLink
+            // 
+            this.coordsHelpLink.AutoSize = true;
+            this.coordsHelpLink.Location = new System.Drawing.Point(217, 164);
+            this.coordsHelpLink.Name = "coordsHelpLink";
+            this.coordsHelpLink.Size = new System.Drawing.Size(194, 26);
+            this.coordsHelpLink.TabIndex = 20;
+            this.coordsHelpLink.TabStop = true;
+            this.coordsHelpLink.Text = "Not sure how to enter the co-ordinates?\r\nClick here for help!";
+            this.coordsHelpLink.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.coordsHelpLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.coordsHelpLink_LinkClicked);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(19, 22);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(372, 13);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "Insert the GPS co-ordinate extents of the main frame in the appropriate boxes.";
             // 
             // CameraBoundsSetup
             // 
@@ -735,6 +759,16 @@
             this.Load += new System.EventHandler(this.CameraBoundsSetup_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
+            this.groupBox8.ResumeLayout(false);
+            this.groupBox8.PerformLayout();
+            this.groupBox10.ResumeLayout(false);
+            this.groupBox10.PerformLayout();
+            this.groupBox9.ResumeLayout(false);
+            this.groupBox9.PerformLayout();
+            this.groupBox7.ResumeLayout(false);
+            this.groupBox7.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox6.ResumeLayout(false);
@@ -743,16 +777,6 @@
             this.groupBox5.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
-            this.groupBox7.ResumeLayout(false);
-            this.groupBox7.PerformLayout();
-            this.groupBox8.ResumeLayout(false);
-            this.groupBox8.PerformLayout();
-            this.groupBox10.ResumeLayout(false);
-            this.groupBox10.PerformLayout();
-            this.groupBox9.ResumeLayout(false);
-            this.groupBox9.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -178,6 +178,9 @@
     <Content Include="opencv_ffmpeg310_64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="tracking.jpg" />
+    <None Include="security-camera.jpg" />
+    <None Include="worldBack.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.94.0\build\net451\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.94.0\build\net451\System.Data.SQLite.Core.targets')" />
