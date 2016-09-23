@@ -35,8 +35,8 @@ namespace TEST_GPS_Parsing
 
 
         //-----------------User options and parameters---------
-        private int captureChoice;              //user's selection of which capture to use
-        private int drawMode_Overlay;
+        public int captureChoice;              //user's selection of which capture to use
+        public int drawMode_Overlay;
         private string fileName;
 
         //-----------------Status flags and parameters----------
@@ -108,7 +108,7 @@ namespace TEST_GPS_Parsing
             {
                 if (camStreamCapture == null)
                 {
-                    initCamStreams();
+                    //initCamStreams();
                 }
 
             }
@@ -121,7 +121,7 @@ namespace TEST_GPS_Parsing
             //recreate the objects if they were disposed by the last call
             if (camStreamCapture == null || webcamVid == null)
             {
-                initCamStreams();
+                //initCamStreams();
             }
 
             //Checks if the minimum number of cameras are available

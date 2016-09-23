@@ -238,7 +238,7 @@
             // groupBox8
             // 
             this.groupBox8.BackColor = System.Drawing.Color.Honeydew;
-            this.groupBox8.BackgroundImage = global::TEST_GPS_Parsing.Properties.Resources.security_camera;
+            this.groupBox8.BackgroundImage = global::TEST_GPS_Parsing.Properties.Resources.security_cam;
             this.groupBox8.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.groupBox8.Controls.Add(this.groupBox10);
             this.groupBox8.Controls.Add(this.label18);
@@ -299,9 +299,9 @@
             this.label19.Location = new System.Drawing.Point(7, 80);
             this.label19.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(73, 13);
+            this.label19.Size = new System.Drawing.Size(49, 13);
             this.label19.TabIndex = 21;
-            this.label19.Text = "Status Left:";
+            this.label19.Text = "IP Left:";
             // 
             // label5
             // 
@@ -325,9 +325,9 @@
             this.label20.Location = new System.Drawing.Point(7, 106);
             this.label20.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(88, 13);
+            this.label20.Size = new System.Drawing.Size(64, 13);
             this.label20.TabIndex = 22;
-            this.label20.Text = "Status Centre:";
+            this.label20.Text = "IP Centre:";
             // 
             // label21
             // 
@@ -336,9 +336,9 @@
             this.label21.Location = new System.Drawing.Point(8, 131);
             this.label21.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(81, 13);
+            this.label21.Size = new System.Drawing.Size(57, 13);
             this.label21.TabIndex = 23;
-            this.label21.Text = "Status Right:";
+            this.label21.Text = "IP Right:";
             // 
             // checkIpAddrButton
             // 
@@ -490,7 +490,6 @@
             this.vidSourceChoiceComboBox.Name = "vidSourceChoiceComboBox";
             this.vidSourceChoiceComboBox.Size = new System.Drawing.Size(108, 21);
             this.vidSourceChoiceComboBox.TabIndex = 0;
-            this.vidSourceChoiceComboBox.Text = "Choose a source...";
             // 
             // groupBox7
             // 
@@ -531,7 +530,6 @@
             this.drawModeChoiceComboBox.Name = "drawModeChoiceComboBox";
             this.drawModeChoiceComboBox.Size = new System.Drawing.Size(121, 21);
             this.drawModeChoiceComboBox.TabIndex = 1;
-            this.drawModeChoiceComboBox.Text = "Choose draw mode...";
             this.drawModeChoiceComboBox.SelectedIndexChanged += new System.EventHandler(this.drawModeChoiceComboBox_SelectedIndexChanged);
             // 
             // label7

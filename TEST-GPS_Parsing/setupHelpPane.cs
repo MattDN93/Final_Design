@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using TEST_GPS_Parsing.Properties;
 
 namespace TEST_GPS_Parsing
 {
@@ -16,12 +17,16 @@ namespace TEST_GPS_Parsing
         public setupHelpPane(int helpType)
         {
             InitializeComponent();
+            //setup the help images
+            Image coordHelp = Resources.coordsHelp;
+            Image camHelp = Resources.cameraHelp;
+
             switch (helpType)
             {
-                case 0: helpImage.Image = Image.FromFile("coordsHelp.png");break;
-                case 1: helpImage.Image = Image.FromFile("cameraHelp.png");break;
+                case 0: helpImage.Image = coordHelp ; helpRequired = 0; break;
+                case 1: helpImage.Image = camHelp ; helpRequired = 1;  break;
                 case 2: 
-                default:
+                default: helpRequired = -1;
                     break;
             }
         }

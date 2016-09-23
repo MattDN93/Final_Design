@@ -13,9 +13,8 @@ namespace TEST_GPS_Parsing
     {
         #region Initialization objects and vars
         //video GPS coordinate extents
-        private double[] upperLeftCoords = new double[2];       //[0] = latitude top left; [1] = longitude top left
-        private double[] outerLimitCoords = new double[2];      //[0] = longitude top right; [1] = latitude bottom left
-        int drawModeChoice = -1;
+        private double[] upperLeftCoords_CB = new double[2];       //[0] = latitude top left; [1] = longitude top left
+        private double[] outerLimitCoords_CB = new double[2];      //[0] = longitude top right; [1] = latitude bottom left
 
         //----------COPY OF VIDEO PARAMETERS--------------
         /*
@@ -28,8 +27,8 @@ namespace TEST_GPS_Parsing
              */
         //The index of video mode defines the selected item. 0=Video on PC 1=Webcam
         //The index of draw mode defines the selected item. 0=Random 1=Ordered 2=Tracking
-        public int videoSource_CB;
-        public int drawMode_CB;
+        public int videoSource_CB = -1;
+        public int drawMode_CB = -1;
         public string filenameToOpen_CB;
 
         //-----------Capture Var Copies--------------------
@@ -44,6 +43,11 @@ namespace TEST_GPS_Parsing
         public static int DRAW_MODE_TRACKING = 2;
         public static int DRAW_MODE_REVOBJTRACK = 3;
 
+        //-------flags for program readiness
+        bool coordsReady;
+        bool camTrackReady;
+        bool ipCamReady;
+
 
         public CameraBoundsSetup(VideoOutputWindow incoming_vo)
         {
@@ -57,10 +61,16 @@ namespace TEST_GPS_Parsing
         {
             //checkFieldsTimer = new Timer(); //instantiate the timer
             checkFieldsTimer.Start();       //start the timer to check status of the entry of points
+            coordsReady = false;
+            camTrackReady = false;
+            ipCamReady = false;
         }
 
         private void checkFieldsTimer_Tick(object sender, EventArgs e)
         {
+            //run the readiness check to enable/disable the start button
+            checkReadiness();
+
             //if user has chosen internal cameras, try to connect them automagically
             if (vidSourceChoiceComboBox.SelectedIndex == 1)
             {
@@ -68,7 +78,9 @@ namespace TEST_GPS_Parsing
                 checkIpAddrButton.Enabled = false;
                 camLeftIpTextBox.Enabled = false;
                 camRightIpTextBox.Enabled = false;
-                camLeftIpTextBox.Enabled = false;
+                camCentreIpTextBox.Enabled = false;
+
+                //allow the start
 
                 //disable this if using local cams since they'll refresh automagically :P
                 refreshStatusButton.Enabled = false;
@@ -85,21 +97,20 @@ namespace TEST_GPS_Parsing
                 checkIpAddrButton.Enabled = true;
                 camLeftIpTextBox.Enabled = true;
                 camRightIpTextBox.Enabled = true;
-                camLeftIpTextBox.Enabled = true;
+                camCentreIpTextBox.Enabled = true;
             }
 
             //check default camera status and display on UI
             if (cscCentre_CB != null && cscCentre_CB.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) { centreCamStatusLabel.Text = "Ready / Available"; }
-            else { centreCamStatusLabel.Text = "Not Available"; }
+            else { centreCamStatusLabel.Text = "Not Available"; camViewStatusTextBox.Text = "Not all cameras available."; }
             if (cscLeft_CB != null && cscLeft_CB.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) { leftCamStatusLabel.Text = "Ready / Available"; }
-            else { leftCamStatusLabel.Text = "Not Available"; }
+            else { leftCamStatusLabel.Text = "Not Available"; camViewStatusTextBox.Text = "Not all cameras available."; }
             if (cscRight_CB != null && cscRight_CB.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) { rightCamStatusLabel.Text = "Ready / Available"; }
-            else { rightCamStatusLabel.Text = "Not Available"; }
+            else { rightCamStatusLabel.Text = "Not Available"; camViewStatusTextBox.Text = "Not all cameras available."; }
 
 
             if (longUpperLeftTextbox.Text == "" || latUpperLeftTextbox.Text == "" || latBottomLeftTextbox.Text == "" || longUpperRightTextbox.Text == "" )
             {
-                setExtentsButton.Enabled = false;      //keep disabled until all fields are filled so they can't start prematurely
                 camViewStatusTextBox.Clear();           //clears from last tick
                 camViewStatusTextBox.BackColor = Color.Orange;
                 camViewStatusTextBox.AppendText("Fields empty:");   //append which fields are still empty until they're fixed
@@ -119,6 +130,8 @@ namespace TEST_GPS_Parsing
                 {
                     camViewStatusTextBox.AppendText(" Lat. Step 3;");
                 }
+
+                coordsReady = false;                    //ensures start button stays disabled
             }
             else
             {
@@ -131,14 +144,14 @@ namespace TEST_GPS_Parsing
                 setBoundsResult = setCameraCoordBounds(latUpperLeftTextbox.Text, longUpperLeftTextbox.Text, longUpperRightTextbox.Text, latBottomLeftTextbox.Text);
                 if (setBoundsResult == true)
                 {
-                    setExtentsButton.Enabled = true;        //keep start button enabled if fields contain something
+                    coordsReady = true;
                 }
                 else
                 {
                     camViewStatusTextBox.Clear();
                     camViewStatusTextBox.BackColor = Color.PaleVioletRed;
                     camViewStatusTextBox.AppendText("Failed to set fields - have you used the right format?");
-                    setExtentsButton.Enabled = false;
+                    coordsReady = false;
                     return;
                 }
 
@@ -146,6 +159,31 @@ namespace TEST_GPS_Parsing
 
             latUpperRightTextbox.Text = latUpperLeftTextbox.Text;
             longBottomLeftTextbox.Text = longUpperLeftTextbox.Text;
+
+            //now check the status of the dropdowns
+            if (drawModeChoiceComboBox.SelectedIndex == -1)
+            {
+                drawModeChoiceComboBox.BackColor = Color.Red;           //if user hasn't selected anything highlight this
+                camTrackReady = false;
+            }
+            else
+            {
+                drawModeChoiceComboBox.BackColor = Color.WhiteSmoke;
+            }  
+            if (vidSourceChoiceComboBox.SelectedIndex == -1)
+            {
+                vidSourceChoiceComboBox.BackColor = Color.Red;          //highlight missing selection
+                camTrackReady = false;
+            }
+            else
+            {
+                vidSourceChoiceComboBox.BackColor = Color.WhiteSmoke;
+            }
+            if (drawModeChoiceComboBox.SelectedIndex != -1 && vidSourceChoiceComboBox.SelectedIndex != -1)
+            {
+                //allow capture to start & reset colouring
+                camTrackReady = true;
+            }
         }
         #endregion
 
@@ -191,8 +229,8 @@ namespace TEST_GPS_Parsing
             //warn user if setting not filled
             if (drawModeChoiceComboBox.SelectedIndex == -1 || vidSourceChoiceComboBox.SelectedIndex == -1)
             {
-                MessageBox.Show("Please select a capture mode and/or a draw mode before continuing.",
-                    "Choose settings first!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation,MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
+             //   MessageBox.Show("Please select a capture mode and/or a draw mode before continuing.",
+             //       "Choose settings first!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation,MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
             }
             else
             {
@@ -200,12 +238,12 @@ namespace TEST_GPS_Parsing
                 //The index of draw mode defines the selected item. 0=Random 1=Ordered 2=Tracking 3=object tracking onscreen
                 switch (drawModeChoiceComboBox.SelectedIndex)
                 {
-                    case 0: drawModeChoice = DRAW_MODE_RANDOM; break;
-                    case 1: drawModeChoice = DRAW_MODE_ORDERED; break;
-                    case 2: drawModeChoice = DRAW_MODE_TRACKING; break;
-                    case 3: drawModeChoice = DRAW_MODE_REVOBJTRACK; break;
+                    case 0: drawMode_CB = DRAW_MODE_RANDOM; break;
+                    case 1: drawMode_CB = DRAW_MODE_ORDERED; break;
+                    case 2: drawMode_CB = DRAW_MODE_TRACKING; break;
+                    case 3: drawMode_CB = DRAW_MODE_REVOBJTRACK; break;
                     default:
-                        drawModeChoice = -1;
+                        drawMode_CB = -1;
                         break;
                 }
 
@@ -213,8 +251,8 @@ namespace TEST_GPS_Parsing
                 switch (vidSourceChoiceComboBox.SelectedIndex)
                 {
                     case 0: chooseVideoFileFialog.ShowDialog(); break;                   //show user file dialog first
-                    case 1: setVideoParameters(0, drawModeChoice); break;   //using webcam so no filename needed
-                    case 2: setVideoParameters(1, drawModeChoice); break;   //using webcam and GPS values
+                    case 1: setVideoParameters(0, drawMode_CB); break;   //using webcam so no filename needed
+                    case 2: setVideoParameters(1, drawMode_CB); break;   //using webcam and GPS values
                     default:
                         break;
                 }
@@ -246,11 +284,28 @@ namespace TEST_GPS_Parsing
             }
         }
 
+        private void checkReadiness()
+        {
+            //if choosing internal cams & those aren't setup OR when choosing IP and THOSE aren't ready
+            //disable the start button
+            if (!coordsReady    ||
+                (vidSourceChoiceComboBox.SelectedIndex == 1 && !camTrackReady) 
+                                ||
+                (vidSourceChoiceComboBox.SelectedIndex == 2 && !ipCamReady)  )
+            {
+                setExtentsButton.Enabled = false;
+            }
+            else
+            {
+                setExtentsButton.Enabled = true;
+            }
+        }
+
         private void chooseVideoFileFialog_FileOk(object sender, CancelEventArgs e)
         {
             //set the parameters of the file and arguments we'll pass 
             //if here, we assume the user is opening a file
-            setVideoParameters(1, drawModeChoice, chooseVideoFileFialog.FileName.ToString());
+            setVideoParameters(1, drawMode_CB, chooseVideoFileFialog.FileName.ToString());
         }
 
         private void clearFieldsButton_Click(object sender, EventArgs e)
@@ -281,13 +336,13 @@ namespace TEST_GPS_Parsing
             int parseSuccessCount = 0;
 
             //convert the text to double and check
-            parseSuccess = double.TryParse(_upperLeft0, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out upperLeftCoords[0]);
+            parseSuccess = double.TryParse(_upperLeft0, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out upperLeftCoords_CB[0]);
             if (parseSuccess) { parseSuccessCount++; } else { parseSuccess = false; }
-            parseSuccess = double.TryParse(_upperLeft1, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out upperLeftCoords[1]);
+            parseSuccess = double.TryParse(_upperLeft1, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out upperLeftCoords_CB[1]);
             if (parseSuccess) { parseSuccessCount++; } else { parseSuccess = false; }
-            parseSuccess = double.TryParse(_upperRight0, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out outerLimitCoords[0]);
+            parseSuccess = double.TryParse(_upperRight0, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out outerLimitCoords_CB[0]);
             if (parseSuccess) { parseSuccessCount++; } else { parseSuccess = false; }
-            parseSuccess = double.TryParse(_bottomLeft1, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out outerLimitCoords[1]);
+            parseSuccess = double.TryParse(_bottomLeft1, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out outerLimitCoords_CB[1]);
             if (parseSuccess) { parseSuccessCount++; } else { parseSuccess = false; }
 
             //make sure all co-ordinates were parsed OK
@@ -382,7 +437,7 @@ namespace TEST_GPS_Parsing
         //}
         #endregion
 
-
+        #region Help system methods 
         private void drawModeChoiceComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
 
@@ -406,6 +461,7 @@ namespace TEST_GPS_Parsing
         {
 
         }
+        #endregion
     }
 }
 
