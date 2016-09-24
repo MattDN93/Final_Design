@@ -274,9 +274,6 @@ namespace TEST_GPS_Parsing
                     MessageBox.Show("The video stream start failed. Details: " + ns.Message,
                         "Something happened", MessageBoxButtons.OK, MessageBoxIcon.Error,MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
                 }
-
-
-
             
         }
 
