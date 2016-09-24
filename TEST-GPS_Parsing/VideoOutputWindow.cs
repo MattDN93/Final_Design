@@ -50,12 +50,31 @@ namespace TEST_GPS_Parsing
         protected int vidPixelHeight;
 
         //-----------------Camera GPS boundary variables--------
-        //vector of vectors allows upperLeftBound & outerLimitBound to exist for all camera frames
+        //struct allows upperLeftBound & outerLimitBound to exist for all camera frames
+        
 
-        public double[] upperLeftBound = new double[2];         //[0] = latitude top left; [1] = longitude top left
-        public double[] outerLimitBound = new double[2];        //[0] = longitude top right; [1] = latitude bottom left
-        public double delta_y;                                  //range of latitude in camera frame
-        public double delta_x;                                  //range of longitude in camera frame
+        struct camBound     //struct for one camera
+        {
+            public double[] upperLeftBound;         //[0] = latitude top left; [1] = longitude top left
+            public double[] outerLimitBound;        //[0] = longitude top right; [1] = latitude bottom left
+            public double delta_y;                                  //range of latitude in camera frame
+            public double delta_x;                                  //range of longitude in camera frame
+
+            //constructor to setup camBound structs
+            public camBound(double olb, double ulb)
+            {
+                upperLeftBound = new double[2];
+                outerLimitBound = new double[2];
+                delta_x = 0.0;
+                delta_y = 0.0;
+            }
+
+        }
+
+        /*array to hold all camera structs, add new ones for expansion later
+            currently 3 cameras 0=left 1=centre 2=right*/
+        private camBound[] camArray;
+
 
         //-----------------Delegate for thread safe controls----
         public delegate void SetTextCallback(string message);   //to set the Video UI elements with thread safe operations
@@ -72,6 +91,14 @@ namespace TEST_GPS_Parsing
         public VideoOutputWindow()                              //this is called before the window is even launched
         {
             InitializeComponent();
+
+            //initialise the bounds array - prevent NullReference Exceptions later         
+            camArray = new camBound[3];
+            for (int i = 0; i < 3; i++)
+            {
+                camArray[i] = new camBound(0.0, 0.0);
+            }
+            
         }
 
         private void VideoOutputWindow_Load(object sender, EventArgs e)
@@ -113,13 +140,15 @@ namespace TEST_GPS_Parsing
                 camStreamCapture = setup.camStreamCapture_CB;
 
                 //---------get capture extents---------
+                // get by default from centre cam (camArray[1])
                 for (int i = 0; i <= 1; i++)
                 {
-                    upperLeftBound[i] = setup.upperLeftCoords_CB[i];
-                    outerLimitBound[i] = setup.outerLimitCoords_CB[i];
+                    camArray[1].upperLeftBound[i] = setup.upperLeftCoords_CB[i];
+                    camArray[1].outerLimitBound[i] = setup.outerLimitCoords_CB[i];
                 }
-                //---------update the UI one time with info--
-                oneTimeDisplaySetup();
+                //---------update the UI initially with info--
+                //by default first camera is the centre (camBound[1])
+                camBoundUIDisplaySetup(1);
 
                 //use the class-local methods now
                 camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
@@ -315,15 +344,18 @@ namespace TEST_GPS_Parsing
                 }
                 else
                 {
-                    valHasChanged = false;
+
+
                     //this is just a normaltimer tick from the refreshOverlay_Tick method and it's likely values haven't  changed. Thus just redraw the overlay without recalc
                     bool returnVal = false;
                     if (drawMode_Overlay != DRAW_MODE_REVOBJTRACK)
                     {
+                        valHasChanged = false;
                         returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, false);     //draw marker from external input of coords
                     }
                     else
                     {
+                        valHasChanged = !valHasChanged;           //let the polygons redraw every 500ms
                         ////returnVal = ol_mark.drawPolygons(webcamVid, true);                                //draw marker from onscreen tracking
                         ////returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, ol_mark.overlayGrid, false);
                     }
@@ -474,8 +506,15 @@ namespace TEST_GPS_Parsing
 
 
 
-        private void oneTimeDisplaySetup()
+        private void camBoundUIDisplaySetup(int camScreenNumber)
         {
+            /* INFORMATION
+             * This method is called once at setup (assuming the middle cam is active for demo)
+             * It's recalled each time a screen switch occurs. 
+             * If switching left, its DECREMENTED, switch right is INCREMENTED
+             * 0 is the LEFTMOST camera (left of initial centre)                
+             */
+
             //the drawMode, fileName and videoSource are copied from the other form
             //evaluates what the user chose from the bounds setup box
             switch (captureChoice)
@@ -503,14 +542,14 @@ namespace TEST_GPS_Parsing
             //display the limits set on previous window for the current camera (assumed to be the centre)
             //upperLeftBound[0] = latitude top left; [1] = longitude top left
             //OuterLimitBound[0] = longitude top right; [1] = latitude bottom left
-            latTopLeftLabel.Text = upperLeftBound[0].ToString();
-            longTopLeftLabel.Text = upperLeftBound[1].ToString();
-            longTopRightLabel.Text = outerLimitBound[0].ToString();
-            latBotLeftLabel.Text = outerLimitBound[1].ToString();
+            latTopLeftLabel.Text = camArray[camScreenNumber].upperLeftBound[0].ToString();
+            longTopLeftLabel.Text = camArray[camScreenNumber].upperLeftBound[1].ToString();
+            longTopRightLabel.Text = camArray[camScreenNumber].outerLimitBound[0].ToString();
+            latBotLeftLabel.Text = camArray[camScreenNumber].outerLimitBound[1].ToString();
 
             //calculate the camera frame coordinate range - assume African co-ords; latitude always <0 longitude always >0
-            delta_y = Math.Abs(outerLimitBound[1] - upperLeftBound[0]);
-            delta_x = outerLimitBound[0] - upperLeftBound[1];
+            camArray[camScreenNumber].delta_y = Math.Abs(camArray[camScreenNumber].outerLimitBound[1] - camArray[camScreenNumber].upperLeftBound[0]);
+            camArray[camScreenNumber].delta_x = camArray[camScreenNumber].outerLimitBound[0] - camArray[camScreenNumber].upperLeftBound[1];
 
             if (camStreamCapture != null)
             {
@@ -519,8 +558,8 @@ namespace TEST_GPS_Parsing
                 ol_mark.setupOverlay();                             //setup the overlay
                 ol_mark.gridWidth = vidPixelWidth;                  //pass these variables to the other class
                 ol_mark.gridHeight = vidPixelHeight;
-                ol_mark.dx = delta_x;
-                ol_mark.dy = delta_y;
+                ol_mark.dx = camArray[camScreenNumber].delta_x;
+                ol_mark.dy = camArray[camScreenNumber].delta_y;
 
                 if (drawMode_Overlay == DRAW_MODE_REVOBJTRACK)      //the (x,y) coords aren't drawn onscreen if using the object based tracking
                 {
@@ -533,9 +572,11 @@ namespace TEST_GPS_Parsing
 
                 for (int i = 0; i <= 1; i++)
                 {
-                    ol_mark.ulBound[i] = upperLeftBound[i];
-                    ol_mark.olBound[i] = outerLimitBound[i];
+                    ol_mark.ulBound[i] = camArray[camScreenNumber].upperLeftBound[i];
+                    ol_mark.olBound[i] = camArray[camScreenNumber].outerLimitBound[i];
                 }
+
+                valHasChanged = false;
 
             }
         }
