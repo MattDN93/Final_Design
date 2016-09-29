@@ -275,6 +275,8 @@ namespace TEST_GPS_Parsing
 
                     if (camStreamCapture.Equals(cscLeft))    //if the current frame is already set to the left
                     {
+                        cscCentre.Stop();
+                        cscRight.Stop();
                         return;     //keep leftmost camera frame
                     }
                     else if (camStreamCapture.Equals(cscCentre)) //if the current frame is set to the centre camera
@@ -282,6 +284,10 @@ namespace TEST_GPS_Parsing
                         //----------------Capture object switch--------------
                         cscCentre = camStreamCapture;       //set the current stream to centre
                         camStreamCapture = cscLeft;         //switch camera left by one screen
+                        cscCentre.Stop();
+                        cscRight.Stop();
+                        cscLeft.Start();
+                        //----------------Coordinate bounds switch-----------
                         currentlyActiveCamera--;            //switch camera index one left
                         camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
                     }
@@ -290,6 +296,10 @@ namespace TEST_GPS_Parsing
                         //----------------Capture object switch--------------
                         cscRight = camStreamCapture;        //set the current stream to right
                         camStreamCapture = cscCentre;       //switch camera left by one screen to centre
+                        cscLeft.Stop();
+                        cscRight.Stop();
+                        cscCentre.Start();
+                        //----------------Coordinate bounds switch-----------
                         currentlyActiveCamera--;            //switch camera index one left
                         camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
                     }
@@ -329,6 +339,8 @@ namespace TEST_GPS_Parsing
 
                     if (camStreamCapture.Equals(cscRight))    //if the current frame is already set to the right
                     {
+                        cscCentre.Stop();
+                        cscLeft.Stop();
                         return;     //keep rightmost camera frame
                     }
                     else if (camStreamCapture.Equals(cscCentre)) //if the current frame is set to the centre camera
@@ -336,6 +348,9 @@ namespace TEST_GPS_Parsing
                         //----------------Capture object switch--------------
                         cscCentre = camStreamCapture;       //set current stream to centre
                         camStreamCapture = cscRight;         //switch camera right by one screen
+                        cscCentre.Stop();
+                        cscLeft.Stop();
+                        cscRight.Start();
 
                         //----------------Coordinate bounds switch-----------
                         currentlyActiveCamera++;            //switch camera index one right
@@ -346,6 +361,9 @@ namespace TEST_GPS_Parsing
                         //----------------Capture object switch--------------
                         cscLeft = camStreamCapture;
                         camStreamCapture = cscCentre;       //switch camera right by one screen to centre
+                        cscLeft.Stop();
+                        cscCentre.Stop();
+                        cscRight.Start();
 
                         //----------------Coordinate bounds switch-----------
                         currentlyActiveCamera++;            //switch camera index one right
@@ -482,24 +500,6 @@ namespace TEST_GPS_Parsing
                     setup = null;                               //clear object because it wasn't setup properly
                 }
 
-            //}
-            //else
-            //{
-            //    //this isn't the first time this session that the user is opening the setting form
-            //    DialogResult setupResult = setup.ShowDialog();
-            //    if (setupResult == DialogResult.OK)
-            //    {
-            //        //TODO: Implement setup routines and UI update
-            //        startCaptureButton.Enabled = true;
-            //    }
-            //    else if (setupResult == DialogResult.Cancel)        //if setup process was prematurely cancelled
-            //    {
-            //        status1TextBox.Clear();
-            //        status1TextBox.Text = "Setup was cancelled. Using previous settings.";
-            //        startCaptureButton.Enabled = true;              //we'll use previously entered settings
-            //    }
-
-            //}
         }
         #endregion
 
@@ -552,7 +552,8 @@ namespace TEST_GPS_Parsing
                             SetTextCallback l = new SetTextCallback(setTextonVideoUI);
                             Invoke(l, new object[] { text });
                         }
-                        else { this.status1TextBox.Text = text; }; break;                   
+                        else { this.status1TextBox.Text = text; }; break;
+
                     default:
                         Console.Write("Couldn't update one or more UI elements with cross-thread call");
                         break;
@@ -563,6 +564,20 @@ namespace TEST_GPS_Parsing
 
             switch (type_2) //this section is used for updating screen bounds display
             {
+                case 3:
+                    if (this.frameHeightLabel.InvokeRequired)
+                    {
+                        SetTextCallback l = new SetTextCallback(setTextonVideoUI);
+                        Invoke(l, new object[] { text });
+                    }
+                    else { this.frameHeightLabel.Text = text; }; break;
+                case 4:
+                    if (this.frameWidthLabel.InvokeRequired)
+                    {
+                        SetTextCallback l = new SetTextCallback(setTextonVideoUI);
+                        Invoke(l, new object[] { text });
+                    }
+                    else { this.frameWidthLabel.Text = text; }; break;
                 case 5:
                     if (this.latTopLeftLabel.InvokeRequired)
                     {
@@ -629,13 +644,16 @@ namespace TEST_GPS_Parsing
             }
 
             getVideoInfo();                                         //call video info function
-            frameHeightLabel.Text = vidPixelHeight.ToString();      //get the video parameters
-            frameWidthLabel.Text = vidPixelWidth.ToString();
+
 
             //display the limits set on previous window for the current camera (assumed to be the centre)
             //upperLeftBound[0] = latitude top left; [1] = longitude top left
             //OuterLimitBound[0] = longitude top right; [1] = latitude bottom left
             //use threadsafe access
+            type_2 = 3;
+            setTextonVideoUI(vidPixelHeight.ToString());      //get the video parameters
+            type_2 = 4;
+            setTextonVideoUI(vidPixelWidth.ToString());
             type_2 = 5;
             setTextonVideoUI(camArray[camScreenNumber].upperLeftBound[0].ToString());
             type_2 = 6;
@@ -725,10 +743,10 @@ namespace TEST_GPS_Parsing
         #region Close & release methods 
         public void ReleaseData()
         {
-            if (camStreamCapture != null) { camStreamCapture.Dispose();}
-            if (cscLeft != null) { cscLeft.Dispose(); }
-            if (cscRight != null) { cscRight.Dispose(); }
-            if (cscCentre != null) { cscCentre.Dispose(); }
+            if (camStreamCapture != null) { camStreamCapture.Stop(); camStreamCapture.Dispose();}
+            if (cscLeft != null) { cscLeft.Stop();  cscLeft.Dispose(); }
+            if (cscRight != null) { cscRight.Stop();  cscRight.Dispose(); }
+            if (cscCentre != null) { cscCentre.Stop();  cscCentre.Dispose(); }
             //rawVideoFramesBox.Dispose();
                 
         }
