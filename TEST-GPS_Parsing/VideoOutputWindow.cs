@@ -334,9 +334,6 @@ namespace TEST_GPS_Parsing
                         return;
                     }
 
-
-
-
                     if (camStreamCapture.Equals(cscRight))    //if the current frame is already set to the right
                     {
                         cscCentre.Stop();
@@ -348,9 +345,10 @@ namespace TEST_GPS_Parsing
                         //----------------Capture object switch--------------
                         cscCentre = camStreamCapture;       //set current stream to centre
                         camStreamCapture = cscRight;         //switch camera right by one screen
-                        cscCentre.Stop();
-                        cscLeft.Stop();
-                        cscRight.Start();
+                        //cscCentre.Stop();
+                        //cscLeft.Stop();
+                        //cscRight.Start();
+                        //camStreamCapture.Start();
 
                         //----------------Coordinate bounds switch-----------
                         currentlyActiveCamera++;            //switch camera index one right
@@ -361,9 +359,10 @@ namespace TEST_GPS_Parsing
                         //----------------Capture object switch--------------
                         cscLeft = camStreamCapture;
                         camStreamCapture = cscCentre;       //switch camera right by one screen to centre
-                        cscLeft.Stop();
-                        cscCentre.Stop();
-                        cscRight.Start();
+                        //cscLeft.Stop();
+                        //cscCentre.Start();
+                        //camStreamCapture.Start();
+                        //cscRight.Stop();
 
                         //----------------Coordinate bounds switch-----------
                         currentlyActiveCamera++;            //switch camera index one right
@@ -497,7 +496,8 @@ namespace TEST_GPS_Parsing
                     status1TextBox.Clear();
                     status1TextBox.Text = "Setup was cancelled.";
                     startCaptureButton.Enabled = false;         //first time setup, require settings before capture
-                    setup = null;                               //clear object because it wasn't setup properly
+                    setup.Close();
+                    setup.Dispose();                               //clear object because it wasn't setup properly
                 }
 
         }

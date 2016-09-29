@@ -82,7 +82,7 @@ namespace TEST_GPS_Parsing
                 camLeftIpTextBox.Enabled = false;
                 camRightIpTextBox.Enabled = false;
                 camCentreIpTextBox.Enabled = false;
-
+                localOrIpCamInfoLabel.Text = "Local cameras selected. These will be initialised automatically. \n Check the status below.";
                 //allow the start
 
                 //disable this if using local cams since they'll refresh automagically :P
@@ -97,6 +97,9 @@ namespace TEST_GPS_Parsing
             else if (vidSourceChoiceComboBox.SelectedIndex == 2)
             {
                 //TODO: Implement IP camera initialisation
+                localOrIpCamInfoLabel.Text =
+                    "IP cameras selected. Enter 3 IP addresses below and click 'Check Addresses'.\n Enter IP address only, the http:// is not needed.\n The status of the cameras will appear in the status pane.";
+
                 checkIpAddrButton.Enabled = true;
                 camLeftIpTextBox.Enabled = true;
                 camRightIpTextBox.Enabled = true;
@@ -191,7 +194,7 @@ namespace TEST_GPS_Parsing
         }
         #endregion
 
-        #region Initialise camera streams
+        #region Initialise camera streams (local and IP)
         public void initCamStreams()
         {
             //tries to initialise the default camera and the first adjacent left and right
@@ -199,9 +202,9 @@ namespace TEST_GPS_Parsing
             try
             {
                 //initialise the centre, left and right camera objects - set as needed
-                cscCentre_CB = new Capture(2);                                     //CENTRE CAMERA FRAME
-                cscLeft_CB = new Capture(1);                                       //LEFT CAMERA FRAME
-                cscRight_CB = new Capture(0);                                      //RIGHT CAMERA FRAME               
+                cscCentre_CB = new Capture(0);                                     //CENTRE CAMERA FRAME
+                cscLeft_CB = new Capture(2);                                       //LEFT CAMERA FRAME
+                cscRight_CB = new Capture(1);                                      //RIGHT CAMERA FRAME               
 
                 if (cscCentre_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
                 {
@@ -225,9 +228,47 @@ namespace TEST_GPS_Parsing
             }
 
         }
+
+        public void initIpCamStreams()
+        {
+            throw new NotImplementedException();
+        }
         #endregion
 
         #region UI and button methods
+        private void checkIpAddrButton_Click(object sender, EventArgs e)
+        {
+            checkIpAddrButton.Text = "Checking...";
+            //parse the IP addresses entered and attempt to connect to those cameras
+            //For testing Vivotek cams 146.230.195.13-15/video.mjpg for 14 use video4.mjpg
+
+            string ipAddrLeft, ipAddrCentre, ipAddrRight;
+            ipAddrLeft = "http://" + camLeftIpTextBox.Text.ToString() + "/video.mjpg";
+            cscLeft_CB = new Emgu.CV.Capture(ipAddrLeft);
+
+            ipAddrCentre = "http://" + camCentreIpTextBox.Text.ToString() + "/video4.mjpg";
+            cscCentre_CB = new Emgu.CV.Capture(ipAddrCentre);
+
+            ipAddrRight = "http://" + camRightIpTextBox.Text.ToString() + "/video.mjpg";
+            cscRight_CB = new Emgu.CV.Capture(ipAddrRight);
+
+            if (cscCentre_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
+            {
+                camStreamCapture_CB = cscCentre_CB;                   //initially set the centre cam to the current
+            }
+            else if (cscLeft_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
+            {
+                camStreamCapture_CB = cscLeft_CB;                     //set initial frame to left cam if centre is not setup
+            }
+            else if (cscRight_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
+            {
+                camStreamCapture_CB = cscRight_CB;                    //set initial frame to the right camera if centre & left not setup
+            }
+
+            ipCamReady = true;
+            checkIpAddrButton.Text = "Check IP addresses";
+        }
+
         private void setExtentsButton_Click(object sender, EventArgs e)
         {
             checkReadiness();
@@ -316,7 +357,7 @@ namespace TEST_GPS_Parsing
         {
             checkFieldsTimer.Stop();        //stop and dispose the timer
             checkFieldsTimer.Dispose();
-            //vo.ReleaseData();               //dispose of the capture methods
+            //ReleaseData();               //dispose of the capture methods
             this.Close();
         }
         #endregion
@@ -380,54 +421,6 @@ namespace TEST_GPS_Parsing
             Console.Write("Set video parameters successfully.");
         }
 
-        //public bool startNewVideoConsole()
-        //{
-        //    vo.fileName = filenameToOpen_CB;       //set the filename to open on the other form
-        //    vo.drawMode_Overlay = drawMode_CB;             //set the draw mode on the other form
-        //    vo.captureChoice = videoSource_CB;     //set the video source on the other form
-
-        //    //pass parameters of the outer limits to the other UI
-        //    vo.upperLeftBound[0] = upperLeftCoords[0];
-        //    vo.upperLeftBound[1] = upperLeftCoords[1];
-        //    vo.outerLimitBound[0] = outerLimitCoords[0];
-        //    vo.outerLimitBound[1] = outerLimitCoords[1];
-
-        //    if (vo.Visible == true)
-        //    {
-        //        MessageBox.Show("Only one instance of the video capture window may be open at a time. Close the other first.", 
-        //            "Instance already running!", MessageBoxButtons.OK, MessageBoxIcon.Warning,MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
-        //        return false;
-        //    }
-        //    else
-        //    {
-        //        try
-        //        {
-        //            vo.TopMost = true;      //set the window to the top and make it visible
-        //            vo.Visible = true;
-        //            vo.Show();
-
-        //        }
-        //        catch (ObjectDisposedException d)
-        //        {
-        //            return false;
-        //            //vo.fileName = filenameToOpen;       //set the filename to open on the other form
-        //            //vo.drawMode_Overlay = drawMode;             //set the draw mode on the other form
-        //            //vo.captureChoice = videoSource;     //set the video source on the other form
-
-        //            ////pass parameters of the outer limits to the other UI
-        //            //vo.upperLeftBound[0] = upperLeftCoords[0];
-        //            //vo.upperLeftBound[1] = upperLeftCoords[1];
-        //            //vo.outerLimitBound[0] = outerLimitCoords[0];
-        //            //vo.outerLimitBound[1] = outerLimitCoords[1];
-        //            //vo.Focus();      //set the window to the top and make it visible
-        //            //vo.Visible = true;
-        //            //vo.Show();
-        //        }
-        //        return true;
-        //    }
-
-
-        //}
         #endregion
 
         #region Help system methods 
@@ -455,6 +448,8 @@ namespace TEST_GPS_Parsing
 
         }
         #endregion
+
+
     }
 }
 
