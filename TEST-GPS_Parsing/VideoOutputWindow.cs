@@ -141,7 +141,7 @@ namespace TEST_GPS_Parsing
                 cscCentre = setup.cscCentre_CB;
                 cscLeft = setup.cscLeft_CB;
                 cscRight = setup.cscRight_CB;
-                camStreamCapture = setup.camStreamCapture_CB;
+                camStreamCapture = setup.currentCamStreamCapture_CB;
 
                 //---------get capture extents---------
                 // get by default from centre cam (camArray[1])

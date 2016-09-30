@@ -12,7 +12,9 @@ namespace TEST_GPS_Parsing
     public partial class CameraBoundsSetup : Form
     {
         #region Initialization objects and vars
-       
+
+        
+
         //==========COPY OF VIDEO PARAMETERS===============
         /*
          These parameters are local to this class instance, they are requested by the video output class
@@ -32,13 +34,15 @@ namespace TEST_GPS_Parsing
         public Capture cscCentre_CB;
         public Capture cscLeft_CB;
         public Capture cscRight_CB;
-        public Capture camStreamCapture_CB;
+        public Capture[] camStreamCaptureArray_CB;                          //array to hold all camera capture objects
+        public Capture currentCamStreamCapture_CB;                  //current "marker" capture object
 
         //video GPS coordinate extents
         public double[] upperLeftCoords_CB = new double[2];       //[0] = latitude top left; [1] = longitude top left
         public double[] outerLimitCoords_CB = new double[2];      //[0] = longitude top right; [1] = latitude bottom left
 
         //==========END COPY OF VIDEO PARAMETERS=============
+        public static int totalCameraNumber_CB = 3;                 //edit this to change # cams
 
         //-------SIMULATION
         public static int DRAW_MODE_RANDOM = 0;
@@ -55,6 +59,7 @@ namespace TEST_GPS_Parsing
         public CameraBoundsSetup(VideoOutputWindow incoming_vo)
         {
             InitializeComponent();
+            camStreamCaptureArray_CB = new Capture[totalCameraNumber_CB];   //set up an array of capture objects
         }
         #endregion 
 
@@ -202,23 +207,25 @@ namespace TEST_GPS_Parsing
             try
             {
                 //initialise the centre, left and right camera objects - set as needed
-                cscCentre_CB = new Capture(0);                                     //CENTRE CAMERA FRAME
-                cscLeft_CB = new Capture(2);                                       //LEFT CAMERA FRAME
-                cscRight_CB = new Capture(1);                                      //RIGHT CAMERA FRAME               
+                //cscCentre_CB = new Capture(0);                                     //CENTRE CAMERA FRAME
+                //cscLeft_CB = new Capture(2);                                       //LEFT CAMERA FRAME
+                //cscRight_CB = new Capture(1);                                      //RIGHT CAMERA FRAME               
 
-                if (cscCentre_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
+                //The ith index starts counting from the leftmost camera and proceeds to the end L->R
+                for (int i = 0; i < totalCameraNumber_CB ; i++)
                 {
-                    camStreamCapture_CB = cscCentre_CB;                   //initially set the centre cam to the current
-                }
-                else if (cscLeft_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
-                {
-                    camStreamCapture_CB = cscLeft_CB;                     //set initial frame to left cam if centre is not setup
-                }
-                else if (cscRight_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
-                {
-                    camStreamCapture_CB = cscRight_CB;                    //set initial frame to the right camera if centre & left not setup
+                    camStreamCaptureArray_CB[i] = new Capture(i);   //initialise as many capture objects as needed
                 }
 
+                //go through each cam and if any haven't loaded, set the other to centre
+                for (int i = 0; i < totalCameraNumber_CB; i++)
+                {
+                    //set the current camera to whichever one is within bounds that is working
+                    if (camStreamCaptureArray_CB[i].GetCaptureProperty(CapProp.FrameHeight) == 0 && (i+1<totalCameraNumber_CB))
+                    {
+                        currentCamStreamCapture_CB = camStreamCaptureArray_CB[i];
+                    }
+                }
 
             }
             catch (NullReferenceException nr)
@@ -254,15 +261,15 @@ namespace TEST_GPS_Parsing
 
             if (cscCentre_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
             {
-                camStreamCapture_CB = cscCentre_CB;                   //initially set the centre cam to the current
+                currentCamStreamCapture_CB = cscCentre_CB;                   //initially set the centre cam to the current
             }
             else if (cscLeft_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
             {
-                camStreamCapture_CB = cscLeft_CB;                     //set initial frame to left cam if centre is not setup
+                currentCamStreamCapture_CB = cscLeft_CB;                     //set initial frame to left cam if centre is not setup
             }
             else if (cscRight_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
             {
-                camStreamCapture_CB = cscRight_CB;                    //set initial frame to the right camera if centre & left not setup
+                currentCamStreamCapture_CB = cscRight_CB;                    //set initial frame to the right camera if centre & left not setup
             }
 
             ipCamReady = true;
