@@ -93,34 +93,49 @@ namespace TEST_GPS_Parsing
                 //disable this if using local cams since they'll refresh automagically :P
                 refreshStatusButton.Enabled = false;
 
-                //if any capture objects haven't been setup yet, run the init routine
-                if (cscCentre_CB == null || cscLeft_CB == null || cscRight_CB == null)
+                //if any capture objects haven't been setup yet, run the init routine (once, since it'll init all)
+                for (int i = 0; i < totalCameraNumber_CB; i++)
                 {
-                    initCamStreams();
+                    if (camStreamCaptureArray_CB[i] == null)
+                    {
+                        initCamStreams(); break;
+                    }
                 }
+
             }
             else if (vidSourceChoiceComboBox.SelectedIndex == 2)
             {
-                //TODO: Implement IP camera initialisation
+                
                 localOrIpCamInfoLabel.Text =
                     "IP cameras selected. Enter 3 IP addresses below and click 'Check Addresses'.\n Enter IP address only, the http:// is not needed.\n The status of the cameras will appear in the status pane.";
-
+                //IP camera initialisation takes place when the user presses the "check IP addresses" button.
+                //the methods below enable the use of those buttons
                 checkIpAddrButton.Enabled = true;
                 camLeftIpTextBox.Enabled = true;
                 camRightIpTextBox.Enabled = true;
                 camCentreIpTextBox.Enabled = true;
             }
 
-            //check default camera status and display on UI
+            //check default camera status and display on UI - code supports >3 cameras but GUI doesn't so work with GUI limit
+            //Assume cam 0 = left, 1 = centre and 2=right
             camView2StatusTextBox.Clear();
-            if (cscCentre_CB != null && cscCentre_CB.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) { centreCamStatusLabel.Text = "Ready / Available"; }
-            else { centreCamStatusLabel.Text = "Not Available"; camView2StatusTextBox.AppendText(" Centre Cam not available |"); }
-            if (cscLeft_CB != null && cscLeft_CB.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) { leftCamStatusLabel.Text = "Ready / Available"; }
-            else { leftCamStatusLabel.Text = "Not Available"; camView2StatusTextBox.AppendText(" Left Cam not available |"); }
-            if (cscRight_CB != null && cscRight_CB.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0) { rightCamStatusLabel.Text = "Ready / Available"; }
-            else { rightCamStatusLabel.Text = "Not Available"; camView2StatusTextBox.AppendText(" Right Cam not available."); }
+            camStatusTextbox.Clear();
+            for (int i = 0; i < totalCameraNumber_CB; i++)
+            {
+                //if the video object isn't null and actually is a video (frame height >0) then update GUI appropriately
+                if (camStreamCaptureArray_CB[i] !=null &&
+                    camStreamCaptureArray_CB[i].GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0)
+                {
+                    camStatusTextbox.AppendText("Camera " + (i+1) + ": Ready \n");
+                }
+                else
+                {
+                    camStatusTextbox.AppendText("Camera " + (i+1) + ": Unavailable \n");
+                    camView2StatusTextBox.AppendText("Cam " + (i+1) + " not available | ");
+                }
+            }
 
-
+            
             if (longUpperLeftTextbox.Text == "" || latUpperLeftTextbox.Text == "" || latBottomLeftTextbox.Text == "" || longUpperRightTextbox.Text == "" )
             {
                 camViewStatusTextBox.Clear();           //clears from last tick
@@ -218,14 +233,18 @@ namespace TEST_GPS_Parsing
                 }
 
                 //go through each cam and if any haven't loaded, set the other to centre
+                int haveLoaded = 0;
                 for (int i = 0; i < totalCameraNumber_CB; i++)
                 {
                     //set the current camera to whichever one is within bounds that is working
-                    if (camStreamCaptureArray_CB[i].GetCaptureProperty(CapProp.FrameHeight) == 0 && (i+1<totalCameraNumber_CB))
+                    if (camStreamCaptureArray_CB[i].GetCaptureProperty(CapProp.FrameHeight) != 0 && (i+1<totalCameraNumber_CB))
                     {
-                        currentCamStreamCapture_CB = camStreamCaptureArray_CB[i];
+                        haveLoaded++;
                     }
                 }
+
+                //assume all local cams with frame height !=0 are working, so find the middle one of them and set the current one to that
+                currentCamStreamCapture_CB = camStreamCaptureArray_CB[(int)haveLoaded/totalCameraNumber_CB];
 
             }
             catch (NullReferenceException nr)
