@@ -21,10 +21,12 @@ namespace TEST_GPS_Parsing
         //-----------------Matrix and Capture Objects----------
         public Mat webcamVid;                  //create a Mat object to manipulate
         public Mat overlayVid;
+
+        public Capture[] camStreamCaptureArray;                          //array to hold all camera capture objects
         private Capture camStreamCapture = null;        //the current OpenCV capture stream
-        private Capture cscLeft = null;                  //left camera capture
-        private Capture cscRight = null;                 //right camera capture
-        private Capture cscCentre = null;                //centre camera capture 
+        //private Capture cscLeft = null;                  //left camera capture
+        //private Capture cscRight = null;                 //right camera capture
+        //private Capture cscCentre = null;                //centre camera capture 
         private Overlay ol_mark;                //object for the overlay of points
 
         protected string latitudeOutOfRangeOverlayMessage = "";      //strings for the overlay class to write into
@@ -76,7 +78,7 @@ namespace TEST_GPS_Parsing
 
         /*array to hold all camera structs, add new ones for expansion later
             currently 3 cameras 0=left 1=centre 2=right*/
-        private camBound[] camArray;
+        private camBound[] camBoundArray;
 
 
         //-----------------Delegate for thread safe controls----
@@ -95,12 +97,13 @@ namespace TEST_GPS_Parsing
         {
             InitializeComponent();
 
-            //initialise the bounds array - prevent NullReference Exceptions later    
+            //initialise the bounds and capture arrays - prevent NullReference Exceptions later    
             //# cameras can be altered in code if needed     
-            camArray = new camBound[totalCameraNumber];
+            camBoundArray = new camBound[totalCameraNumber];
+            camStreamCaptureArray = new Capture[totalCameraNumber];
             for (int i = 0; i < totalCameraNumber; i++)
             {
-                camArray[i] = new camBound(0.0, 0.0);
+                camBoundArray[i] = new camBound(0.0, 0.0);
             }
             
         }
@@ -131,24 +134,26 @@ namespace TEST_GPS_Parsing
             CvInvoke.UseOpenCL = false;
             try
             {
-                //TODO: get setup variable's data here
                 //---------get capture properties------
                 drawMode_Overlay = setup.drawMode_CB;
                 captureChoice = setup.videoSource_CB;
                 fileName = setup.filenameToOpen_CB;
 
                 //---------get capture objects---------
-                cscCentre = setup.cscCentre_CB;
-                cscLeft = setup.cscLeft_CB;
-                cscRight = setup.cscRight_CB;
+                //get as many capture objects as cameras active
+                for (int i = 0; i < totalCameraNumber ; i++)
+                {
+                    camStreamCaptureArray[i] = setup.camStreamCaptureArray_CB[i];
+                }
+
                 camStreamCapture = setup.currentCamStreamCapture_CB;
 
                 //---------get capture extents---------
                 // get by default from centre cam (camArray[1])
                 for (int i = 0; i <= 1; i++)
                 {
-                    camArray[1].upperLeftBound[i] = setup.upperLeftCoords_CB[i];
-                    camArray[1].outerLimitBound[i] = setup.outerLimitCoords_CB[i];
+                    camBoundArray[1].upperLeftBound[i] = setup.upperLeftCoords_CB[i];
+                    camBoundArray[1].outerLimitBound[i] = setup.outerLimitCoords_CB[i];
                 }
                 //---------update the UI initially with info--
                 //by default first camera is the centre (camBound[1])
@@ -250,124 +255,164 @@ namespace TEST_GPS_Parsing
                     //switch coordinates
                     if (currentlyActiveCamera -1 >= 0)       //don't go left if you can't
                     {
+                        
+                        double dx_test = camBoundArray[currentlyActiveCamera].delta_x;
+                        //------------modify camera GPS bounds-----------
                         //setup left cam's upper right longitude bound
-                        camArray[currentlyActiveCamera - 1].outerLimitBound[0] =
-                            camArray[currentlyActiveCamera].upperLeftBound[1];
+                        camBoundArray[currentlyActiveCamera - 1].outerLimitBound[0] =
+                            camBoundArray[currentlyActiveCamera].upperLeftBound[1];
 
                         //setup left cam's latitude (no change)
-                        camArray[currentlyActiveCamera - 1].outerLimitBound[1] =
-                            camArray[currentlyActiveCamera].outerLimitBound[1];
+                        camBoundArray[currentlyActiveCamera - 1].outerLimitBound[1] =
+                            camBoundArray[currentlyActiveCamera].outerLimitBound[1];
 
                         //setup upper left latitude (no change)
-                        camArray[currentlyActiveCamera - 1].upperLeftBound[0] =
-                            camArray[currentlyActiveCamera].upperLeftBound[0];
+                        camBoundArray[currentlyActiveCamera - 1].upperLeftBound[0] =
+                            camBoundArray[currentlyActiveCamera].upperLeftBound[0];
 
                         //setup upper left longitude
-                        camArray[currentlyActiveCamera - 1].upperLeftBound[1] =
-                            camArray[currentlyActiveCamera].outerLimitBound[0] 
-                            - camArray[currentlyActiveCamera].delta_x;
+                        camBoundArray[currentlyActiveCamera - 1].upperLeftBound[1] =
+                            camBoundArray[currentlyActiveCamera].outerLimitBound[0] 
+                            - dx_test/*camBoundArray[currentlyActiveCamera].delta_x*/;
+
+                        //------------modify actual capture objects---------
+                        //make the camera one screen to the left the new active camera
+                        //camStreamCaptureArray[currentlyActiveCamera] = camStreamCapture;
+                        //camStreamCapture = camStreamCaptureArray[currentlyActiveCamera - 1];
+
+
+                        //halt all other camera frames for resource purposes
+                        for (int i = 0; i < camStreamCaptureArray.Length; i++)
+                        {
+                            if (i != currentlyActiveCamera - 1 )
+                            {
+                                camStreamCaptureArray[i].Pause();
+                            }
+                        }
+
+                        currentlyActiveCamera--;                        //indicate we've switched one camera left
+                        camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
+
                     }
                     else if (currentlyActiveCamera - 1 == 0)   //we're already on the leftmost camera
                     {
                         return;
                     }
+                    
+                    ////capture object comparison and switch
 
-
-                    if (camStreamCapture.Equals(cscLeft))    //if the current frame is already set to the left
-                    {
-                        cscCentre.Stop();
-                        cscRight.Stop();
-                        return;     //keep leftmost camera frame
-                    }
-                    else if (camStreamCapture.Equals(cscCentre)) //if the current frame is set to the centre camera
-                    {
-                        //----------------Capture object switch--------------
-                        cscCentre = camStreamCapture;       //set the current stream to centre
-                        camStreamCapture = cscLeft;         //switch camera left by one screen
-                        cscCentre.Stop();
-                        cscRight.Stop();
-                        cscLeft.Start();
-                        //----------------Coordinate bounds switch-----------
-                        currentlyActiveCamera--;            //switch camera index one left
-                        camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
-                    }
-                    else if (camStreamCapture.Equals(cscRight))
-                    {
-                        //----------------Capture object switch--------------
-                        cscRight = camStreamCapture;        //set the current stream to right
-                        camStreamCapture = cscCentre;       //switch camera left by one screen to centre
-                        cscLeft.Stop();
-                        cscRight.Stop();
-                        cscCentre.Start();
-                        //----------------Coordinate bounds switch-----------
-                        currentlyActiveCamera--;            //switch camera index one left
-                        camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
-                    }
+                    //if (camStreamCapture.Equals(cscLeft))    //if the current frame is already set to the left
+                    //{
+                    //    cscCentre.Stop();
+                    //    cscRight.Stop();
+                    //    return;     //keep leftmost camera frame
+                    //}
+                    //else if (camStreamCapture.Equals(cscCentre)) //if the current frame is set to the centre camera
+                    //{
+                    //    //----------------Capture object switch--------------
+                    //    cscCentre = camStreamCapture;       //set the current stream to centre
+                    //    camStreamCapture = cscLeft;         //switch camera left by one screen
+                    //    cscCentre.Stop();
+                    //    cscRight.Stop();
+                    //    cscLeft.Start();
+                    //    //----------------Coordinate bounds switch-----------
+                    //    currentlyActiveCamera--;            //switch camera index one left
+                    //    camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
+                    //}
+                    //else if (camStreamCapture.Equals(cscRight))
+                    //{
+                    //    //----------------Capture object switch--------------
+                    //    cscRight = camStreamCapture;        //set the current stream to right
+                    //    camStreamCapture = cscCentre;       //switch camera left by one screen to centre
+                    //    cscLeft.Stop();
+                    //    cscRight.Stop();
+                    //    cscCentre.Start();
+                    //    //----------------Coordinate bounds switch-----------
+                    //    currentlyActiveCamera--;            //switch camera index one left
+                    //    camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
+                    //}
 
                 }
                 else if (switchCase == 1)       //means a switch right is requested
                 {
                     //switch coordinates
-                    if (currentlyActiveCamera + 1 <= camArray.Length)       //don't go right if you can't
+                    if (currentlyActiveCamera + 1 <= camBoundArray.Length)       //don't go right if you can't
                     {
                         //setup left cam's upper right longitude bound
-                        camArray[currentlyActiveCamera + 1].outerLimitBound[0] =
-                            camArray[currentlyActiveCamera].outerLimitBound[0] +
-                            camArray[currentlyActiveCamera].delta_x;
+                        camBoundArray[currentlyActiveCamera + 1].outerLimitBound[0] =
+                            camBoundArray[currentlyActiveCamera].outerLimitBound[0] +
+                            camBoundArray[currentlyActiveCamera].delta_x;
 
                         //setup left cam's latitude (no change)
-                        camArray[currentlyActiveCamera - 1].outerLimitBound[1] =
-                            camArray[currentlyActiveCamera].outerLimitBound[1];
+                        camBoundArray[currentlyActiveCamera + 1].outerLimitBound[1] =
+                            camBoundArray[currentlyActiveCamera].outerLimitBound[1];
 
                         //setup upper left latitude (no change)
-                        camArray[currentlyActiveCamera + 1].upperLeftBound[0] =
-                            camArray[currentlyActiveCamera].upperLeftBound[0];
+                        camBoundArray[currentlyActiveCamera + 1].upperLeftBound[0] =
+                            camBoundArray[currentlyActiveCamera].upperLeftBound[0];
 
                         //setup upper left longitude
-                        camArray[currentlyActiveCamera + 1].upperLeftBound[1] =
-                            camArray[currentlyActiveCamera].outerLimitBound[0];
-                           
+                        camBoundArray[currentlyActiveCamera + 1].upperLeftBound[1] =
+                            camBoundArray[currentlyActiveCamera].outerLimitBound[0];
+
+                        //------------modify actual capture objects---------
+                        //make the camera one screen to the right the new active camera
+                        camStreamCaptureArray[currentlyActiveCamera] = camStreamCapture;
+                        camStreamCapture = camStreamCaptureArray[currentlyActiveCamera + 1];
+                        camStreamCaptureArray[currentlyActiveCamera + 1].Start();
+
+                        //halt all other camera frames for resource purposes
+                        for (int i = 0; i < camStreamCaptureArray.Length; i++)
+                        {
+                            if (i != currentlyActiveCamera + 1)
+                            {
+                                camStreamCaptureArray[i].Pause();
+                            }
+                        }
+
+                        currentlyActiveCamera++;                        //indicate we've switched one camera right
+                        camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
 
                     }
-                    else if (currentlyActiveCamera + 1 > camArray.Length)   //we're already on the leftmost camera
+                    else if (currentlyActiveCamera + 1 > camBoundArray.Length)   //we're already on the leftmost camera
                     {
                         return;
                     }
 
-                    if (camStreamCapture.Equals(cscRight))    //if the current frame is already set to the right
-                    {
-                        cscCentre.Stop();
-                        cscLeft.Stop();
-                        return;     //keep rightmost camera frame
-                    }
-                    else if (camStreamCapture.Equals(cscCentre)) //if the current frame is set to the centre camera
-                    {
-                        //----------------Capture object switch--------------
-                        cscCentre = camStreamCapture;       //set current stream to centre
-                        camStreamCapture = cscRight;         //switch camera right by one screen
-                        //cscCentre.Stop();
-                        //cscLeft.Stop();
-                        //cscRight.Start();
-                        //camStreamCapture.Start();
+                    //if (camStreamCapture.Equals(cscRight))    //if the current frame is already set to the right
+                    //{
+                    //    cscCentre.Stop();
+                    //    cscLeft.Stop();
+                    //    return;     //keep rightmost camera frame
+                    //}
+                    //else if (camStreamCapture.Equals(cscCentre)) //if the current frame is set to the centre camera
+                    //{
+                    //    //----------------Capture object switch--------------
+                    //    cscCentre = camStreamCapture;       //set current stream to centre
+                    //    camStreamCapture = cscRight;         //switch camera right by one screen
+                    //    //cscCentre.Stop();
+                    //    //cscLeft.Stop();
+                    //    //cscRight.Start();
+                    //    //camStreamCapture.Start();
 
-                        //----------------Coordinate bounds switch-----------
-                        currentlyActiveCamera++;            //switch camera index one right
-                        camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
-                    }
-                    else if (camStreamCapture.Equals(cscLeft)) //if curent frame is set to the left
-                    {
-                        //----------------Capture object switch--------------
-                        cscLeft = camStreamCapture;
-                        camStreamCapture = cscCentre;       //switch camera right by one screen to centre
-                        //cscLeft.Stop();
-                        //cscCentre.Start();
-                        //camStreamCapture.Start();
-                        //cscRight.Stop();
+                    //    //----------------Coordinate bounds switch-----------
+                    //    currentlyActiveCamera++;            //switch camera index one right
+                    //    camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
+                    //}
+                    //else if (camStreamCapture.Equals(cscLeft)) //if curent frame is set to the left
+                    //{
+                    //    //----------------Capture object switch--------------
+                    //    cscLeft = camStreamCapture;
+                    //    camStreamCapture = cscCentre;       //switch camera right by one screen to centre
+                    //    //cscLeft.Stop();
+                    //    //cscCentre.Start();
+                    //    //camStreamCapture.Start();
+                    //    //cscRight.Stop();
 
-                        //----------------Coordinate bounds switch-----------
-                        currentlyActiveCamera++;            //switch camera index one right
-                        camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
-                    }
+                    //    //----------------Coordinate bounds switch-----------
+                    //    currentlyActiveCamera++;            //switch camera index one right
+                    //    camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
+                    //}
 
 
                 }
@@ -655,19 +700,19 @@ namespace TEST_GPS_Parsing
             type_2 = 4;
             setTextonVideoUI(vidPixelWidth.ToString());
             type_2 = 5;
-            setTextonVideoUI(camArray[camScreenNumber].upperLeftBound[0].ToString());
+            setTextonVideoUI(camBoundArray[camScreenNumber].upperLeftBound[0].ToString());
             type_2 = 6;
-            setTextonVideoUI(camArray[camScreenNumber].upperLeftBound[1].ToString());
+            setTextonVideoUI(camBoundArray[camScreenNumber].upperLeftBound[1].ToString());
             type_2 = 7;
-            setTextonVideoUI(camArray[camScreenNumber].outerLimitBound[0].ToString());
+            setTextonVideoUI(camBoundArray[camScreenNumber].outerLimitBound[0].ToString());
             type_2 = 8;
-            setTextonVideoUI(camArray[camScreenNumber].outerLimitBound[1].ToString());
+            setTextonVideoUI(camBoundArray[camScreenNumber].outerLimitBound[1].ToString());
             type_2 = -1;
 
 
             //calculate the camera frame coordinate range - assume African co-ords; latitude always <0 longitude always >0
-            camArray[camScreenNumber].delta_y = Math.Abs(camArray[camScreenNumber].outerLimitBound[1] - camArray[camScreenNumber].upperLeftBound[0]);
-            camArray[camScreenNumber].delta_x = camArray[camScreenNumber].outerLimitBound[0] - camArray[camScreenNumber].upperLeftBound[1];
+            camBoundArray[camScreenNumber].delta_y = Math.Abs(camBoundArray[camScreenNumber].outerLimitBound[1] - camBoundArray[camScreenNumber].upperLeftBound[0]);
+            camBoundArray[camScreenNumber].delta_x = camBoundArray[camScreenNumber].outerLimitBound[0] - camBoundArray[camScreenNumber].upperLeftBound[1];
 
             if (camStreamCapture != null)
             {
@@ -676,8 +721,8 @@ namespace TEST_GPS_Parsing
                 ol_mark.setupOverlay();                             //setup the overlay
                 ol_mark.gridWidth = vidPixelWidth;                  //pass these variables to the other class
                 ol_mark.gridHeight = vidPixelHeight;
-                ol_mark.dx = camArray[camScreenNumber].delta_x;
-                ol_mark.dy = camArray[camScreenNumber].delta_y;
+                ol_mark.dx = camBoundArray[camScreenNumber].delta_x;
+                ol_mark.dy = camBoundArray[camScreenNumber].delta_y;
 
                 if (drawMode_Overlay == DRAW_MODE_REVOBJTRACK)      //the (x,y) coords aren't drawn onscreen if using the object based tracking
                 {
@@ -690,8 +735,8 @@ namespace TEST_GPS_Parsing
 
                 for (int i = 0; i <= 1; i++)
                 {
-                    ol_mark.ulBound[i] = camArray[camScreenNumber].upperLeftBound[i];
-                    ol_mark.olBound[i] = camArray[camScreenNumber].outerLimitBound[i];
+                    ol_mark.ulBound[i] = camBoundArray[camScreenNumber].upperLeftBound[i];
+                    ol_mark.olBound[i] = camBoundArray[camScreenNumber].outerLimitBound[i];
                 }
 
                 valHasChanged = false;
@@ -744,9 +789,20 @@ namespace TEST_GPS_Parsing
         public void ReleaseData()
         {
             if (camStreamCapture != null) { camStreamCapture.Stop(); camStreamCapture.Dispose();}
-            if (cscLeft != null) { cscLeft.Stop();  cscLeft.Dispose(); }
-            if (cscRight != null) { cscRight.Stop();  cscRight.Dispose(); }
-            if (cscCentre != null) { cscCentre.Stop();  cscCentre.Dispose(); }
+
+            //stop each camera capture instance
+            for (int i = 0; i < totalCameraNumber ; i++)
+            {
+                //this method might be called at the start of execution so check for null references in case
+                if (camStreamCaptureArray != null && camStreamCaptureArray[i] != null)
+                {
+                    camStreamCaptureArray[i].Stop();
+                    camStreamCaptureArray[i].Dispose();
+                }
+            }
+            //if (cscLeft != null) { cscLeft.Stop();  cscLeft.Dispose(); }
+            //if (cscRight != null) { cscRight.Stop();  cscRight.Dispose(); }
+            //if (cscCentre != null) { cscCentre.Stop();  cscCentre.Dispose(); }
             //rawVideoFramesBox.Dispose();
                 
         }

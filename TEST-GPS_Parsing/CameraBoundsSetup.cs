@@ -31,9 +31,9 @@ namespace TEST_GPS_Parsing
         public string filenameToOpen_CB;
 
         //-----------Capture Var Copies--------------------
-        public Capture cscCentre_CB;
-        public Capture cscLeft_CB;
-        public Capture cscRight_CB;
+        //public Capture cscCentre_CB;
+        //public Capture cscLeft_CB;
+        //public Capture cscRight_CB;
         public Capture[] camStreamCaptureArray_CB;                          //array to hold all camera capture objects
         public Capture currentCamStreamCapture_CB;                  //current "marker" capture object
 
@@ -268,28 +268,31 @@ namespace TEST_GPS_Parsing
             //parse the IP addresses entered and attempt to connect to those cameras
             //For testing Vivotek cams 146.230.195.13-15/video.mjpg for 14 use video4.mjpg
 
+            //TODO: fix hardcoded capture array properties
+
             string ipAddrLeft, ipAddrCentre, ipAddrRight;
             ipAddrLeft = "http://" + camLeftIpTextBox.Text.ToString() + "/video.mjpg";
-            cscLeft_CB = new Emgu.CV.Capture(ipAddrLeft);
+            camStreamCaptureArray_CB[0] = new Emgu.CV.Capture(ipAddrLeft);
 
             ipAddrCentre = "http://" + camCentreIpTextBox.Text.ToString() + "/video4.mjpg";
-            cscCentre_CB = new Emgu.CV.Capture(ipAddrCentre);
+            camStreamCaptureArray_CB[1] = new Emgu.CV.Capture(ipAddrCentre);
 
             ipAddrRight = "http://" + camRightIpTextBox.Text.ToString() + "/video.mjpg";
-            cscRight_CB = new Emgu.CV.Capture(ipAddrRight);
+            camStreamCaptureArray_CB[2] = new Emgu.CV.Capture(ipAddrRight);
 
-            if (cscCentre_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
+            //go through each cam and if any haven't loaded, set the other to centre
+            int haveLoaded = 0;
+            for (int i = 0; i < totalCameraNumber_CB; i++)
             {
-                currentCamStreamCapture_CB = cscCentre_CB;                   //initially set the centre cam to the current
+                //set the current camera to whichever one is within bounds that is working
+                if (camStreamCaptureArray_CB[i].GetCaptureProperty(CapProp.FrameHeight) != 0 && (i + 1 < totalCameraNumber_CB))
+                {
+                    haveLoaded++;
+                }
             }
-            else if (cscLeft_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
-            {
-                currentCamStreamCapture_CB = cscLeft_CB;                     //set initial frame to left cam if centre is not setup
-            }
-            else if (cscRight_CB.GetCaptureProperty(CapProp.FrameHeight) != 0)
-            {
-                currentCamStreamCapture_CB = cscRight_CB;                    //set initial frame to the right camera if centre & left not setup
-            }
+
+            //assume all local cams with frame height !=0 are working, so find the middle one of them and set the current one to that
+            currentCamStreamCapture_CB = camStreamCaptureArray_CB[(int)haveLoaded / totalCameraNumber_CB];
 
             ipCamReady = true;
             checkIpAddrButton.Text = "Check IP addresses";
@@ -321,27 +324,22 @@ namespace TEST_GPS_Parsing
                         break;
                 }
 
-
+            int haveLoaded = 0;
+            for (int i = 0; i < totalCameraNumber_CB; i++)
+            {
+                //check how many cameras are available and throw a warning if <3
+                if (camStreamCaptureArray_CB[i].GetCaptureProperty(CapProp.FrameHeight) != 0 && (i + 1 <= totalCameraNumber_CB))
+                {
+                    haveLoaded++;
+                }
+            }
             //Checks if the minimum number of cameras are available
-            if (cscLeft_CB.GetCaptureProperty(CapProp.FrameHeight) == 0 ||
-                cscRight_CB.GetCaptureProperty(CapProp.FrameHeight) == 0 ||
-                cscCentre_CB.GetCaptureProperty(CapProp.FrameHeight) == 0)
+            if (haveLoaded <3)
             {
                 MessageBox.Show("Error - at least 3 cameras must be operational for this program to work optimally. If you choose to continue, you might encounter unexpected problems. Continue without 3 cameras?", "Camera Load error!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             }
-
-            //now start the process!
-            try
-                {
-
-                }
-                catch (NotSupportedException ns)
-                {
-                    MessageBox.Show("The video stream start failed. Details: " + ns.Message,
-                        "Something happened", MessageBoxButtons.OK, MessageBoxIcon.Error,MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
-                }
-            
+           
         }
 
         private void checkReadiness()

@@ -426,6 +426,8 @@
             // 
             // vidSourceChoiceComboBox
             // 
+            this.vidSourceChoiceComboBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.vidSourceChoiceComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.vidSourceChoiceComboBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.vidSourceChoiceComboBox.FormattingEnabled = true;
             this.vidSourceChoiceComboBox.Items.AddRange(new object[] {
@@ -694,10 +696,12 @@
             // camStatusTextbox
             // 
             this.camStatusTextbox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.camStatusTextbox.Cursor = System.Windows.Forms.Cursors.Default;
             this.camStatusTextbox.Location = new System.Drawing.Point(7, 31);
             this.camStatusTextbox.Multiline = true;
             this.camStatusTextbox.Name = "camStatusTextbox";
             this.camStatusTextbox.ReadOnly = true;
+            this.camStatusTextbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.camStatusTextbox.Size = new System.Drawing.Size(282, 61);
             this.camStatusTextbox.TabIndex = 21;
             // 
