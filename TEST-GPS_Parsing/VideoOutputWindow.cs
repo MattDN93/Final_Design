@@ -86,6 +86,9 @@ namespace TEST_GPS_Parsing
         protected bool randomSim;                 //using random simulation mode or ordered
         protected bool valHasChanged;             //for updating the marker
 
+        private Object uiUpdateLock = new Object(); //mutex lock to prevent UI update race conditions
+
+
         //-----------------Settings parameters------------------
         protected int vidPixelWidth;              //video dimensions
         protected int vidPixelHeight;
@@ -344,7 +347,7 @@ namespace TEST_GPS_Parsing
 
                         //setup upper left longitude
                         camBoundArray[currentlyActiveCamera - 1].upperLeftBound[1] =
-                            camBoundArray[currentlyActiveCamera].outerLimitBound[0] 
+                            camBoundArray[currentlyActiveCamera].upperLeftBound[1] 
                             - dx_test/*camBoundArray[currentlyActiveCamera].delta_x*/;
 
                         //------------modify actual capture objects---------
@@ -518,21 +521,27 @@ namespace TEST_GPS_Parsing
                 {
                     valHasChanged = true;       //we're deceiving new data from the parser
                     bool varsInUse = false;
-                    while (!varsInUse)
-                    {
+                    //while (!varsInUse)
+                    //{
                         try
                         {
                             varsInUse = ol_mark.setNewCoords(incoming_lat, incoming_long);      //set coords if not being read from/written to
                         }
                         catch (OverflowException)
                         {
+                        lock (uiUpdateLock)
+                        {
                             type = 4;
-                            setTextonVideoUI("Arithmetic error in calculating bounds - did you set them correctly?");       //use thread safe var access
-                            type = -1;
-                            //return;
                         }
-                        
+                            setTextonVideoUI("Arithmetic error in calculating bounds - did you set them correctly?");       //use thread safe var access
+                        lock (uiUpdateLock)
+                        {
+                            type = -1;
+                        }
+                        //return;
                     }
+                        
+                    //}
                     //now we draw the marker with the updated point coords
                     bool returnVal = false;
                     if (drawMode_Overlay != DRAW_MODE_REVOBJTRACK)
@@ -568,22 +577,41 @@ namespace TEST_GPS_Parsing
                     }
                 }
 
-                ol_mark.usingCoords = true;             //prevents the double lat/long variables from being modified
-                type = 0;
-                double realLat = ol_mark.current_pointGPS_lat;  //gets the actual lat/long as opposed to the scaled versions of pixels for screen
+                //ol_mark.usingCoords = true;             //prevents the double lat/long variables from being modified
+                double realLat;
+                lock (uiUpdateLock)
+                {
+                    type = 0;
+                    realLat = ol_mark.current_pointGPS_lat;  //gets the actual lat/long as opposed to the scaled versions of pixels for screen
+                }
                 setTextonVideoUI(realLat.ToString()); //we need to do this to prevent the marshall by ref warning
 
-                type = 1;
-                double realLong = ol_mark.current_pointGPS_long;
+                double realLong;
+                lock (uiUpdateLock)
+                {
+                    type = 1;
+                    realLong = ol_mark.current_pointGPS_long;
+                }
                 setTextonVideoUI(realLong.ToString()); //we need to do this to prevent the marshall by ref warning
 
-                type = 2;
+                lock (uiUpdateLock)
+                {
+                    type = 2;
+                }
                 setTextonVideoUI(ol_mark.latitudeOutOfRangeOverlayMessage);
 
-                type = 3;
+                lock (uiUpdateLock)
+                {
+                    type = 3;
+                }
                 setTextonVideoUI(ol_mark.longitudeOutOfRangeOverlayMessage);
-                ol_mark.usingCoords = false;            //unlocks double lat/long vars
-                type = -1;
+                //ol_mark.usingCoords = false;            //unlocks double lat/long vars
+                lock (uiUpdateLock)
+                {
+                    type = -1;
+                }
+
+
             }
         }
         #endregion
@@ -650,37 +678,67 @@ namespace TEST_GPS_Parsing
                         {
                             SetTextCallback l = new SetTextCallback(setTextonVideoUI);
                             Invoke(l, new object[] { text });
-
                         }
-                        else { this.latitudeLabel.Text = text; }; break;
+                        else
+                        {
+                            lock (uiUpdateLock)
+                            {
+                                this.latitudeLabel.Text = text;
+                            }
+
+                        }; break;
                     case 1:
                         if (this.LongitudeLabel.InvokeRequired)
                         {
                             SetTextCallback l = new SetTextCallback(setTextonVideoUI);
                             Invoke(l, new object[] { text });
                         }
-                        else { this.LongitudeLabel.Text = text; }; break;
+                        else {
+                            lock (uiUpdateLock)
+                            {
+                                this.LongitudeLabel.Text = text;
+                            }
+
+                        }; break;
                     case 2:
                         if (this.latOORStatusBox.InvokeRequired)
                         {
                             SetTextCallback l = new SetTextCallback(setTextonVideoUI);
                             Invoke(l, new object[] { text });
                         }
-                        else { this.latOORStatusBox.Text = text; }; break;
+                        else
+                        {
+                            lock (uiUpdateLock)
+                            {
+                                this.latOORStatusBox.Text = text;
+                            }
+                        }; break;
                     case 3:
                         if (this.longOORTextBox.InvokeRequired)
                         {
                             SetTextCallback l = new SetTextCallback(setTextonVideoUI);
                             Invoke(l, new object[] { text });
                         }
-                        else { this.status1TextBox.Text = text; }; break;
+                        else
+                        {
+                            lock (uiUpdateLock)
+                            {
+                                this.longOORTextBox.Text = text;
+                            }
+                        }; break;
                     case 4:
                         if (this.status1TextBox.InvokeRequired)
                         {
                             SetTextCallback l = new SetTextCallback(setTextonVideoUI);
                             Invoke(l, new object[] { text });
                         }
-                        else { this.status1TextBox.Text = text; }; break;
+                        else
+                        {
+                            lock (uiUpdateLock)
+                            {
+                                this.status1TextBox.Text = text;
+                            }
+                        }; break;
 
                     default:
                         Console.Write("Couldn't update one or more UI elements with cross-thread call");
@@ -778,19 +836,41 @@ namespace TEST_GPS_Parsing
             //upperLeftBound[0] = latitude top left; [1] = longitude top left
             //OuterLimitBound[0] = longitude top right; [1] = latitude bottom left
             //use threadsafe access
-            type_2 = 3;
+
+            lock (uiUpdateLock)
+            {
+                type_2 = 3;
+            }
             setTextonVideoUI(vidPixelHeight.ToString());      //get the video parameters
-            type_2 = 4;
+            lock (uiUpdateLock)
+            {
+                type_2 = 4;
+            }
             setTextonVideoUI(vidPixelWidth.ToString());
-            type_2 = 5;
+            lock (uiUpdateLock)
+            {
+                type_2 = 5;
+            }
             setTextonVideoUI(camBoundArray[camScreenNumber].upperLeftBound[0].ToString());
-            type_2 = 6;
+            lock (uiUpdateLock)
+            {
+                type_2 = 6;
+            }
             setTextonVideoUI(camBoundArray[camScreenNumber].upperLeftBound[1].ToString());
-            type_2 = 7;
+            lock (uiUpdateLock)
+            {
+                type_2 = 7;
+            }
             setTextonVideoUI(camBoundArray[camScreenNumber].outerLimitBound[0].ToString());
-            type_2 = 8;
+            lock (uiUpdateLock)
+            {
+                type_2 = 8;
+            }
             setTextonVideoUI(camBoundArray[camScreenNumber].outerLimitBound[1].ToString());
-            type_2 = -1;
+            lock (uiUpdateLock)
+            {
+                type_2 = -1;
+            }
 
 
             //calculate the camera frame coordinate range - assume African co-ords; latitude always <0 longitude always >0

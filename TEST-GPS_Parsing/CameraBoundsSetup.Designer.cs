@@ -56,6 +56,8 @@
             this.checkIpAddrButton = new System.Windows.Forms.Button();
             this.label18 = new System.Windows.Forms.Label();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.camStatusTextbox = new System.Windows.Forms.TextBox();
             this.refreshStatusButton = new System.Windows.Forms.Button();
             this.cameraHelpLink = new System.Windows.Forms.LinkLabel();
             this.label6 = new System.Windows.Forms.Label();
@@ -82,8 +84,7 @@
             this.longUpperLeftTextbox = new System.Windows.Forms.TextBox();
             this.coordsHelpLink = new System.Windows.Forms.LinkLabel();
             this.label1 = new System.Windows.Forms.Label();
-            this.camStatusTextbox = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
+            this.insertTestValues = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox8.SuspendLayout();
@@ -116,9 +117,9 @@
             this.groupBox1.Controls.Add(this.setExtentsButton);
             this.groupBox1.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox1.Location = new System.Drawing.Point(464, 20);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox1.Size = new System.Drawing.Size(387, 62);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
@@ -139,7 +140,7 @@
             this.goBackButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.goBackButton.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.goBackButton.Location = new System.Drawing.Point(320, 17);
-            this.goBackButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.goBackButton.Margin = new System.Windows.Forms.Padding(2);
             this.goBackButton.Name = "goBackButton";
             this.goBackButton.Size = new System.Drawing.Size(63, 38);
             this.goBackButton.TabIndex = 2;
@@ -151,7 +152,7 @@
             // 
             this.clearFieldsButton.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.clearFieldsButton.Location = new System.Drawing.Point(253, 17);
-            this.clearFieldsButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.clearFieldsButton.Margin = new System.Windows.Forms.Padding(2);
             this.clearFieldsButton.Name = "clearFieldsButton";
             this.clearFieldsButton.Size = new System.Drawing.Size(63, 38);
             this.clearFieldsButton.TabIndex = 1;
@@ -164,7 +165,7 @@
             this.setExtentsButton.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.setExtentsButton.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.setExtentsButton.Location = new System.Drawing.Point(15, 17);
-            this.setExtentsButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.setExtentsButton.Margin = new System.Windows.Forms.Padding(2);
             this.setExtentsButton.Name = "setExtentsButton";
             this.setExtentsButton.Size = new System.Drawing.Size(205, 38);
             this.setExtentsButton.TabIndex = 0;
@@ -176,7 +177,7 @@
             // 
             this.camViewStatusTextBox.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.camViewStatusTextBox.Location = new System.Drawing.Point(73, 50);
-            this.camViewStatusTextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.camViewStatusTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.camViewStatusTextBox.Name = "camViewStatusTextBox";
             this.camViewStatusTextBox.ReadOnly = true;
             this.camViewStatusTextBox.Size = new System.Drawing.Size(375, 21);
@@ -230,7 +231,7 @@
             // 
             this.camView2StatusTextBox.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.camView2StatusTextBox.Location = new System.Drawing.Point(73, 74);
-            this.camView2StatusTextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.camView2StatusTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.camView2StatusTextBox.Name = "camView2StatusTextBox";
             this.camView2StatusTextBox.ReadOnly = true;
             this.camView2StatusTextBox.Size = new System.Drawing.Size(375, 21);
@@ -390,6 +391,30 @@
             this.groupBox9.TabStop = false;
             this.groupBox9.Text = "Camera Status";
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.BackColor = System.Drawing.Color.Transparent;
+            this.label5.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(5, 15);
+            this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(204, 13);
+            this.label5.TabIndex = 27;
+            this.label5.Text = "Camera status will refresh periodically.";
+            // 
+            // camStatusTextbox
+            // 
+            this.camStatusTextbox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.camStatusTextbox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.camStatusTextbox.Location = new System.Drawing.Point(7, 31);
+            this.camStatusTextbox.Multiline = true;
+            this.camStatusTextbox.Name = "camStatusTextbox";
+            this.camStatusTextbox.ReadOnly = true;
+            this.camStatusTextbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.camStatusTextbox.Size = new System.Drawing.Size(282, 61);
+            this.camStatusTextbox.TabIndex = 21;
+            // 
             // refreshStatusButton
             // 
             this.refreshStatusButton.Location = new System.Drawing.Point(308, 27);
@@ -435,7 +460,7 @@
             "Locally-Attached Cam",
             "Networked Cameras"});
             this.vidSourceChoiceComboBox.Location = new System.Drawing.Point(127, 46);
-            this.vidSourceChoiceComboBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.vidSourceChoiceComboBox.Margin = new System.Windows.Forms.Padding(2);
             this.vidSourceChoiceComboBox.Name = "vidSourceChoiceComboBox";
             this.vidSourceChoiceComboBox.Size = new System.Drawing.Size(115, 23);
             this.vidSourceChoiceComboBox.TabIndex = 0;
@@ -477,7 +502,7 @@
             "Tracking",
             "Object-Based Tracking"});
             this.drawModeChoiceComboBox.Location = new System.Drawing.Point(90, 38);
-            this.drawModeChoiceComboBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.drawModeChoiceComboBox.Margin = new System.Windows.Forms.Padding(2);
             this.drawModeChoiceComboBox.Name = "drawModeChoiceComboBox";
             this.drawModeChoiceComboBox.Size = new System.Drawing.Size(129, 23);
             this.drawModeChoiceComboBox.TabIndex = 1;
@@ -499,6 +524,7 @@
             this.groupBox3.BackColor = System.Drawing.Color.PeachPuff;
             this.groupBox3.BackgroundImage = global::TEST_GPS_Parsing.Properties.Resources.worldBack;
             this.groupBox3.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.groupBox3.Controls.Add(this.insertTestValues);
             this.groupBox3.Controls.Add(this.groupBox6);
             this.groupBox3.Controls.Add(this.groupBox5);
             this.groupBox3.Controls.Add(this.groupBox4);
@@ -550,7 +576,7 @@
             this.latBottomLeftTextbox.BackColor = System.Drawing.Color.Blue;
             this.latBottomLeftTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.latBottomLeftTextbox.Location = new System.Drawing.Point(103, 24);
-            this.latBottomLeftTextbox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.latBottomLeftTextbox.Margin = new System.Windows.Forms.Padding(2);
             this.latBottomLeftTextbox.Name = "latBottomLeftTextbox";
             this.latBottomLeftTextbox.Size = new System.Drawing.Size(102, 21);
             this.latBottomLeftTextbox.TabIndex = 4;
@@ -558,7 +584,7 @@
             // longBottomLeftTextbox
             // 
             this.longBottomLeftTextbox.Location = new System.Drawing.Point(103, 51);
-            this.longBottomLeftTextbox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.longBottomLeftTextbox.Margin = new System.Windows.Forms.Padding(2);
             this.longBottomLeftTextbox.Name = "longBottomLeftTextbox";
             this.longBottomLeftTextbox.ReadOnly = true;
             this.longBottomLeftTextbox.Size = new System.Drawing.Size(102, 21);
@@ -602,7 +628,7 @@
             this.longUpperRightTextbox.BackColor = System.Drawing.Color.Green;
             this.longUpperRightTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.longUpperRightTextbox.Location = new System.Drawing.Point(102, 21);
-            this.longUpperRightTextbox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.longUpperRightTextbox.Margin = new System.Windows.Forms.Padding(2);
             this.longUpperRightTextbox.Name = "longUpperRightTextbox";
             this.longUpperRightTextbox.Size = new System.Drawing.Size(102, 21);
             this.longUpperRightTextbox.TabIndex = 2;
@@ -610,7 +636,7 @@
             // latUpperRightTextbox
             // 
             this.latUpperRightTextbox.Location = new System.Drawing.Point(102, 48);
-            this.latUpperRightTextbox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.latUpperRightTextbox.Margin = new System.Windows.Forms.Padding(2);
             this.latUpperRightTextbox.Name = "latUpperRightTextbox";
             this.latUpperRightTextbox.ReadOnly = true;
             this.latUpperRightTextbox.Size = new System.Drawing.Size(102, 21);
@@ -655,7 +681,7 @@
             this.latUpperLeftTextbox.BackColor = System.Drawing.Color.Blue;
             this.latUpperLeftTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.latUpperLeftTextbox.Location = new System.Drawing.Point(103, 48);
-            this.latUpperLeftTextbox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.latUpperLeftTextbox.Margin = new System.Windows.Forms.Padding(2);
             this.latUpperLeftTextbox.Name = "latUpperLeftTextbox";
             this.latUpperLeftTextbox.Size = new System.Drawing.Size(102, 21);
             this.latUpperLeftTextbox.TabIndex = 3;
@@ -665,7 +691,7 @@
             this.longUpperLeftTextbox.BackColor = System.Drawing.Color.Green;
             this.longUpperLeftTextbox.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.longUpperLeftTextbox.Location = new System.Drawing.Point(103, 21);
-            this.longUpperLeftTextbox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.longUpperLeftTextbox.Margin = new System.Windows.Forms.Padding(2);
             this.longUpperLeftTextbox.Name = "longUpperLeftTextbox";
             this.longUpperLeftTextbox.Size = new System.Drawing.Size(102, 21);
             this.longUpperLeftTextbox.TabIndex = 1;
@@ -673,7 +699,7 @@
             // coordsHelpLink
             // 
             this.coordsHelpLink.AutoSize = true;
-            this.coordsHelpLink.Location = new System.Drawing.Point(231, 162);
+            this.coordsHelpLink.Location = new System.Drawing.Point(227, 140);
             this.coordsHelpLink.Name = "coordsHelpLink";
             this.coordsHelpLink.Size = new System.Drawing.Size(214, 26);
             this.coordsHelpLink.TabIndex = 20;
@@ -693,29 +719,15 @@
             this.label1.TabIndex = 7;
             this.label1.Text = "Insert the GPS co-ordinate extents of the main frame in the appropriate boxes.";
             // 
-            // camStatusTextbox
+            // insertTestValues
             // 
-            this.camStatusTextbox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.camStatusTextbox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.camStatusTextbox.Location = new System.Drawing.Point(7, 31);
-            this.camStatusTextbox.Multiline = true;
-            this.camStatusTextbox.Name = "camStatusTextbox";
-            this.camStatusTextbox.ReadOnly = true;
-            this.camStatusTextbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.camStatusTextbox.Size = new System.Drawing.Size(282, 61);
-            this.camStatusTextbox.TabIndex = 21;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.BackColor = System.Drawing.Color.Transparent;
-            this.label5.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(5, 15);
-            this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(204, 13);
-            this.label5.TabIndex = 27;
-            this.label5.Text = "Camera status will refresh periodically.";
+            this.insertTestValues.Location = new System.Drawing.Point(276, 183);
+            this.insertTestValues.Name = "insertTestValues";
+            this.insertTestValues.Size = new System.Drawing.Size(105, 23);
+            this.insertTestValues.TabIndex = 24;
+            this.insertTestValues.Text = "[DEV] Test Values";
+            this.insertTestValues.UseVisualStyleBackColor = true;
+            this.insertTestValues.Click += new System.EventHandler(this.insertTestValues_Click);
             // 
             // CameraBoundsSetup
             // 
@@ -729,7 +741,7 @@
             this.Controls.Add(this.label9);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.label2);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "CameraBoundsSetup";
             this.Text = "Select Extent of Camera View";
             this.Load += new System.EventHandler(this.CameraBoundsSetup_Load);
@@ -814,5 +826,6 @@
         private System.Windows.Forms.TextBox camView2StatusTextBox;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox camStatusTextbox;
+        private System.Windows.Forms.Button insertTestValues;
     }
 }

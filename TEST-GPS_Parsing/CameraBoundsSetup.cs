@@ -451,6 +451,17 @@ namespace TEST_GPS_Parsing
             //ReleaseData();               //dispose of the capture methods
             this.Close();
         }
+
+        private void insertTestValues_Click(object sender, EventArgs e)
+        {
+            longUpperLeftTextbox.Text = "30.1";
+            longUpperRightTextbox.Text = "30.2";
+            latUpperLeftTextbox.Text = "-29.987";
+            latBottomLeftTextbox.Text = "-30";
+
+            drawModeChoiceComboBox.SelectedIndex = 2;
+            vidSourceChoiceComboBox.SelectedIndex = 1;
+        }
         #endregion
 
         #region Camera modification methods
@@ -538,6 +549,7 @@ namespace TEST_GPS_Parsing
         {
 
         }
+
         #endregion
 
 
