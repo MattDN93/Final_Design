@@ -6,6 +6,7 @@ using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Emgu.Util;
+using DirectShowLib;
 
 namespace TEST_GPS_Parsing
 {
@@ -13,7 +14,15 @@ namespace TEST_GPS_Parsing
     {
         #region Initialization objects and vars
 
-        
+
+        //-------------TEST---------------
+        public DsDevice[] _SystemCameras_CB;
+        public VideoOutputWindow.Video_Device[] camStreamCaptureArray_CB;
+        public int CameraDevice_CB;
+        public Capture _capture_CB;
+
+               
+        //-------------END TEST-----------
 
         //==========COPY OF VIDEO PARAMETERS===============
         /*
@@ -34,7 +43,7 @@ namespace TEST_GPS_Parsing
         //public Capture cscCentre_CB;
         //public Capture cscLeft_CB;
         //public Capture cscRight_CB;
-        public Capture[] camStreamCaptureArray_CB;                          //array to hold all camera capture objects
+        //public Capture[] camStreamCaptureArray_CB;                          //array to hold all camera capture objects
         public Capture currentCamStreamCapture_CB;                  //current "marker" capture object
 
         //video GPS coordinate extents
@@ -59,7 +68,8 @@ namespace TEST_GPS_Parsing
         public CameraBoundsSetup(VideoOutputWindow incoming_vo)
         {
             InitializeComponent();
-            camStreamCaptureArray_CB = new Capture[totalCameraNumber_CB];   //set up an array of capture objects
+           //--------------ORIGINAL CODE----------
+            // camStreamCaptureArray_CB = new Capture[totalCameraNumber_CB];   //set up an array of capture objects
         }
         #endregion 
 
@@ -72,6 +82,11 @@ namespace TEST_GPS_Parsing
             coordsReady = false;
             camTrackReady = false;
             ipCamReady = false;
+
+            //------------------TEST------------------
+            _SystemCameras_CB = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
+            camStreamCaptureArray_CB = new VideoOutputWindow.Video_Device[_SystemCameras_CB.Length];
+            //------------------END TEST--------------
         }
 
         private void checkFieldsTimer_Tick(object sender, EventArgs e)
@@ -94,13 +109,26 @@ namespace TEST_GPS_Parsing
                 refreshStatusButton.Enabled = false;
 
                 //if any capture objects haven't been setup yet, run the init routine (once, since it'll init all)
+
+                //--------------TEST CODE-----------------
                 for (int i = 0; i < totalCameraNumber_CB; i++)
                 {
-                    if (camStreamCaptureArray_CB[i] == null)
+                    if (camStreamCaptureArray_CB[i].Device_Name == null)
                     {
                         initCamStreams(); break;
                     }
                 }
+                //--------------END TEST CODE-------------
+
+                //--------------ORIGINAL CODE-------------
+                //for (int i = 0; i < totalCameraNumber_CB; i++)
+                //{
+                //    if (camStreamCaptureArray_CB[i] == null)
+                //    {
+                //        initCamStreams(); break;
+                //    }
+                //}
+                //-------------END ORIGINAL CODE-------------
 
             }
             else if (vidSourceChoiceComboBox.SelectedIndex == 2)
@@ -123,8 +151,8 @@ namespace TEST_GPS_Parsing
             for (int i = 0; i < totalCameraNumber_CB; i++)
             {
                 //if the video object isn't null and actually is a video (frame height >0) then update GUI appropriately
-                if (camStreamCaptureArray_CB[i] !=null &&
-                    camStreamCaptureArray_CB[i].GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0)
+                if (camStreamCaptureArray_CB[i].Device_Name !=null /*&&
+                    camStreamCaptureArray_CB[i].GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0*/)
                 {
                     camStatusTextbox.AppendText("Camera " + (i+1) + ": Ready \n");
                 }
@@ -215,44 +243,80 @@ namespace TEST_GPS_Parsing
         #endregion
 
         #region Initialise camera streams (local and IP)
+
+        private void SetupCapture(int Camera_Identifier)
+        {
+            //update the selected device
+            CameraDevice_CB = Camera_Identifier;
+
+            //Dispose of Capture if it was created before
+            if (_capture_CB != null) _capture_CB.Dispose();
+            try
+            {
+                //Set up capture device
+                _capture_CB = new Capture(CameraDevice_CB);
+            }
+            catch (NullReferenceException excpt)
+            {
+                MessageBox.Show(excpt.Message);
+            }
+        }
+
         public void initCamStreams()
         {
             //tries to initialise the default camera and the first adjacent left and right
+            //--------------------TEST----------------
 
-            try
+
+            for (int i = 0; i < _SystemCameras_CB.Length; i++)
             {
-                //initialise the centre, left and right camera objects - set as needed
-                //cscCentre_CB = new Capture(0);                                     //CENTRE CAMERA FRAME
-                //cscLeft_CB = new Capture(2);                                       //LEFT CAMERA FRAME
-                //cscRight_CB = new Capture(1);                                      //RIGHT CAMERA FRAME               
-
-                //The ith index starts counting from the leftmost camera and proceeds to the end L->R
-                for (int i = 0; i < totalCameraNumber_CB ; i++)
-                {
-                    camStreamCaptureArray_CB[i] = new Capture(i);   //initialise as many capture objects as needed
-                }
-
-                //go through each cam and if any haven't loaded, set the other to centre
-                int haveLoaded = 0;
-                for (int i = 0; i < totalCameraNumber_CB; i++)
-                {
-                    //set the current camera to whichever one is within bounds that is working
-                    if (camStreamCaptureArray_CB[i].GetCaptureProperty(CapProp.FrameHeight) != 0 && (i+1<totalCameraNumber_CB))
-                    {
-                        haveLoaded++;
-                    }
-                }
-
-                //assume all local cams with frame height !=0 are working, so find the middle one of them and set the current one to that
-                currentCamStreamCapture_CB = camStreamCaptureArray_CB[(int)haveLoaded/totalCameraNumber_CB];
-
-            }
-            catch (NullReferenceException nr)
-            {
-
-                throw nr;
+                camStreamCaptureArray_CB[i] = new VideoOutputWindow.Video_Device(i, _SystemCameras_CB[i].Name, _SystemCameras_CB[i].ClassID); //fill web cam array
             }
 
+            //setup the middlemost cam first
+            //anything LOWER index is left, HIGHER is right
+            SetupCapture((int)_SystemCameras_CB.Length / 2);
+             
+
+            //--------------------ENDTEST---------------
+
+
+
+            //--------------------ORIGINAL CODE-----------
+            //try
+            //{
+            //    //initialise the centre, left and right camera objects - set as needed
+            //    //cscCentre_CB = new Capture(0);                                     //CENTRE CAMERA FRAME
+            //    //cscLeft_CB = new Capture(2);                                       //LEFT CAMERA FRAME
+            //    //cscRight_CB = new Capture(1);                                      //RIGHT CAMERA FRAME               
+
+            //    //The ith index starts counting from the leftmost camera and proceeds to the end L->R
+            //    for (int i = 0; i < totalCameraNumber_CB ; i++)
+            //    {
+            //        camStreamCaptureArray_CB[i] = new Capture(i);   //initialise as many capture objects as needed
+            //    }
+
+            //    //go through each cam and if any haven't loaded, set the other to centre
+            //    int haveLoaded = 0;
+            //    for (int i = 0; i < totalCameraNumber_CB; i++)
+            //    {
+            //        //set the current camera to whichever one is within bounds that is working
+            //        if (camStreamCaptureArray_CB[i].GetCaptureProperty(CapProp.FrameHeight) != 0 && (i+1<totalCameraNumber_CB))
+            //        {
+            //            haveLoaded++;
+            //        }
+            //    }
+
+            //    //assume all local cams with frame height !=0 are working, so find the middle one of them and set the current one to that
+            //    currentCamStreamCapture_CB = camStreamCaptureArray_CB[(int)haveLoaded/totalCameraNumber_CB];
+
+            //}
+            //catch (NullReferenceException nr)
+            //{
+
+            //    throw nr;
+            //}
+            //--------------------END ORIGINAL CODE------------------
         }
 
         public void initIpCamStreams()
@@ -269,33 +333,34 @@ namespace TEST_GPS_Parsing
             //For testing Vivotek cams 146.230.195.13-15/video.mjpg for 14 use video4.mjpg
 
             //TODO: fix hardcoded capture array properties
-
+            //-------------ORIGINAL CODE COMMENTED OUT----------
             string ipAddrLeft, ipAddrCentre, ipAddrRight;
             ipAddrLeft = "http://" + camLeftIpTextBox.Text.ToString() + "/video.mjpg";
-            camStreamCaptureArray_CB[0] = new Emgu.CV.Capture(ipAddrLeft);
+            //camStreamCaptureArray_CB[0] = new Emgu.CV.Capture(ipAddrLeft);
 
             ipAddrCentre = "http://" + camCentreIpTextBox.Text.ToString() + "/video4.mjpg";
-            camStreamCaptureArray_CB[1] = new Emgu.CV.Capture(ipAddrCentre);
+            //camStreamCaptureArray_CB[1] = new Emgu.CV.Capture(ipAddrCentre);
 
             ipAddrRight = "http://" + camRightIpTextBox.Text.ToString() + "/video.mjpg";
-            camStreamCaptureArray_CB[2] = new Emgu.CV.Capture(ipAddrRight);
+            //camStreamCaptureArray_CB[2] = new Emgu.CV.Capture(ipAddrRight);
 
             //go through each cam and if any haven't loaded, set the other to centre
             int haveLoaded = 0;
             for (int i = 0; i < totalCameraNumber_CB; i++)
             {
                 //set the current camera to whichever one is within bounds that is working
-                if (camStreamCaptureArray_CB[i].GetCaptureProperty(CapProp.FrameHeight) != 0 && (i + 1 < totalCameraNumber_CB))
-                {
+                //if (camStreamCaptureArray_CB[i].GetCaptureProperty(CapProp.FrameHeight) != 0 && (i + 1 < totalCameraNumber_CB))
+                //{
                     haveLoaded++;
-                }
+                //}
             }
 
             //assume all local cams with frame height !=0 are working, so find the middle one of them and set the current one to that
-            currentCamStreamCapture_CB = camStreamCaptureArray_CB[(int)haveLoaded / totalCameraNumber_CB];
+            //currentCamStreamCapture_CB = camStreamCaptureArray_CB[(int)haveLoaded / totalCameraNumber_CB];
 
             ipCamReady = true;
             checkIpAddrButton.Text = "Check IP addresses";
+            //---------------END ORIGINAL CODE COMMENTED OUT
         }
 
         private void setExtentsButton_Click(object sender, EventArgs e)
@@ -327,11 +392,13 @@ namespace TEST_GPS_Parsing
             int haveLoaded = 0;
             for (int i = 0; i < totalCameraNumber_CB; i++)
             {
+                //---------------ORIGINAL CODE COMMENTED OUT---------
                 //check how many cameras are available and throw a warning if <3
-                if (camStreamCaptureArray_CB[i].GetCaptureProperty(CapProp.FrameHeight) != 0 && (i + 1 <= totalCameraNumber_CB))
+                if (camStreamCaptureArray_CB[i].Device_Name != null/*GetCaptureProperty(CapProp.FrameHeight) != 0*/ && (i + 1 <= totalCameraNumber_CB))
                 {
                     haveLoaded++;
                 }
+                //----------------END ORIG CODE OUT---------------
             }
             //Checks if the minimum number of cameras are available
             if (haveLoaded <3)

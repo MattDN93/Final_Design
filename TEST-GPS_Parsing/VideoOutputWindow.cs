@@ -12,6 +12,7 @@ using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Emgu.Util;
+using DirectShowLib;
 
 namespace TEST_GPS_Parsing
 {
@@ -23,6 +24,44 @@ namespace TEST_GPS_Parsing
         public Mat overlayVid;
 
         public Capture[] camStreamCaptureArray;                          //array to hold all camera capture objects
+
+
+
+
+        public DsDevice[] _SystemCameras;
+        public Video_Device[] WebCams;
+        int CameraDevice;
+        Capture _capture;
+
+        public struct Video_Device
+        {
+            public string Device_Name;
+            public int Device_ID;
+            public Guid Identifier;
+
+            public Video_Device(int ID, string Name, Guid Identity = new Guid())
+            {
+                Device_ID = ID;
+                Device_Name = Name;
+                Identifier = Identity;
+            }
+
+            /// <summary>
+            /// Represent the Device as a String
+            /// </summary>
+            /// <returns>The string representation of this color</returns>
+            public override string ToString()
+            {
+                return String.Format("[{0}] {1}: {2}", Device_ID, Device_Name, Identifier);
+            }
+        }
+
+        
+
+
+
+
+
         private Capture camStreamCapture = null;        //the current OpenCV capture stream
         //private Capture cscLeft = null;                  //left camera capture
         //private Capture cscRight = null;                 //right camera capture
@@ -96,7 +135,7 @@ namespace TEST_GPS_Parsing
         public VideoOutputWindow()                              //this is called before the window is even launched
         {
             InitializeComponent();
-
+            
             //initialise the bounds and capture arrays - prevent NullReference Exceptions later    
             //# cameras can be altered in code if needed     
             camBoundArray = new camBound[totalCameraNumber];
@@ -141,12 +180,25 @@ namespace TEST_GPS_Parsing
 
                 //---------get capture objects---------
                 //get as many capture objects as cameras active
-                for (int i = 0; i < totalCameraNumber ; i++)
-                {
-                    camStreamCaptureArray[i] = setup.camStreamCaptureArray_CB[i];
-                }
 
-                camStreamCapture = setup.currentCamStreamCapture_CB;
+                //----------------TEST CODE--------------------
+                WebCams = setup.camStreamCaptureArray_CB;
+                _SystemCameras = setup._SystemCameras_CB;
+                CameraDevice = setup.CameraDevice_CB;
+                _capture = setup._capture_CB;
+
+                //Test code configuration steps with current code
+                camStreamCapture = _capture;
+                //----------------END TEST CODE----------------
+
+                //----------------ORIGINAL CODE----------------
+                //for (int i = 0; i < totalCameraNumber ; i++)
+                //{
+                //    camStreamCaptureArray[i] = setup.camStreamCaptureArray_CB[i];
+                //}
+
+                //camStreamCapture = setup.currentCamStreamCapture_CB;
+                //---------------END ORIGINAL CODE-------------
 
                 //---------get capture extents---------
                 // get by default from centre cam (camArray[1])
@@ -244,6 +296,26 @@ namespace TEST_GPS_Parsing
 
         }
 
+        private void SetupCapture(int Camera_Identifier)
+        {
+            //update the selected device
+            CameraDevice = Camera_Identifier;
+
+            //Dispose of Capture if it was created before
+            if (camStreamCapture != null) camStreamCapture.Dispose();
+            try
+            {
+                //Set up capture device
+                camStreamCapture = new Capture(CameraDevice);
+                camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
+                camStreamCapture.Start();
+            }
+            catch (NullReferenceException excpt)
+            {
+                MessageBox.Show(excpt.Message);
+            }
+        }
+
         private void screenStateSwitch(int switchCase)
         {
             if (isStreaming)
@@ -277,22 +349,28 @@ namespace TEST_GPS_Parsing
 
                         //------------modify actual capture objects---------
                         //make the camera one screen to the left the new active camera
+                        //----------------Capture object switch--------------
+                        SetupCapture(currentlyActiveCamera - 1);
+                        camStreamCapture.Start();
+                        //----------------------END TEST CODE-----------
+                        //----------------------ORIGINAL CODE COMMENTED OUT------
                         //camStreamCaptureArray[currentlyActiveCamera] = camStreamCapture;
+                        //camStreamCaptureArray[currentlyActiveCamera - 1].Start();
                         //camStreamCapture = camStreamCaptureArray[currentlyActiveCamera - 1];
-
-
-                        //halt all other camera frames for resource purposes
-                        for (int i = 0; i < camStreamCaptureArray.Length; i++)
-                        {
-                            if (i != currentlyActiveCamera - 1 )
-                            {
-                                camStreamCaptureArray[i].Pause();
-                            }
-                        }
-
-                        currentlyActiveCamera--;                        //indicate we've switched one camera left
+                        //----------------Coordinate bounds switch-----------
+                        
+                        currentlyActiveCamera--;            //switch camera index one left
                         camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
 
+                        ////halt all other camera frames for resource purposes
+                        //for (int i = 0; i < camStreamCaptureArray.Length; i++)
+                        //{
+                        //    if (i != currentlyActiveCamera - 1)
+                        //    {
+                        //        camStreamCaptureArray[i].Pause();
+                        //    }
+                        //}
+                        //----------------------END ORIGINAL CODE OUT
                     }
                     else if (currentlyActiveCamera - 1 == 0)   //we're already on the leftmost camera
                     {
@@ -357,19 +435,24 @@ namespace TEST_GPS_Parsing
 
                         //------------modify actual capture objects---------
                         //make the camera one screen to the right the new active camera
-                        camStreamCaptureArray[currentlyActiveCamera] = camStreamCapture;
-                        camStreamCapture = camStreamCaptureArray[currentlyActiveCamera + 1];
-                        camStreamCaptureArray[currentlyActiveCamera + 1].Start();
+
+                        //--------------TEST CODE-------
+                        SetupCapture(currentlyActiveCamera + 1);
+                        //--------------END TEST CODE-----
+                        //-------------ORIGINAL CODE COMMENTED OUT------------
+                        //camStreamCaptureArray[currentlyActiveCamera] = camStreamCapture;
+                        //camStreamCapture = camStreamCaptureArray[currentlyActiveCamera + 1];
+                        //camStreamCaptureArray[currentlyActiveCamera + 1].Start();
 
                         //halt all other camera frames for resource purposes
-                        for (int i = 0; i < camStreamCaptureArray.Length; i++)
-                        {
-                            if (i != currentlyActiveCamera + 1)
-                            {
-                                camStreamCaptureArray[i].Pause();
-                            }
-                        }
-
+                        //for (int i = 0; i < camStreamCaptureArray.Length; i++)
+                        //{
+                        //    if (i != currentlyActiveCamera + 1)
+                        //    {
+                        //        camStreamCaptureArray[i].Pause();
+                        //    }
+                        //}
+                        //-----------------END ORIGINAL CODE--------------
                         currentlyActiveCamera++;                        //indicate we've switched one camera right
                         camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
 
@@ -446,7 +529,7 @@ namespace TEST_GPS_Parsing
                             type = 4;
                             setTextonVideoUI("Arithmetic error in calculating bounds - did you set them correctly?");       //use thread safe var access
                             type = -1;
-                            return;
+                            //return;
                         }
                         
                     }

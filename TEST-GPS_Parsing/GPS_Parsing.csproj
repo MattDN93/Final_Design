@@ -47,6 +47,10 @@
       <HintPath>..\packages\BruTile.Desktop.0.18.2\lib\net40\BruTile.MbTiles.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="DirectShowLib-2005, Version=2.1.0.0, Culture=neutral, PublicKeyToken=67e7b740cdfc2d3f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\emgucv-310\bin\DirectShowLib-2005.dll</HintPath>
+    </Reference>
     <Reference Include="Emgu.CV.UI">
       <HintPath>..\..\emgucv-310\bin\Emgu.CV.UI.dll</HintPath>
     </Reference>
@@ -167,6 +171,9 @@
     <Content Include="Cmaera_Selection.png" />
     <Content Include="coordsHelp.PNG" />
     <Content Include="cvextern.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="DirectShowLib-2005.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="msvcp120.dll">
