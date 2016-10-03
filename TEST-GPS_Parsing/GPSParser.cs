@@ -24,6 +24,9 @@ namespace TEST_GPS_Parsing
         bool videoOutputRunning = false;                //bool to check if the vo object has been created or not
         private static int resourceInUse= 0;          //Flag to manage threads and resource locks  
 
+        private Object coordsSendLock = new Object();
+
+
         /*IMPORTANT: These wait handles are for the mutex locks on the multithreading
             waitHandleParser:   FALSE = parser has lock, other threads must wait till release
                                 TRUE = if the dbthread is waiting with WaitOne(), setting this with .Set() unlocks and hands to the db thread
@@ -38,7 +41,9 @@ namespace TEST_GPS_Parsing
         Mapping mapData = new Mapping();              //set up a new mapping object for mapping function access
         GMapOverlay locationMarkersOverlay;           //overlay for the location markers on map
         VideoOutputWindow vo;                         //object for the video output window
-        VideoOutputWindow vo_renew;
+
+
+
         string sentenceBuffer;                        //global buffer to read incoming data used for parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
@@ -370,12 +375,13 @@ namespace TEST_GPS_Parsing
                             {
                                 if (!vo.IsDisposed)
                                 {
-                                    vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
+                                    lock (coordsSendLock)
+                                    {
+                                        vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
+                                    }
+                                   
                                 }
-                                else if (vo_renew != null)
-                                {
-                                    vo_renew.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
-                                }
+
                             }
                             catch (NullReferenceException)
                             {
@@ -410,7 +416,7 @@ namespace TEST_GPS_Parsing
                     //FOR SIMULATION ONLY
                     if (debug)
                     {
-                        Thread.Sleep(200);
+                        Thread.Sleep(1000);
                     }
                     
                         //---------------

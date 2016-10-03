@@ -111,7 +111,7 @@ namespace TEST_GPS_Parsing
                 //if any capture objects haven't been setup yet, run the init routine (once, since it'll init all)
 
                 //--------------TEST CODE-----------------
-                for (int i = 0; i < totalCameraNumber_CB; i++)
+                for (int i = 0; i < camStreamCaptureArray_CB.Length; i++)
                 {
                     if (camStreamCaptureArray_CB[i].Device_Name == null)
                     {
@@ -148,7 +148,7 @@ namespace TEST_GPS_Parsing
             //Assume cam 0 = left, 1 = centre and 2=right
             camView2StatusTextBox.Clear();
             camStatusTextbox.Clear();
-            for (int i = 0; i < totalCameraNumber_CB; i++)
+            for (int i = 0; i < camStreamCaptureArray_CB.Length; i++)
             {
                 //if the video object isn't null and actually is a video (frame height >0) then update GUI appropriately
                 if (camStreamCaptureArray_CB[i].Device_Name !=null /*&&
@@ -267,15 +267,23 @@ namespace TEST_GPS_Parsing
             //tries to initialise the default camera and the first adjacent left and right
             //--------------------TEST----------------
 
-
-            for (int i = 0; i < _SystemCameras_CB.Length; i++)
+            try
             {
-                camStreamCaptureArray_CB[i] = new VideoOutputWindow.Video_Device(i, _SystemCameras_CB[i].Name, _SystemCameras_CB[i].ClassID); //fill web cam array
+                for (int i = 0; i < _SystemCameras_CB.Length; i++)
+                {
+                    camStreamCaptureArray_CB[i] = new VideoOutputWindow.Video_Device(i, _SystemCameras_CB[i].Name, _SystemCameras_CB[i].ClassID); //fill web cam array
+                }
+
+                //setup the middlemost cam first
+                //anything LOWER index is left, HIGHER is right
+                SetupCapture((int)_SystemCameras_CB.Length / 2);
+            }
+            catch (NullReferenceException nr)
+            {
+
+                throw nr;
             }
 
-            //setup the middlemost cam first
-            //anything LOWER index is left, HIGHER is right
-            SetupCapture((int)_SystemCameras_CB.Length / 2);
              
 
             //--------------------ENDTEST---------------
@@ -346,7 +354,7 @@ namespace TEST_GPS_Parsing
 
             //go through each cam and if any haven't loaded, set the other to centre
             int haveLoaded = 0;
-            for (int i = 0; i < totalCameraNumber_CB; i++)
+            for (int i = 0; i < camStreamCaptureArray_CB.Length; i++)
             {
                 //set the current camera to whichever one is within bounds that is working
                 //if (camStreamCaptureArray_CB[i].GetCaptureProperty(CapProp.FrameHeight) != 0 && (i + 1 < totalCameraNumber_CB))
@@ -390,7 +398,7 @@ namespace TEST_GPS_Parsing
                 }
 
             int haveLoaded = 0;
-            for (int i = 0; i < totalCameraNumber_CB; i++)
+            for (int i = 0; i < camStreamCaptureArray_CB.Length; i++)
             {
                 //---------------ORIGINAL CODE COMMENTED OUT---------
                 //check how many cameras are available and throw a warning if <3
@@ -454,10 +462,16 @@ namespace TEST_GPS_Parsing
 
         private void insertTestValues_Click(object sender, EventArgs e)
         {
-            longUpperLeftTextbox.Text = "30.1";
-            longUpperRightTextbox.Text = "30.2";
-            latUpperLeftTextbox.Text = "-29.987";
-            latBottomLeftTextbox.Text = "-30";
+            //Test Suite for co-ord checks - Howard College Traversal With Google Earth
+            //bounds UpperLeft: Lat -29.866178; Long 30.981370
+            //bounds UpperRight Long 30.983583
+            //bounds BottomLeft Lat -29.866673
+            //goes up, right off, across main, left off, across right and right off, and back up out top
+
+            longUpperLeftTextbox.Text = "30.981370";
+            longUpperRightTextbox.Text = "30.983583";
+            latUpperLeftTextbox.Text = "-29.866178";
+            latBottomLeftTextbox.Text = "-29.866673";
 
             drawModeChoiceComboBox.SelectedIndex = 2;
             vidSourceChoiceComboBox.SelectedIndex = 1;

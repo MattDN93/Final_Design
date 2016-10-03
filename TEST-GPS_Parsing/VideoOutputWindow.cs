@@ -24,10 +24,8 @@ namespace TEST_GPS_Parsing
         public Mat overlayVid;
 
         public Capture[] camStreamCaptureArray;                          //array to hold all camera capture objects
-
-
-
-
+        
+        //------------------DirectShow Capture Objects--------------
         public DsDevice[] _SystemCameras;
         public Video_Device[] WebCams;
         int CameraDevice;
@@ -86,8 +84,9 @@ namespace TEST_GPS_Parsing
         protected bool randomSim;                 //using random simulation mode or ordered
         protected bool valHasChanged;             //for updating the marker
 
-        private Object uiUpdateLock = new Object(); //mutex lock to prevent UI update race conditions
-
+        private System.Threading.Semaphore uiUpdateSemaphone = new Semaphore(1,3); //mutex lock to prevent UI update race conditions
+        private Object uiWriteLock = new object();
+        bool writingToUi = false;
 
         //-----------------Settings parameters------------------
         protected int vidPixelWidth;              //video dimensions
@@ -132,6 +131,24 @@ namespace TEST_GPS_Parsing
         public static int DRAW_MODE_ORDERED = 1;
         public static int DRAW_MODE_TRACKING = 2;
         public static int DRAW_MODE_REVOBJTRACK = 3;
+
+        /*IMPORTANT - Semaphore for UI access
+            This semaphone maintains thread access to the variables on the video output screen
+            A thread enters with WaitOne(); if 
+             */
+        public Semaphore UiUpdateSemaphone
+        {
+            get
+            {
+                return UiUpdateSemaphone;
+            }
+
+            set
+            {
+                UiUpdateSemaphone = value;
+            }
+        }
+
         #endregion
 
         #region Initializer and Setup
@@ -247,8 +264,8 @@ namespace TEST_GPS_Parsing
                         switch (ol_mark.camSwitchStatus)
                         {
                             case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
-                            case 0: screenStateSwitch(0); webcamVid = new Mat(); break;  //switch the current camera to the left
-                            case 1: screenStateSwitch(1); webcamVid = new Mat(); break; //switch the current camera to the right
+                            case 0: currentlyActiveCamera = screenStateSwitch(0, currentlyActiveCamera); webcamVid = new Mat(); break;  //switch the current camera to the left
+                            case 1: currentlyActiveCamera = screenStateSwitch(1, currentlyActiveCamera); webcamVid = new Mat(); break; //switch the current camera to the right
                             case 2: break;      //the feed need not be changed from the current one (since the value is in this screen)
                             default:
                                 break;
@@ -305,7 +322,7 @@ namespace TEST_GPS_Parsing
             CameraDevice = Camera_Identifier;
 
             //Dispose of Capture if it was created before
-            if (camStreamCapture != null) camStreamCapture.Dispose();
+            if (camStreamCapture != null) camStreamCapture.Stop(); camStreamCapture.Dispose();
             try
             {
                 //Set up capture device
@@ -317,9 +334,13 @@ namespace TEST_GPS_Parsing
             {
                 MessageBox.Show(excpt.Message);
             }
+            catch (Exception e)
+            {
+                status1TextBox.Text = "Error initialising camera...";
+            }
         }
 
-        private void screenStateSwitch(int switchCase)
+        private int screenStateSwitch(int switchCase, int activeCamLocal)
         {
             if (isStreaming)
             {
@@ -328,42 +349,41 @@ namespace TEST_GPS_Parsing
                 if (switchCase == 0)        //means a switch left is requested
                 {
                     //switch coordinates
-                    if (currentlyActiveCamera -1 >= 0)       //don't go left if you can't
+                    if (activeCamLocal - 1 >= 0)       //don't go left if you can't
                     {
                         
-                        double dx_test = camBoundArray[currentlyActiveCamera].delta_x;
+                        double dx_test = camBoundArray[activeCamLocal].delta_x;
                         //------------modify camera GPS bounds-----------
                         //setup left cam's upper right longitude bound
-                        camBoundArray[currentlyActiveCamera - 1].outerLimitBound[0] =
-                            camBoundArray[currentlyActiveCamera].upperLeftBound[1];
+                        camBoundArray[activeCamLocal - 1].outerLimitBound[0] =
+                            camBoundArray[activeCamLocal].upperLeftBound[1];
 
                         //setup left cam's latitude (no change)
-                        camBoundArray[currentlyActiveCamera - 1].outerLimitBound[1] =
-                            camBoundArray[currentlyActiveCamera].outerLimitBound[1];
+                        camBoundArray[activeCamLocal - 1].outerLimitBound[1] =
+                            camBoundArray[activeCamLocal].outerLimitBound[1];
 
                         //setup upper left latitude (no change)
-                        camBoundArray[currentlyActiveCamera - 1].upperLeftBound[0] =
-                            camBoundArray[currentlyActiveCamera].upperLeftBound[0];
+                        camBoundArray[activeCamLocal - 1].upperLeftBound[0] =
+                            camBoundArray[activeCamLocal].upperLeftBound[0];
 
                         //setup upper left longitude
-                        camBoundArray[currentlyActiveCamera - 1].upperLeftBound[1] =
-                            camBoundArray[currentlyActiveCamera].upperLeftBound[1] 
+                        camBoundArray[activeCamLocal - 1].upperLeftBound[1] =
+                            camBoundArray[activeCamLocal].upperLeftBound[1] 
                             - dx_test/*camBoundArray[currentlyActiveCamera].delta_x*/;
 
                         //------------modify actual capture objects---------
                         //make the camera one screen to the left the new active camera
                         //----------------Capture object switch--------------
-                        SetupCapture(currentlyActiveCamera - 1);
-                        camStreamCapture.Start();
+                        SetupCapture(activeCamLocal - 1);
                         //----------------------END TEST CODE-----------
                         //----------------------ORIGINAL CODE COMMENTED OUT------
                         //camStreamCaptureArray[currentlyActiveCamera] = camStreamCapture;
                         //camStreamCaptureArray[currentlyActiveCamera - 1].Start();
                         //camStreamCapture = camStreamCaptureArray[currentlyActiveCamera - 1];
                         //----------------Coordinate bounds switch-----------
-                        
-                        currentlyActiveCamera--;            //switch camera index one left
-                        camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
+
+                        activeCamLocal--;            //switch camera index one left
+                        camBoundUIDisplaySetup(activeCamLocal);  //call UI update to show new bounds onscreen
 
                         ////halt all other camera frames for resource purposes
                         //for (int i = 0; i < camStreamCaptureArray.Length; i++)
@@ -374,10 +394,11 @@ namespace TEST_GPS_Parsing
                         //    }
                         //}
                         //----------------------END ORIGINAL CODE OUT
+                        return activeCamLocal;
                     }
-                    else if (currentlyActiveCamera - 1 == 0)   //we're already on the leftmost camera
+                    else if (activeCamLocal - 1 == 0)   //we're already on the leftmost camera
                     {
-                        return;
+                        return activeCamLocal;
                     }
                     
                     ////capture object comparison and switch
@@ -417,30 +438,30 @@ namespace TEST_GPS_Parsing
                 else if (switchCase == 1)       //means a switch right is requested
                 {
                     //switch coordinates
-                    if (currentlyActiveCamera + 1 <= camBoundArray.Length)       //don't go right if you can't
+                    if (activeCamLocal + 1 <= camBoundArray.Length)       //don't go right if you can't
                     {
                         //setup left cam's upper right longitude bound
-                        camBoundArray[currentlyActiveCamera + 1].outerLimitBound[0] =
-                            camBoundArray[currentlyActiveCamera].outerLimitBound[0] +
-                            camBoundArray[currentlyActiveCamera].delta_x;
+                        camBoundArray[activeCamLocal + 1].outerLimitBound[0] =
+                            camBoundArray[activeCamLocal].outerLimitBound[0] +
+                            camBoundArray[activeCamLocal].delta_x;
 
                         //setup left cam's latitude (no change)
-                        camBoundArray[currentlyActiveCamera + 1].outerLimitBound[1] =
-                            camBoundArray[currentlyActiveCamera].outerLimitBound[1];
+                        camBoundArray[activeCamLocal + 1].outerLimitBound[1] =
+                            camBoundArray[activeCamLocal].outerLimitBound[1];
 
                         //setup upper left latitude (no change)
-                        camBoundArray[currentlyActiveCamera + 1].upperLeftBound[0] =
-                            camBoundArray[currentlyActiveCamera].upperLeftBound[0];
+                        camBoundArray[activeCamLocal + 1].upperLeftBound[0] =
+                            camBoundArray[activeCamLocal].upperLeftBound[0];
 
                         //setup upper left longitude
-                        camBoundArray[currentlyActiveCamera + 1].upperLeftBound[1] =
-                            camBoundArray[currentlyActiveCamera].outerLimitBound[0];
+                        camBoundArray[activeCamLocal + 1].upperLeftBound[1] =
+                            camBoundArray[activeCamLocal].outerLimitBound[0];
 
                         //------------modify actual capture objects---------
                         //make the camera one screen to the right the new active camera
 
                         //--------------TEST CODE-------
-                        SetupCapture(currentlyActiveCamera + 1);
+                        SetupCapture(activeCamLocal + 1);
                         //--------------END TEST CODE-----
                         //-------------ORIGINAL CODE COMMENTED OUT------------
                         //camStreamCaptureArray[currentlyActiveCamera] = camStreamCapture;
@@ -456,13 +477,13 @@ namespace TEST_GPS_Parsing
                         //    }
                         //}
                         //-----------------END ORIGINAL CODE--------------
-                        currentlyActiveCamera++;                        //indicate we've switched one camera right
-                        camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
-
+                        activeCamLocal++;                        //indicate we've switched one camera right
+                        camBoundUIDisplaySetup(activeCamLocal);  //call UI update to show new bounds onscreen
+                        return activeCamLocal;
                     }
-                    else if (currentlyActiveCamera + 1 > camBoundArray.Length)   //we're already on the leftmost camera
+                    else if (activeCamLocal + 1 > camBoundArray.Length)   //we're already on the leftmost camera
                     {
-                        return;
+                        return activeCamLocal;
                     }
 
                     //if (camStreamCapture.Equals(cscRight))    //if the current frame is already set to the right
@@ -504,6 +525,7 @@ namespace TEST_GPS_Parsing
                 }
             }
             switchCase = 2;        //set back to "current"
+            return activeCamLocal;
         }
 
         //This recalculates the incoming datapoints once every 500ms since GPS data only arrives that often
@@ -529,15 +551,10 @@ namespace TEST_GPS_Parsing
                         }
                         catch (OverflowException)
                         {
-                        lock (uiUpdateLock)
-                        {
-                            type = 4;
-                        }
+                        type = 4;
                             setTextonVideoUI("Arithmetic error in calculating bounds - did you set them correctly?");       //use thread safe var access
-                        lock (uiUpdateLock)
-                        {
-                            type = -1;
-                        }
+                        type = -1;
+                        
                         //return;
                     }
                         
@@ -577,40 +594,21 @@ namespace TEST_GPS_Parsing
                     }
                 }
 
-                //ol_mark.usingCoords = true;             //prevents the double lat/long variables from being modified
-                double realLat;
-                lock (uiUpdateLock)
-                {
-                    type = 0;
-                    realLat = ol_mark.current_pointGPS_lat;  //gets the actual lat/long as opposed to the scaled versions of pixels for screen
-                }
+                //prevents the double lat/long variables from being modified
+                type = 0;
+                double realLat = ol_mark.current_pointGPS_lat;  //gets the actual lat/long as opposed to the scaled versions of pixels for screen
                 setTextonVideoUI(realLat.ToString()); //we need to do this to prevent the marshall by ref warning
 
-                double realLong;
-                lock (uiUpdateLock)
-                {
-                    type = 1;
-                    realLong = ol_mark.current_pointGPS_long;
-                }
+                type = 1;
+                double realLong = ol_mark.current_pointGPS_long;
                 setTextonVideoUI(realLong.ToString()); //we need to do this to prevent the marshall by ref warning
 
-                lock (uiUpdateLock)
-                {
-                    type = 2;
-                }
+                type = 2;
                 setTextonVideoUI(ol_mark.latitudeOutOfRangeOverlayMessage);
 
-                lock (uiUpdateLock)
-                {
-                    type = 3;
-                }
+                type = 3;
                 setTextonVideoUI(ol_mark.longitudeOutOfRangeOverlayMessage);
-                //ol_mark.usingCoords = false;            //unlocks double lat/long vars
-                lock (uiUpdateLock)
-                {
-                    type = -1;
-                }
-
+                type = -1;
 
             }
         }
@@ -681,10 +679,7 @@ namespace TEST_GPS_Parsing
                         }
                         else
                         {
-                            lock (uiUpdateLock)
-                            {
                                 this.latitudeLabel.Text = text;
-                            }
 
                         }; break;
                     case 1:
@@ -694,10 +689,7 @@ namespace TEST_GPS_Parsing
                             Invoke(l, new object[] { text });
                         }
                         else {
-                            lock (uiUpdateLock)
-                            {
                                 this.LongitudeLabel.Text = text;
-                            }
 
                         }; break;
                     case 2:
@@ -708,10 +700,7 @@ namespace TEST_GPS_Parsing
                         }
                         else
                         {
-                            lock (uiUpdateLock)
-                            {
                                 this.latOORStatusBox.Text = text;
-                            }
                         }; break;
                     case 3:
                         if (this.longOORTextBox.InvokeRequired)
@@ -721,10 +710,7 @@ namespace TEST_GPS_Parsing
                         }
                         else
                         {
-                            lock (uiUpdateLock)
-                            {
                                 this.longOORTextBox.Text = text;
-                            }
                         }; break;
                     case 4:
                         if (this.status1TextBox.InvokeRequired)
@@ -734,10 +720,7 @@ namespace TEST_GPS_Parsing
                         }
                         else
                         {
-                            lock (uiUpdateLock)
-                            {
                                 this.status1TextBox.Text = text;
-                            }
                         }; break;
 
                     default:
@@ -837,41 +820,26 @@ namespace TEST_GPS_Parsing
             //OuterLimitBound[0] = longitude top right; [1] = latitude bottom left
             //use threadsafe access
 
-            lock (uiUpdateLock)
-            {
-                type_2 = 3;
-            }
+            //prevents the double lat/long variables from being modified
+            type_2 = 3;
             setTextonVideoUI(vidPixelHeight.ToString());      //get the video parameters
-            lock (uiUpdateLock)
-            {
-                type_2 = 4;
-            }
-            setTextonVideoUI(vidPixelWidth.ToString());
-            lock (uiUpdateLock)
-            {
-                type_2 = 5;
-            }
-            setTextonVideoUI(camBoundArray[camScreenNumber].upperLeftBound[0].ToString());
-            lock (uiUpdateLock)
-            {
-                type_2 = 6;
-            }
-            setTextonVideoUI(camBoundArray[camScreenNumber].upperLeftBound[1].ToString());
-            lock (uiUpdateLock)
-            {
-                type_2 = 7;
-            }
-            setTextonVideoUI(camBoundArray[camScreenNumber].outerLimitBound[0].ToString());
-            lock (uiUpdateLock)
-            {
-                type_2 = 8;
-            }
-            setTextonVideoUI(camBoundArray[camScreenNumber].outerLimitBound[1].ToString());
-            lock (uiUpdateLock)
-            {
-                type_2 = -1;
-            }
 
+            type_2 = 4;
+            setTextonVideoUI(vidPixelWidth.ToString());
+
+            type_2 = 5;
+            setTextonVideoUI(camBoundArray[camScreenNumber].upperLeftBound[0].ToString());
+
+            type_2 = 6;
+            setTextonVideoUI(camBoundArray[camScreenNumber].upperLeftBound[1].ToString());
+
+            type_2 = 7;
+            setTextonVideoUI(camBoundArray[camScreenNumber].outerLimitBound[0].ToString());
+
+            type_2 = 8;
+            setTextonVideoUI(camBoundArray[camScreenNumber].outerLimitBound[1].ToString());
+
+            type_2 = -1;
 
             //calculate the camera frame coordinate range - assume African co-ords; latitude always <0 longitude always >0
             camBoundArray[camScreenNumber].delta_y = Math.Abs(camBoundArray[camScreenNumber].outerLimitBound[1] - camBoundArray[camScreenNumber].upperLeftBound[0]);
