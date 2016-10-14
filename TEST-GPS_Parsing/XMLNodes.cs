@@ -8,37 +8,10 @@ namespace TEST_GPS_Parsing
     class XMLNodes
     {
         //top-end XML document components
-        public XmlDocument databaseDoc;
         public XmlWriter dbWriter;
-        public XmlNode rootNode;
-        public XmlComment docComment, docComment2;
         public string dbFileName;
         public static string dbFileToOpenName;
         System.IO.StreamWriter dbOutputFile;
-
-        //GPS specific elements
-        //Setting up XML Nodes
-        XmlNode newElem;
-
-        XmlNode latitude;
-        XmlNode longitude;
-        XmlNode fixtype;
-        XmlNode grspd;
-        XmlNode angle;
-        XmlNode date;
-        XmlNode time;
-        XmlNode fixqual;
-        XmlNode numsats;
-        XmlNode accuracy;
-        XmlNode altitude;
-
-
-        //Assign nodes' attrivutes
-        XmlAttribute packetID;
-        XmlAttribute grspdType;
-        XmlAttribute angleType;
-
-
 
         /// <summary>
         /// 

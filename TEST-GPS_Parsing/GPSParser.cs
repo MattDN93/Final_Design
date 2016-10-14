@@ -14,14 +14,18 @@ namespace TEST_GPS_Parsing
 {
     public partial class GPSParser : Form
     {
+        #region Initialization and Vars
         //*********THIS VAR IS FOR TESTING FEATURES, set to false for debug features off
-        bool debug = false;
+        bool debug = true;
         //*************************************
         public string inputLogFilename;
         bool dbLoggingActive = true;
-        bool newLogEveryStart = true;                 //TRUE = makes new file every time start is clicked; FALSE = once per session
         bool parseIsRunning = false;                  //bool to denote whether the parser is in progress or not.
+        bool videoOutputRunning = false;                //bool to check if the vo object has been created or not
         private static int resourceInUse= 0;          //Flag to manage threads and resource locks  
+
+        private Object coordsSendLock = new Object();
+
 
         /*IMPORTANT: These wait handles are for the mutex locks on the multithreading
             waitHandleParser:   FALSE = parser has lock, other threads must wait till release
@@ -35,13 +39,22 @@ namespace TEST_GPS_Parsing
 
         GPSPacket gpsData = new GPSPacket();          //global GPS data packet for UI display                                                     
         Mapping mapData = new Mapping();              //set up a new mapping object for mapping function access
-        GMapOverlay locationMarkersOverlay;           //overlay for the location markers
+        GMapOverlay locationMarkersOverlay;           //overlay for the location markers on map
+        VideoOutputWindow vo;                         //object for the video output window
+
+
+
         string sentenceBuffer;                        //global buffer to read incoming data used for parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
         int duplicatePacketCounter = 1;                     //used to ensure duplicate packets aren't saved into the DB
-        private XmlWriter fileStream;
 
+        public bool newLogEveryStart { get; private set; }
+
+        //private XmlWriter fileStream;
+        #endregion
+
+        #region Class Instantiation
         public GPSParser()
         {
             InitializeComponent();
@@ -79,7 +92,9 @@ namespace TEST_GPS_Parsing
             }
 
         }
+        #endregion
 
+        #region Init Panes and UI
         private bool initMappingPane()
         {
             //Set up the Mapping provider to show the maps in the pane
@@ -95,7 +110,7 @@ namespace TEST_GPS_Parsing
                 locationMarkersOverlay = new GMapOverlay("locationMarker");
 
             }
-            catch (SystemException e)
+            catch (SystemException)
             {
                 return false;
 
@@ -109,9 +124,12 @@ namespace TEST_GPS_Parsing
             //openLogDialog = new OpenFileDialog();     //create new instance of the openFileDialog object
             startButton.Enabled = false;
             stopButton.Enabled = false;
+            statusTextBox.BackColor = System.Drawing.Color.LemonChiffon;
             statusTextBox.AppendText("Ready. Click the button to open a file.");
         }
+        #endregion
 
+        #region Main User Button Interaction
         private void openFileButton_Click(object sender, EventArgs e)
         {
                 //open the dialog
@@ -191,11 +209,46 @@ namespace TEST_GPS_Parsing
 
         }
 
+        //------------------Open the Video Streaming Component------------------
+        private void openPortButton_Click(object sender, EventArgs e)
+        {
+            //if (vo.IsDisposed)         //if the object was created before, destroy and recreate it
+            //{
+            //    vo_renew = new VideoOutputWindow();
+            //    CameraBoundsSetup cmBound = new CameraBoundsSetup(vo_renew);
+            //    updateUITimer.Stop();
+            //    status2TextBox.AppendText("Camera Bound setup window open; waiting....");
+            //    DialogResult cmResult = cmBound.ShowDialog();
+            //    updateUITimer.Start();
+            //}
+            //if (!vo.IsDisposed)
+            //{
+                //CameraBoundsSetup cmBound = new CameraBoundsSetup(vo);
+                vo = new VideoOutputWindow();
+            videoOutputRunning = true; //used to inform the parser it can send co-ords to the video method now
+                vo.Show();
+                //DialogResult cmResult = cmBound.ShowDialog();
+                updateUITimer.Start();
+            //}
+
+
+
+
+        }
+        #endregion
+
+        #region Updating UI methods
+
         private void updateUITimer_Tick(object sender, EventArgs e)
         {
             if (recvRawDataWorker.IsBusy)
             {
                 gpsData.timeElapsed++; //update the running timer only if parsing is active
+                if (!videoOutputRunning)
+                {
+                    statusTextBox.BackColor = System.Drawing.Color.Orange;
+                    statusTextBox.Text = "Warning: Video capture not set up yet!";
+                }
             }
 
             //also check on status of database logging requirement
@@ -211,238 +264,6 @@ namespace TEST_GPS_Parsing
                 status2TextBox.AppendText("Database logging disabled.");
             }
 
-        }
-
-        //-------------------------THREADING SECTION--------------------------------
-        //-------------------------RESOURCE LOCK MANAGER----------------------------
-        //-------------------------RESOURCE LOCKING METHOD------------------------------
-        public bool resourceUse(XmlDocument dbFile = null, XmlNode root = null, System.IO.StreamWriter dbOutputFile = null)
-        {
-            //0 indicates that the method is not in use.
-            if (0 == Interlocked.Exchange(ref resourceInUse, 1))
-            {
-                Console.WriteLine("{0} acquired the lock", Thread.CurrentThread.Name);
-
-                //Code to access a resource that is not thread safe would go here.
-                if (Thread.CurrentThread.Name == "GPS Logging Thread")
-                {
-                    gpsData = gpsData.parseSelection(sentenceBuffer, gpsData);
-                }
-                else if (Thread.CurrentThread.Name == "Database Write Thread")
-                {
-                    //writeToDatabase(dbFile,gpsData,root,dbOutputFile);        //write gpsData to the XML database
-                }
-               
-                Console.WriteLine("{0} exiting lock", Thread.CurrentThread.Name);
-
-                //Release the lock
-                Interlocked.Exchange(ref resourceInUse, 0);
-                return true;
-            }
-            else
-            {
-                Console.WriteLine("   {0} was denied the lock", Thread.CurrentThread.Name);
-                return false;
-            }
-
-        }
-
-
-        //-------------------------THREAD 1: FOR BACKGROUND WORK--------------------
-        private void recvRawDataWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            //Set thread parameters
-            Thread.CurrentThread.Name = "GPS Logging Thread";
-            Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
-
-            //create a new streamreader instance for the incoming file
-            System.IO.StreamReader inputFile = new System.IO.StreamReader(gpsData.gpsLogfilename);
-
-            //start reading the line
-            //For simulating NMEA behaviour
-            int count = 0;
-            
-                while (inputFile.EndOfStream == false)
-                {
-                    if (!recvRawDataWorker.CancellationPending) //check for thread cancel request from stop button (since it's only active here)
-                    {                    
-                        sentenceBuffer = inputFile.ReadLine();
-                        //This function updates the UI elements with the parsed NMEA data
-                        rawBuffer += sentenceBuffer;                         //aggregates the raw buffer to display it
-
-
-                    //Checks if the resource is available 
-                    Console.WriteLine("Parser has data-lock");
-                    gpsData = gpsData.parseSelection(sentenceBuffer, gpsData);  //perform the parsing operation
-
-                    mapData.parseLatLong(gpsData.latitude, gpsData.longitude);  //pass the data to the mapping method
-
-                    count++;
-
-                    //this allows for a thread-safe variable access
-                    if (gpsData.packetID > gpsData.deltaCount)
-                    {
-                        gpsData.deltaCount++;
-                        //locationMarkersOverlay = mapData.plotOnMap(locationMarkersOverlay);          //passes the initialised overlay to be populated
-                                                                            
-                        //unlock the data to write to the DB 
-                        _waitHandleParser.Set();
-                        Console.WriteLine("Parser released lock");
-
-                        Console.WriteLine("Waiting for DB write to finish");
-                        if (dbLoggingActive == true)
-                        {
-                            _waitHandleDatabase.WaitOne();                  //only wait for write if there's actually a write happening
-                        }
-                        
-                        Console.WriteLine("Parser obtained UI write lock");
-                        recvRawDataWorker.ReportProgress(count, gpsData); //only update the UI if a whole new packet has been read- saves calling every char                                                
-
-                        if (dbLoggingActive == true)
-                        {
-                            _waitHandleParser.Set(); //inform the db thread that the lock has been released
-                        }
-                        
-                        Console.WriteLine("Parser released UI lock");
-                        //rawBuffer = "";
-                    }
-
-
-                    //FOR SIMULATION ONLY
-                    if (debug)
-                    {
-                        Thread.Sleep(500);
-                    }
-                    
-                        //---------------
-                    }
-                    else
-                    {
-                    inputFile.Close();
-                    //everything else is handled in the completion thread
-                    break;
-                    }
-                }
-            inputFile.Close();
-
-        
-        }
-
-        //------------------------THREAD 2: FOR UPDATING THE DATABASE--------------------------------
-
-        private void dbLoggingThread_DoWork(object sender, DoWorkEventArgs e)
-        {
-            Thread.CurrentThread.Name = "Database Write Thread";
-            Thread.CurrentThread.Priority = ThreadPriority.BelowNormal;
-
-            //creates XMLNode object - only call the create method if logging is needed
-            XMLNodes myXmlDb = new XMLNodes();
-            
-            //set up the XML database - if the user wants it of course! this is the initial check for database active or not
-            if (dbLoggingActive == true)    //initial check if user wants DB logging
-            {
-                myXmlDb.createXmlDbFile();  //calls the method to set the DB up
-
-                int packetCount = 0;
-                bool dataUnlocked = false;
-                //now enter the continuous logging loop for as long as the incoming data parser thread is running
-                while (parseIsRunning)      //stay in this loop as long as the parser is active
-                {
-                    packetCount++;          //increment number of packets processed
-                    if (!dbLoggingThread.CancellationPending)
-                    {
-                        Console.WriteLine("Waiting for parser to release lock");
-                        /*  tells the db logger thread to block until it receives a Set() signal from the parser thread 
-                            to indicate that the parser has released the lock */
-                        _waitHandleParser.WaitOne();
-
-                        //Once this line is passed we assume the lock was released so the db thread has lock on the data
-                        Console.WriteLine("DB thread obtained write lock");
-                        bool writeComplete = writeToDatabase(myXmlDb, gpsData);
-                        while (!writeComplete)
-                        {
-                            Console.WriteLine("Writing to DB...");
-                        }
-                        //now the blocking parser thread gets sent a signal that the db thread is releasing the resources
-                        _waitHandleDatabase.Set();
-                        Console.WriteLine("Write done - DB releasing lock");
-
-                        //write a new 
-                    }
-                    else
-                    {
-                        //a unusual cancel has been requested, try close XML file safely
-                        bool quitResult;
-                        quitResult = myXmlDb.closeXmlDbFile();
-                        if (quitResult == false)
-                        {
-                            status2TextBox.Clear();
-                            status2TextBox.AppendText("Error closing DB. Corruption possible.");
-                            break;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                        
-                    }
-                }
-
-            }
-            _waitHandleDatabase.Set();  //ping the main thread to keep logging since database logging is off
-        }
-        
-        
-
-        //----------------------Progress Changed on thread methods-------------------------------------
-
-        private void dbLoggingThread_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            
-        }
-
-        private void recvRawDataWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            if (!recvRawDataWorker.CancellationPending)
-            {
-                //check the status of the system each time a new sentence received and inform the user
-                statusTextBox.Clear();
-                statusTextBox.AppendText("Parsing in progress. No errors.");
-
-                //function called to get all the incoming data and refresh the UI
-                updateUI(gpsData, sentenceBuffer);
-                rawBuffer = "";             //since earlier call is asynchronous, only clear the raw buffer once 100% sure that its data has reached the UI - which is now.
-            }
-            
-        }
-
-        //----------------------------Thread completion methods---------------------------
-        
-        private void recvRawDataWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (dbLoggingActive == true)
-            {
-                _waitHandleDatabase.Set();      //pings the parser thread to release the lock
-                dbLoggingThread.CancelAsync(); //requests cancellation of the database thread
-                _waitHandleParser.Set();        //parser informs the waiting db thread lock is released so it can close the file
-            }
-
-            statusTextBox.Clear();
-            statusTextBox.AppendText("GPS parsing complete or interrupted.");
-            rawLogFileTextBox.Text = "";
-            stopButton.Enabled = false;
-            startButton.Enabled = true;
-            openFileButton.Enabled = true;
-            parseIsRunning = false;
-            trayIconParsing.Text = "Logging stopped.";
-            trayIconParsing.ShowBalloonTip(5, "GPS Logging stopped", "Logging stopped or interrupted. Open a new file to restart logging.", ToolTipIcon.Error);
-        }
-
-        private void dbLoggingThread_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-           XMLNodes temp = new XMLNodes();
-
-           //temp.closeXmlDbFile();
         }
 
         //-------------------------UI update method------------------------------------------
@@ -499,46 +320,184 @@ namespace TEST_GPS_Parsing
 
 
         }
+        #endregion
 
-        //-------------------------Form shutdown method-----------
-        //Warns the user before shutting down the app if a process is running
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        //-------------------------THREADING SECTION--------------------------------
+        #region Background Worker Thread
+
+
+        //-------------------------THREAD 1: FOR BACKGROUND WORK--------------------
+        private void recvRawDataWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            DialogResult userQuit;
-            if (parseIsRunning == true)
-            {
-                userQuit = MessageBox.Show("Quitting while parsing is running could corrupt the database; reccommend stopping the process first. Do you still want to force quit and risk losing data?", "Be careful! Forcefully quit?", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
-                if (userQuit == DialogResult.Yes)
+            //Set thread parameters
+            Thread.CurrentThread.Name = "GPS Logging Thread";
+            Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
+
+            //create a new streamreader instance for the incoming file
+            System.IO.StreamReader inputFile = new System.IO.StreamReader(gpsData.gpsLogfilename);
+
+            //start reading the line
+            //For simulating NMEA behaviour
+            int count = 0;
+            
+                while (inputFile.EndOfStream == false)
                 {
-                    parseIsRunning = false;
-                    statusTextBox.Clear();
-                    statusTextBox.AppendText("Stop requested, ending thread...");
-                    recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
-                    _waitHandleDatabase.Set();      //pings the parser thread to release the lock
-                    dbLoggingThread.CancelAsync(); //requests cancellation of the database thread
-                    _waitHandleParser.Set();
-                    e.Cancel = false;               //event shouldn't be cancelled i.e. we want to close the app
-                }
-                else
-                {
-                    //DO NOT close the app, return to caller
-                    e.Cancel = true;
-                    return;
-                }
-            }
-            else
-            {
-                userQuit = MessageBox.Show("Close the program?", "Are you sure?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (userQuit != DialogResult.Yes)
-                {
-                    //tells the form caller we DO NOT want to close the app
-                    e.Cancel = true;
-                    return;
-                }
-            }
+                    if (!recvRawDataWorker.CancellationPending) //check for thread cancel request from stop button (since it's only active here)
+                    {                    
+                        sentenceBuffer = inputFile.ReadLine();
+                        //This function updates the UI elements with the parsed NMEA data
+                        rawBuffer += sentenceBuffer;                         //aggregates the raw buffer to display it
 
 
+                    //Checks if the resource is available 
+                    Console.WriteLine("Parser has data-lock");
+                    gpsData = gpsData.parseSelection(sentenceBuffer, gpsData);  //perform the parsing operation
+
+                    mapData.parseLatLong(gpsData.latitude, gpsData.longitude);  //pass the data to the mapping method
+
+                    count++;
+
+                    //this allows for a thread-safe variable access
+                    if (gpsData.packetID > gpsData.deltaCount)
+                    {
+                        gpsData.deltaCount++;
+                        //locationMarkersOverlay = mapData.plotOnMap(locationMarkersOverlay);          //passes the initialised overlay to be populated
+
+                        //unlock the data to write to the DB 
+                        _waitHandleParser.Set();
+                        Console.WriteLine("Parser released lock");
+
+                        //send the co-ordinates to the video output UI - keeps calling till its set
+                        //pass the new instance of the overlay if it's been disposed before
+                        if (parseIsRunning)
+                        {
+                            try
+                            {
+                                if (!vo.IsDisposed)
+                                {
+                                    lock (coordsSendLock)
+                                    {
+                                        vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
+                                    }
+                                   
+                                }
+
+                            }
+                            catch (NullReferenceException)
+                            {
+                                videoOutputRunning = false;
+                            }
+
+                            
+                        }
+
+
+                        
+
+                        Console.WriteLine("Waiting for DB write to finish");
+                        if (dbLoggingActive == true)
+                        {
+                            _waitHandleDatabase.WaitOne();                  //only wait for write if there's actually a write happening
+                        }
+                        
+                        Console.WriteLine("Parser obtained UI write lock");
+                        recvRawDataWorker.ReportProgress(count, gpsData); //only update the UI if a whole new packet has been read- saves calling every char                                                
+
+                        if (dbLoggingActive == true)
+                        {
+                            _waitHandleParser.Set(); //inform the db thread that the lock has been released
+                        }
+                        
+                        Console.WriteLine("Parser released UI lock");
+                        //rawBuffer = "";
+                    }
+
+
+                    //FOR SIMULATION ONLY
+                    if (debug)
+                    {
+                        Thread.Sleep(1000);
+                    }
+                    
+                        //---------------
+                    }
+                    else
+                    {
+                    inputFile.Close();
+                    //everything else is handled in the completion thread
+                    break;
+                    }
+                }
+            inputFile.Close();
+
+        
         }
+
+        #endregion
+        //------------------------THREAD 2: FOR UPDATING THE DATABASE----------------
+        #region Database Update Thread
+
+        private void dbLoggingThread_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Thread.CurrentThread.Name = "Database Write Thread";
+            Thread.CurrentThread.Priority = ThreadPriority.BelowNormal;
+
+            //creates XMLNode object - only call the create method if logging is needed
+            XMLNodes myXmlDb = new XMLNodes();
+            
+            //set up the XML database - if the user wants it of course! this is the initial check for database active or not
+            if (dbLoggingActive == true)    //initial check if user wants DB logging
+            {
+                myXmlDb.createXmlDbFile();  //calls the method to set the DB up
+
+                int packetCount = 0;
+                //now enter the continuous logging loop for as long as the incoming data parser thread is running
+                while (parseIsRunning)      //stay in this loop as long as the parser is active
+                {
+                    packetCount++;          //increment number of packets processed
+                    if (!dbLoggingThread.CancellationPending)
+                    {
+                        Console.WriteLine("Waiting for parser to release lock");
+                        /*  tells the db logger thread to block until it receives a Set() signal from the parser thread 
+                            to indicate that the parser has released the lock */
+                        _waitHandleParser.WaitOne();
+
+                        //Once this line is passed we assume the lock was released so the db thread has lock on the data
+                        Console.WriteLine("DB thread obtained write lock");
+                        bool writeComplete = writeToDatabase(myXmlDb, gpsData);
+                        while (!writeComplete)
+                        {
+                            Console.WriteLine("Writing to DB...");
+                        }
+                        //now the blocking parser thread gets sent a signal that the db thread is releasing the resources
+                        _waitHandleDatabase.Set();
+                        Console.WriteLine("Write done - DB releasing lock");
+
+                        //write a new 
+                    }
+                    else
+                    {
+                        //a unusual cancel has been requested, try close XML file safely
+                        bool quitResult;
+                        quitResult = myXmlDb.closeXmlDbFile();
+                        if (quitResult == false)
+                        {
+                            status2TextBox.Clear();
+                            status2TextBox.AppendText("Error closing DB. Corruption possible.");
+                            break;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        
+                    }
+                }
+
+            }
+            _waitHandleDatabase.Set();  //ping the main thread to keep logging since database logging is off
+        }
+
 
         //-------------------------DB update method---------------
 
@@ -549,23 +508,86 @@ namespace TEST_GPS_Parsing
             {
                 duplicatePacketCounter++;
                 myXmlDb.populateDbFields(gpsDataForDB);
-                
-                return true;              
+
+                return true;
             }
             return true;
         }
+        #endregion
 
-        //-------------------------End threads---------------------------------------------
+        #region Thread Update Methods
 
-        //------------------Open the Video Streaming Component------------------
-        private void openPortButton_Click(object sender, EventArgs e)
+        private void dbLoggingThread_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            CameraBoundsSetup cmBound = new CameraBoundsSetup();
-            updateUITimer.Stop();
-            status2TextBox.AppendText("Camera Bound setup window open; waiting....");
-            DialogResult cmResult = cmBound.ShowDialog();
-            updateUITimer.Start();
+            
         }
+
+        private void recvRawDataWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            if (!recvRawDataWorker.CancellationPending)
+            {
+                //check the status of the system each time a new sentence received and inform the user
+                statusTextBox.Clear();
+                if (videoOutputRunning)
+                {
+                    statusTextBox.BackColor = System.Drawing.Color.ForestGreen;
+                    statusTextBox.AppendText("Parsing in progress. No errors.");
+                }
+                else
+                {
+                    statusTextBox.BackColor = System.Drawing.Color.LightGoldenrodYellow;
+                    statusTextBox.AppendText("Parsing in progress with warning...");
+                }
+                
+
+                //function called to get all the incoming data and refresh the UI
+                updateUI(gpsData, sentenceBuffer);
+                rawBuffer = "";             //since earlier call is asynchronous, only clear the raw buffer once 100% sure that its data has reached the UI - which is now.
+            }
+            
+        }
+
+        //----------------------------Thread completion methods---------------------------
+        
+        private void recvRawDataWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (dbLoggingActive == true)
+            {
+                _waitHandleDatabase.Set();      //pings the parser thread to release the lock
+                dbLoggingThread.CancelAsync(); //requests cancellation of the database thread
+                _waitHandleParser.Set();        //parser informs the waiting db thread lock is released so it can close the file
+            }
+
+            try
+            {
+                statusTextBox.Clear();
+                statusTextBox.AppendText("GPS parsing complete or interrupted.");
+                rawLogFileTextBox.Text = "";
+                stopButton.Enabled = false;
+                startButton.Enabled = true;
+                openFileButton.Enabled = true;
+                parseIsRunning = false;
+                trayIconParsing.Text = "Logging stopped.";
+                trayIconParsing.ShowBalloonTip(5, "GPS Logging stopped", "Logging stopped or interrupted. Open a new file to restart logging.", ToolTipIcon.Error);
+            }
+            catch (ObjectDisposedException)
+            {
+                parseIsRunning = false;
+            }
+           
+        }
+
+        private void dbLoggingThread_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+           XMLNodes temp = new XMLNodes();
+
+           //temp.closeXmlDbFile();
+        }
+        #endregion
+
+        //-------------------------End threads------------------------------------
+
+        #region UI Menu Element Methods
 
         private void trayIconParsing_MouseDoubleClick(object sender, MouseEventArgs e)
         {
@@ -738,7 +760,54 @@ namespace TEST_GPS_Parsing
             mapPane.MapProvider = GMap.NET.MapProviders.BingMapProvider.Instance;
             trayIconParsing.ShowBalloonTip(3, "Mapping Info", "Map provider switched to Bing", ToolTipIcon.Info);
         }
+        #endregion
+
+        #region Form Shutdown
+
+        //-------------------------Form shutdown method-----------
+        //Warns the user before shutting down the app if a process is running
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult userQuit;
+            if (parseIsRunning == true)
+            {
+                userQuit = MessageBox.Show("Quitting while parsing is running could corrupt the database; reccommend stopping the process first. Do you still want to force quit and risk losing data?", "Be careful! Forcefully quit?", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+                if (userQuit == DialogResult.Yes)
+                {
+                    parseIsRunning = false;
+                    statusTextBox.Clear();
+                    statusTextBox.AppendText("Stop requested, ending thread...");
+                    recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
+                    _waitHandleDatabase.Set();      //pings the parser thread to release the lock
+                    dbLoggingThread.CancelAsync(); //requests cancellation of the database thread
+                    _waitHandleParser.Set();
+                    e.Cancel = false;               //event shouldn't be cancelled i.e. we want to close the app
+                }
+                else
+                {
+                    //DO NOT close the app, return to caller
+                    e.Cancel = true;
+                    return;
+                }
+            }
+            else
+            {
+                userQuit = MessageBox.Show("Close the program?", "Are you sure?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (userQuit != DialogResult.Yes)
+                {
+                    //tells the form caller we DO NOT want to close the app
+                    e.Cancel = true;
+                    return;
+                }
+            }
 
 
+        }
+        #endregion
     }
+
+
 }
+    
+
+
