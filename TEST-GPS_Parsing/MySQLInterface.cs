@@ -11,8 +11,6 @@ namespace TEST_GPS_Parsing
 {
     class MySQLInterface
     {
-        string dbPassword = "";
-        string dbUsername = "";
         string dbName = "";
         MySqlConnection conn;
         MySqlDataReader rdr;
@@ -23,12 +21,9 @@ namespace TEST_GPS_Parsing
         string sql;
 
         //connect to the database file
-        public void loginProcess()
+        public void loginProcess(string dbUsername, string dbPassword)
         {
-            dbUsername = "root"; /*usernameTextbox.Text;*/
-            dbPassword = "W1nd0w5L1v3//";/*passwordTextbox.Text;*/
             dbName = "dbtest";
-
             string connStr = "server=localhost;user=" + dbUsername + ";database=" + dbName +";port=3306;password=" + dbPassword + ";";
             conn = new MySqlConnection(connStr);
 
@@ -37,9 +32,10 @@ namespace TEST_GPS_Parsing
                 Console.WriteLine("Connecting to MySQL...");
                 conn.Open();
             }
-            catch (Exception ex)
+            catch (Exception open_ex)
             {
-                Console.WriteLine(ex.ToString());
+                Console.WriteLine(open_ex.ToString());
+                throw open_ex;
             }
             Console.WriteLine("Done.");
         }
@@ -102,44 +98,53 @@ namespace TEST_GPS_Parsing
         //insert the data into the table
         public void populateDbFieldsGPS(GPSPacket gpsDataForDB)
         {
-            //check where to append from - if table data already exists
-            sql = "SELECT COUNT(*) FROM gpsData";
-            cmd = new MySqlCommand(sql, conn);
-            result = cmd.ExecuteScalar();
-            if (result != null)
+            try
             {
-                r = Convert.ToInt32(result);
+                //check where to append from - if table data already exists
+                sql = "SELECT COUNT(*) FROM gpsData";
+                cmd = new MySqlCommand(sql, conn);
+                result = cmd.ExecuteScalar();
+                if (result != null)
+                {
+                    r = Convert.ToInt32(result);
+                }
+                else
+                {
+                    r = 1;
+                }
+
+                //append to the table if already existing
+                result = null;
+
+                //test writing new tables
+
+                sql = @"insert into gpsData values("
+                + (r++) + ","                               //this is the overall DB ID
+                + gpsDataForDB.ID + ",'"                 //note this ID is the packet per session
+                + gpsDataForDB.date + "','"
+                + gpsDataForDB.time + "','"
+                + gpsDataForDB.latitude + "','"
+                + gpsDataForDB.longitude + "','"
+                + gpsDataForDB.grspd_k + "','"
+                + gpsDataForDB.grspd_kph + "','"
+                + gpsDataForDB.altitude + "','"
+                + gpsDataForDB.cardAngle + "','"
+                + gpsDataForDB.trkangle + "','"
+                + gpsDataForDB.accuracy + "','"
+                + gpsDataForDB.fixtype_f + "','"
+                + gpsDataForDB.fixqual_f + "','"
+                + gpsDataForDB.numsats + "','"
+                + gpsDataForDB.checksumResultStatusForDisplay +
+                "');";
+
+                cmd = new MySqlCommand(sql, conn);
+                result = cmd.ExecuteScalar();
             }
-            else
+            catch (Exception ex)
             {
-                r = 2;
+                throw ex;
             }
 
-            //append to the table if already existing
-            result = null;
-            //test writing new tables
-
-            sql = @"insert into gpsData values("
-            + (r + gpsDataForDB.ID) + ","                               //this is the overall DB ID
-            + gpsDataForDB.ID + ",'"                 //note this ID is the packet per session
-            + gpsDataForDB.date + "','" 
-            + gpsDataForDB.time + "','"
-            + gpsDataForDB.latitude + "','"
-            + gpsDataForDB.longitude + "','"
-            + gpsDataForDB.grspd_k + "','"
-            + gpsDataForDB.grspd_kph + "','"
-            + gpsDataForDB.altitude + "','"
-            + gpsDataForDB.cardAngle + "','"
-            + gpsDataForDB.trkangle + "','"
-            + gpsDataForDB.accuracy + "','"
-            + gpsDataForDB.fixtype_f + "','"
-            + gpsDataForDB.fixqual_f + "','"
-            + gpsDataForDB.numsats + "','"
-            + gpsDataForDB.checksumResultStatusForDisplay +
-            "');";
-
-            cmd = new MySqlCommand(sql, conn);
-            result = cmd.ExecuteScalar();
         }
 
         public void populateDbFieldsVideo(GPSPacket gpsDataDb, VideoOutputWindow voForDb)

@@ -109,15 +109,25 @@
             this.dbLoggingThread = new System.ComponentModel.BackgroundWorker();
             this.label23 = new System.Windows.Forms.Label();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
-            this.label25 = new System.Windows.Forms.Label();
-            this.mapPaneStatusTectBox = new System.Windows.Forms.TextBox();
             this.label24 = new System.Windows.Forms.Label();
             this.mapPane = new GMap.NET.WindowsForms.GMapControl();
-            this.label26 = new System.Windows.Forms.Label();
             this.label20 = new System.Windows.Forms.Label();
             this.label28 = new System.Windows.Forms.Label();
             this.label29 = new System.Windows.Forms.Label();
             this.dbSetupButton = new System.Windows.Forms.Button();
+            this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.label25 = new System.Windows.Forms.Label();
+            this.panel4 = new System.Windows.Forms.Panel();
+            this.label26 = new System.Windows.Forms.Label();
+            this.panel5 = new System.Windows.Forms.Panel();
+            this.dbUsernameTextbox = new System.Windows.Forms.TextBox();
+            this.dbPwdTextbox = new System.Windows.Forms.TextBox();
+            this.label30 = new System.Windows.Forms.Label();
+            this.label31 = new System.Windows.Forms.Label();
+            this.dbStatusTextbox = new System.Windows.Forms.TextBox();
+            this.dbLoggedOnLabel = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -127,6 +137,11 @@
             this.groupBox6.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.groupBox7.SuspendLayout();
+            this.groupBox8.SuspendLayout();
+            this.panel2.SuspendLayout();
+            this.panel3.SuspendLayout();
+            this.panel4.SuspendLayout();
+            this.panel5.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -525,7 +540,7 @@
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(446, 374);
+            this.startButton.Location = new System.Drawing.Point(77, 5);
             this.startButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(67, 28);
@@ -536,12 +551,12 @@
             // 
             // openFileButton
             // 
-            this.openFileButton.Location = new System.Drawing.Point(384, 296);
+            this.openFileButton.Location = new System.Drawing.Point(65, 4);
             this.openFileButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.openFileButton.Name = "openFileButton";
-            this.openFileButton.Size = new System.Drawing.Size(129, 32);
+            this.openFileButton.Size = new System.Drawing.Size(113, 32);
             this.openFileButton.TabIndex = 7;
-            this.openFileButton.Text = "Open NMEA Log";
+            this.openFileButton.Text = "Connect GPS ";
             this.openFileButton.UseVisualStyleBackColor = true;
             this.openFileButton.Click += new System.EventHandler(this.openFileButton_Click);
             // 
@@ -559,7 +574,7 @@
             // 
             this.label19.AutoSize = true;
             this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.Location = new System.Drawing.Point(341, 375);
+            this.label19.Location = new System.Drawing.Point(341, 429);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(26, 29);
             this.label19.TabIndex = 12;
@@ -573,11 +588,11 @@
             // groupBox5
             // 
             this.groupBox5.Controls.Add(this.rawLogFileTextBox);
-            this.groupBox5.Location = new System.Drawing.Point(13, 413);
+            this.groupBox5.Location = new System.Drawing.Point(13, 467);
             this.groupBox5.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.groupBox5.Size = new System.Drawing.Size(653, 155);
+            this.groupBox5.Size = new System.Drawing.Size(653, 101);
             this.groupBox5.TabIndex = 13;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Raw input logfile";
@@ -590,12 +605,12 @@
             this.rawLogFileTextBox.Name = "rawLogFileTextBox";
             this.rawLogFileTextBox.ReadOnly = true;
             this.rawLogFileTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.rawLogFileTextBox.Size = new System.Drawing.Size(635, 128);
+            this.rawLogFileTextBox.Size = new System.Drawing.Size(635, 82);
             this.rawLogFileTextBox.TabIndex = 0;
             // 
             // stopButton
             // 
-            this.stopButton.Location = new System.Drawing.Point(549, 373);
+            this.stopButton.Location = new System.Drawing.Point(194, 5);
             this.stopButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.stopButton.Name = "stopButton";
             this.stopButton.Size = new System.Drawing.Size(67, 29);
@@ -670,7 +685,7 @@
             // 
             // openVideoButton
             // 
-            this.openVideoButton.Location = new System.Drawing.Point(585, 300);
+            this.openVideoButton.Location = new System.Drawing.Point(17, 36);
             this.openVideoButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.openVideoButton.Name = "openVideoButton";
             this.openVideoButton.Size = new System.Drawing.Size(70, 54);
@@ -878,8 +893,6 @@
             // 
             // groupBox7
             // 
-            this.groupBox7.Controls.Add(this.label25);
-            this.groupBox7.Controls.Add(this.mapPaneStatusTectBox);
             this.groupBox7.Controls.Add(this.label24);
             this.groupBox7.Controls.Add(this.mapPane);
             this.groupBox7.Location = new System.Drawing.Point(680, 12);
@@ -888,23 +901,6 @@
             this.groupBox7.TabIndex = 20;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Map Location";
-            // 
-            // label25
-            // 
-            this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(320, 20);
-            this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(52, 17);
-            this.label25.TabIndex = 16;
-            this.label25.Text = "Status:";
-            // 
-            // mapPaneStatusTectBox
-            // 
-            this.mapPaneStatusTectBox.Location = new System.Drawing.Point(374, 18);
-            this.mapPaneStatusTectBox.Name = "mapPaneStatusTectBox";
-            this.mapPaneStatusTectBox.ReadOnly = true;
-            this.mapPaneStatusTectBox.Size = new System.Drawing.Size(246, 22);
-            this.mapPaneStatusTectBox.TabIndex = 15;
             // 
             // label24
             // 
@@ -940,21 +936,11 @@
             this.mapPane.TabIndex = 0;
             this.mapPane.Zoom = 10D;
             // 
-            // label26
-            // 
-            this.label26.AutoSize = true;
-            this.label26.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label26.Location = new System.Drawing.Point(524, 310);
-            this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(55, 29);
-            this.label26.TabIndex = 21;
-            this.label26.Text = "OR:";
-            // 
             // label20
             // 
             this.label20.AutoSize = true;
             this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label20.Location = new System.Drawing.Point(524, 373);
+            this.label20.Location = new System.Drawing.Point(163, 5);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(20, 29);
             this.label20.TabIndex = 22;
@@ -964,7 +950,7 @@
             // 
             this.label28.AutoSize = true;
             this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label28.Location = new System.Drawing.Point(341, 337);
+            this.label28.Location = new System.Drawing.Point(342, 364);
             this.label28.Name = "label28";
             this.label28.Size = new System.Drawing.Size(26, 29);
             this.label28.TabIndex = 23;
@@ -973,7 +959,7 @@
             // label29
             // 
             this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(368, 380);
+            this.label29.Location = new System.Drawing.Point(10, 11);
             this.label29.Name = "label29";
             this.label29.Size = new System.Drawing.Size(63, 17);
             this.label29.TabIndex = 24;
@@ -981,35 +967,161 @@
             // 
             // dbSetupButton
             // 
-            this.dbSetupButton.Location = new System.Drawing.Point(384, 335);
+            this.dbSetupButton.Location = new System.Drawing.Point(118, 29);
             this.dbSetupButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dbSetupButton.Name = "dbSetupButton";
-            this.dbSetupButton.Size = new System.Drawing.Size(129, 32);
+            this.dbSetupButton.Size = new System.Drawing.Size(61, 32);
             this.dbSetupButton.TabIndex = 25;
-            this.dbSetupButton.Text = "Database Setup";
+            this.dbSetupButton.Text = "Logon";
             this.dbSetupButton.UseVisualStyleBackColor = true;
             this.dbSetupButton.Click += new System.EventHandler(this.dbSetupButton_Click);
+            // 
+            // groupBox8
+            // 
+            this.groupBox8.Controls.Add(this.dbStatusTextbox);
+            this.groupBox8.Location = new System.Drawing.Point(13, 410);
+            this.groupBox8.Name = "groupBox8";
+            this.groupBox8.Size = new System.Drawing.Size(324, 53);
+            this.groupBox8.TabIndex = 26;
+            this.groupBox8.TabStop = false;
+            this.groupBox8.Text = "Database Status";
+            // 
+            // panel2
+            // 
+            this.panel2.BackColor = System.Drawing.Color.SpringGreen;
+            this.panel2.Controls.Add(this.label29);
+            this.panel2.Controls.Add(this.startButton);
+            this.panel2.Controls.Add(this.label20);
+            this.panel2.Controls.Add(this.stopButton);
+            this.panel2.Location = new System.Drawing.Point(373, 424);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(288, 39);
+            this.panel2.TabIndex = 27;
+            // 
+            // panel3
+            // 
+            this.panel3.BackColor = System.Drawing.Color.Gold;
+            this.panel3.Controls.Add(this.label25);
+            this.panel3.Controls.Add(this.openVideoButton);
+            this.panel3.Location = new System.Drawing.Point(563, 317);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(99, 99);
+            this.panel3.TabIndex = 28;
+            // 
+            // label25
+            // 
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(1, 5);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(97, 17);
+            this.label25.TabIndex = 25;
+            this.label25.Text = "Activate Cams";
+            // 
+            // panel4
+            // 
+            this.panel4.BackColor = System.Drawing.Color.SkyBlue;
+            this.panel4.Controls.Add(this.label26);
+            this.panel4.Controls.Add(this.openFileButton);
+            this.panel4.Location = new System.Drawing.Point(373, 290);
+            this.panel4.Name = "panel4";
+            this.panel4.Size = new System.Drawing.Size(184, 43);
+            this.panel4.TabIndex = 29;
+            // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Location = new System.Drawing.Point(13, 10);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(49, 17);
+            this.label26.TabIndex = 8;
+            this.label26.Text = "Setup:";
+            // 
+            // panel5
+            // 
+            this.panel5.BackColor = System.Drawing.Color.LawnGreen;
+            this.panel5.Controls.Add(this.dbLoggedOnLabel);
+            this.panel5.Controls.Add(this.label31);
+            this.panel5.Controls.Add(this.dbPwdTextbox);
+            this.panel5.Controls.Add(this.dbUsernameTextbox);
+            this.panel5.Controls.Add(this.dbSetupButton);
+            this.panel5.Location = new System.Drawing.Point(373, 340);
+            this.panel5.Name = "panel5";
+            this.panel5.Size = new System.Drawing.Size(184, 78);
+            this.panel5.TabIndex = 30;
+            // 
+            // dbUsernameTextbox
+            // 
+            this.dbUsernameTextbox.Location = new System.Drawing.Point(8, 23);
+            this.dbUsernameTextbox.Name = "dbUsernameTextbox";
+            this.dbUsernameTextbox.Size = new System.Drawing.Size(100, 22);
+            this.dbUsernameTextbox.TabIndex = 26;
+            this.dbUsernameTextbox.Text = "DB Username";
+            this.dbUsernameTextbox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.dbUsernameTextbox_MouseClick);
+            // 
+            // dbPwdTextbox
+            // 
+            this.dbPwdTextbox.Location = new System.Drawing.Point(8, 51);
+            this.dbPwdTextbox.Name = "dbPwdTextbox";
+            this.dbPwdTextbox.Size = new System.Drawing.Size(100, 22);
+            this.dbPwdTextbox.TabIndex = 27;
+            this.dbPwdTextbox.Text = "password";
+            this.dbPwdTextbox.UseSystemPasswordChar = true;
+            this.dbPwdTextbox.TextChanged += new System.EventHandler(this.dbPwdTextbox_TextChanged);
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label30.Location = new System.Drawing.Point(601, 284);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(26, 29);
+            this.label30.TabIndex = 31;
+            this.label30.Text = "4";
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(43, 3);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(114, 17);
+            this.label31.TabIndex = 9;
+            this.label31.Text = "Database Setup:";
+            // 
+            // dbStatusTextbox
+            // 
+            this.dbStatusTextbox.Location = new System.Drawing.Point(8, 22);
+            this.dbStatusTextbox.Name = "dbStatusTextbox";
+            this.dbStatusTextbox.ReadOnly = true;
+            this.dbStatusTextbox.Size = new System.Drawing.Size(306, 22);
+            this.dbStatusTextbox.TabIndex = 4;
+            // 
+            // dbLoggedOnLabel
+            // 
+            this.dbLoggedOnLabel.AutoSize = true;
+            this.dbLoggedOnLabel.Location = new System.Drawing.Point(5, 38);
+            this.dbLoggedOnLabel.Name = "dbLoggedOnLabel";
+            this.dbLoggedOnLabel.Size = new System.Drawing.Size(176, 17);
+            this.dbLoggedOnLabel.TabIndex = 28;
+            this.dbLoggedOnLabel.Text = "DB logged on this session.";
             // 
             // GPSParser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1318, 598);
-            this.Controls.Add(this.dbSetupButton);
-            this.Controls.Add(this.label29);
+            this.Controls.Add(this.label30);
+            this.Controls.Add(this.panel5);
+            this.Controls.Add(this.panel4);
+            this.Controls.Add(this.panel3);
+            this.Controls.Add(this.panel2);
+            this.Controls.Add(this.groupBox8);
             this.Controls.Add(this.label28);
-            this.Controls.Add(this.label20);
-            this.Controls.Add(this.label26);
-            this.Controls.Add(this.stopButton);
-            this.Controls.Add(this.openVideoButton);
             this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.label23);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.label19);
             this.Controls.Add(this.label18);
-            this.Controls.Add(this.openFileButton);
-            this.Controls.Add(this.startButton);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -1039,6 +1151,16 @@
             this.menuStrip1.PerformLayout();
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
+            this.groupBox8.ResumeLayout(false);
+            this.groupBox8.PerformLayout();
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
+            this.panel3.ResumeLayout(false);
+            this.panel3.PerformLayout();
+            this.panel4.ResumeLayout(false);
+            this.panel4.PerformLayout();
+            this.panel5.ResumeLayout(false);
+            this.panel5.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1125,15 +1247,25 @@
         private System.Windows.Forms.ToolStripMenuItem googleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openStreetMapsToolStripMenuItem;
-        private System.Windows.Forms.Label label25;
-        private System.Windows.Forms.TextBox mapPaneStatusTectBox;
-        private System.Windows.Forms.Label label26;
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.TextBox checksumTextbox;
         private System.Windows.Forms.Label label27;
         private System.Windows.Forms.Label label28;
         private System.Windows.Forms.Label label29;
         private System.Windows.Forms.Button dbSetupButton;
+        private System.Windows.Forms.GroupBox groupBox8;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.Label label25;
+        private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.Panel panel5;
+        private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.TextBox dbPwdTextbox;
+        private System.Windows.Forms.TextBox dbUsernameTextbox;
+        private System.Windows.Forms.Label label30;
+        private System.Windows.Forms.TextBox dbStatusTextbox;
+        private System.Windows.Forms.Label dbLoggedOnLabel;
     }
 }
 

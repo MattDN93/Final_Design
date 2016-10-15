@@ -124,6 +124,10 @@ namespace TEST_GPS_Parsing
             //openLogDialog = new OpenFileDialog();     //create new instance of the openFileDialog object
             startButton.Enabled = false;
             stopButton.Enabled = false;
+            dbSetupButton.Enabled = false;
+            dbUsernameTextbox.Enabled = false;
+            dbPwdTextbox.Enabled = false;
+            dbLoggedOnLabel.Visible = false;
             statusTextBox.BackColor = System.Drawing.Color.LemonChiffon;
             statusTextBox.AppendText("Ready. Click the button to open a file.");
         }
@@ -132,15 +136,38 @@ namespace TEST_GPS_Parsing
         #region Main User Button Interaction
         private void dbSetupButton_Click(object sender, EventArgs e)
         {
+            dbSetupButton.Enabled = true;
+            
             sqlDb = new MySQLInterface();
-            sqlDb.loginProcess();
+            try
+            {
+                //try logon to the DB with the user credentials
+                sqlDb.loginProcess(dbUsernameTextbox.Text, dbPwdTextbox.Text);
+                dbSetupButton.Enabled = false;
+                dbStatusTextbox.BackColor = System.Drawing.Color.LawnGreen;
+                dbStatusTextbox.Text = "Logged onto DB OK - Ready!";
+                //remove the logon details for this session since it'll stay logged in
+                dbPwdTextbox.Visible = false;
+                dbUsernameTextbox.Visible = false;
+                dbSetupButton.Visible = false;
+                dbLoggedOnLabel.Visible = true;
+            }
+            catch (Exception open_ex)
+            {
+                dbStatusTextbox.BackColor = System.Drawing.Color.PaleVioletRed;
+                dbStatusTextbox.Text = open_ex.Message.ToString();
+            }
+            
         }
 
 
         private void openFileButton_Click(object sender, EventArgs e)
         {
-                //open the dialog
-                openLogDialog.ShowDialog();   
+            //open the dialog
+            openLogDialog.ShowDialog();
+            dbSetupButton.Enabled = true;
+            dbUsernameTextbox.Enabled = true;
+            dbPwdTextbox.Enabled = true;
         }
 
         private void openLogDialog_FileOk(object sender, CancelEventArgs e)
@@ -507,7 +534,7 @@ namespace TEST_GPS_Parsing
                         //New SQL Database call to update the database
                         bool writeCompleteSQL = writeToDabataseSQL(gpsData);
 
-                        while (/*!writeComplete ||*/ !writeCompleteSQL)
+                        while (!writeCompleteSQL)
                         {
                             Console.WriteLine("Writing to DB...");
                         }
@@ -548,7 +575,14 @@ namespace TEST_GPS_Parsing
             if (duplicatePacketCounter != gpsDataForDB.packetID)
             {
                 duplicatePacketCounter++;
-                sqlDb.populateDbFieldsGPS(gpsDataForDB);
+                try
+                {
+                    sqlDb.populateDbFieldsGPS(gpsDataForDB);
+                }
+                catch (Exception)
+                {
+                    return true;
+                }
 
                 return true;
             }
@@ -646,6 +680,23 @@ namespace TEST_GPS_Parsing
         private void trayIconParsing_MouseDoubleClick(object sender, MouseEventArgs e)
         {
 
+        }
+
+        private void dbUsernameTextbox_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (dbUsernameTextbox.Text == "DB Username")
+            {
+                dbUsernameTextbox.Clear();
+            }
+
+        }
+
+        private void dbPwdTextbox_TextChanged(object sender, EventArgs e)
+        {
+            if (dbPwdTextbox.Text == "password")
+            {
+                dbPwdTextbox.Clear();
+            }
         }
 
         //ToolStrip Methods - to enable or disable the database or other settings---------------------------------
@@ -858,6 +909,7 @@ namespace TEST_GPS_Parsing
 
         }
         #endregion
+
 
     }
 

@@ -175,8 +175,8 @@ namespace TEST_GPS_Parsing
 
             if (sentenceBuffer.Contains("GPRMC")) //We assume that each "packet" of sentences begins with a GPRMC hence update the packet ID each time a GPRMC is found!
             {
-                updatedGpsData.ID = packetID;
                 packetID++;
+                updatedGpsData.ID = packetID;              
                 updatedGpsData = parseGPRMC(sentenceBuffer, gpsData);
                 updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 0);    //checksum compute with GPRMC
 
