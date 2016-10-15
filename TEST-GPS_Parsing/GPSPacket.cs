@@ -45,6 +45,7 @@ namespace TEST_GPS_Parsing
         public string checksumGPRMC;
         public string checksumGPVTG;
         public string checksumGPGGA;
+        public string checksumResultStatusForDisplay;
 
         //Default constructor
         public GPSPacket()
@@ -74,6 +75,7 @@ namespace TEST_GPS_Parsing
             checksumGPRMC = "";
             checksumGPGGA = "";
             checksumGPVTG = "";
+            checksumResultStatusForDisplay = "";
         }
 
         //function to return friendly string from flags

@@ -134,6 +134,8 @@ namespace TEST_GPS_Parsing
             addToDb.WriteElementString("FixQuality", gpsDataForDB.fixqual_f);
             addToDb.WriteElementString("NumSats", gpsDataForDB.numsats);
 
+            addToDb.WriteElementString("ChecksumResult",gpsDataForDB.checksumResultStatusForDisplay);
+
             addToDb.WriteEndElement();              //end Packet
             addToDb.Flush();
 
