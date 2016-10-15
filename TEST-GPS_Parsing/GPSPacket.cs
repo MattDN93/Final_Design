@@ -40,9 +40,11 @@ namespace TEST_GPS_Parsing
         //friendly status flags return
         public string fixtype_f;
         public string fixqual_f;
-        
+
         //checksum for integrity
-        public checksum;
+        public string checksumGPRMC;
+        public string checksumGPVTG;
+        public string checksumGPGGA;
 
         //Default constructor
         public GPSPacket()
@@ -69,7 +71,9 @@ namespace TEST_GPS_Parsing
             //friendly status flags return
             fixtype_f = "";
             fixqual_f = "";
-            checksum = "";
+            checksumGPRMC = "";
+            checksumGPGGA = "";
+            checksumGPVTG = "";
         }
 
         //function to return friendly string from flags
@@ -110,8 +114,9 @@ namespace TEST_GPS_Parsing
         }
         
         //Make sure the checksum is correct by generating a checksum from the string and comparing
-        private static string getChecksum(string sentence)
+        public GPSPacket getChecksum(string sentence, GPSPacket updatedGpsData, int sentenceType)
         {
+          string checksum = "", checksumStr = "";
           //Start with first Item
           int checksumCalc= Convert.ToByte(sentence[sentence.IndexOf('$')+1]);
           // Loop through all chars to get a checksum
@@ -120,13 +125,38 @@ namespace TEST_GPS_Parsing
             // No. XOR the checksum with this character's value
             checksumCalc^=Convert.ToByte(sentence[i]);              
           }
-          // Return the checksum formatted as a two-character hexadecimal
-          if (checksumCalc.ToString() == checksum)
+          //convert the integer value to a 2-digit hex (in string representation)
+            checksumStr = checksumCalc.ToString("X2");
+            switch (sentenceType)
+            {
+                //case 0 = GPRMC
+                case 0: checksum = checksumGPRMC; break;
+                case 1: checksum = checksumGPGGA; break;
+                case 2: checksum = checksumGPVTG; break;
+                default:
+                    break;
+            }
+
+            // Check what was parsed from the NMEA string and compare to the raw calculation
+            if (checksumStr == checksum)
           {
-              return true;
+                //checksum passed, return object
+              return updatedGpsData;
           }else 
           {
-              return false;
+                //the checksum has failed, note that in the field
+                switch (sentenceType)
+                {
+                    //case 0 = GPRMC
+                    case 0: checksumGPRMC = "FAIL"; break;
+                    //case 1 = GPGGA
+                    case 1: checksumGPGGA = "FAIL"; break;
+                    //case 2 = GTVTG
+                    case 2: checksumGPVTG = "FAIL"; break;
+                    default:
+                        break;
+                }
+                return updatedGpsData;
           }
 
         }
@@ -146,6 +176,7 @@ namespace TEST_GPS_Parsing
                 updatedGpsData.ID = packetID;
                 packetID++;
                 updatedGpsData = parseGPRMC(sentenceBuffer, gpsData);
+                updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 0);    //checksum compute with GPRMC
 
                 //do some last-minute formatting to the fields based on known issues
                 updatedGpsData.date = updatedGpsData.date.TrimEnd('/'); //remove trailing "/"
@@ -170,11 +201,13 @@ namespace TEST_GPS_Parsing
             else if (sentenceBuffer.Contains("GPGGA"))
             {
                 updatedGpsData = parseGPGGA(sentenceBuffer, gpsData);
+                updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 1);    //checksum compute with GPGGA
                 return updatedGpsData;
             }
             else if (sentenceBuffer.Contains("GPVTG"))
             {
                 updatedGpsData = parseGPVTG(sentenceBuffer, gpsData);
+                updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 2);    //checksum compute with GPVTG
                 //trim off leading zeroes from the speed
                 if (updatedGpsData.grspd_kph.StartsWith("0"))
                 {
@@ -298,10 +331,18 @@ namespace TEST_GPS_Parsing
                                 gpsData.grspd_kph = subField; //parse double to a string for display
                             }
                             break;
+
                         default: break;
                     }
                 }
+                else 
+                {
+                    break;
+                }
             }
+            //after the asterisk there's a few chars of checksum
+            //checksum is the first char after the asterisk to the end
+            checksumGPVTG = sentenceBuffer.Substring(sentenceBuffer.IndexOf('*') + 1);
             return gpsData;
         }
 
@@ -357,7 +398,15 @@ namespace TEST_GPS_Parsing
                         default: break;
                     }
                 }
+                else
+                {
+                    break;
+                }
+
             }
+            //after the asterisk there's a few chars of checksum
+            //checksum is the first char after the asterisk to the end
+            checksumGPGGA = sentenceBuffer.Substring(sentenceBuffer.IndexOf('*') + 1);
             return gpsData;
         }
 
@@ -475,7 +524,9 @@ namespace TEST_GPS_Parsing
                 }
 
             }
-
+            //after the asterisk there's a few chars of checksum
+            //checksum is the first char after the asterisk to the end
+            checksumGPRMC = sentenceBuffer.Substring(sentenceBuffer.IndexOf('*') + 1);
             //return completed packet
             return gpsData;
 

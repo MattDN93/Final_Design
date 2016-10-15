@@ -113,6 +113,8 @@
             this.mapPane = new GMap.NET.WindowsForms.GMapControl();
             this.label26 = new System.Windows.Forms.Label();
             this.label20 = new System.Windows.Forms.Label();
+            this.label27 = new System.Windows.Forms.Label();
+            this.checksumTextbox = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -568,24 +570,24 @@
             // groupBox5
             // 
             this.groupBox5.Controls.Add(this.rawLogFileTextBox);
-            this.groupBox5.Location = new System.Drawing.Point(14, 388);
+            this.groupBox5.Location = new System.Drawing.Point(13, 413);
             this.groupBox5.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.groupBox5.Size = new System.Drawing.Size(653, 174);
+            this.groupBox5.Size = new System.Drawing.Size(653, 155);
             this.groupBox5.TabIndex = 13;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Raw input logfile";
             // 
             // rawLogFileTextBox
             // 
-            this.rawLogFileTextBox.Location = new System.Drawing.Point(9, 22);
+            this.rawLogFileTextBox.Location = new System.Drawing.Point(7, 19);
             this.rawLogFileTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.rawLogFileTextBox.Multiline = true;
             this.rawLogFileTextBox.Name = "rawLogFileTextBox";
             this.rawLogFileTextBox.ReadOnly = true;
             this.rawLogFileTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.rawLogFileTextBox.Size = new System.Drawing.Size(635, 146);
+            this.rawLogFileTextBox.Size = new System.Drawing.Size(635, 128);
             this.rawLogFileTextBox.TabIndex = 0;
             // 
             // stopButton
@@ -615,13 +617,15 @@
             // 
             // groupBox6
             // 
+            this.groupBox6.Controls.Add(this.checksumTextbox);
+            this.groupBox6.Controls.Add(this.label27);
             this.groupBox6.Controls.Add(this.status2TextBox);
             this.groupBox6.Controls.Add(this.statusTextBox);
             this.groupBox6.Location = new System.Drawing.Point(13, 292);
             this.groupBox6.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox6.Size = new System.Drawing.Size(324, 86);
+            this.groupBox6.Size = new System.Drawing.Size(324, 115);
             this.groupBox6.TabIndex = 16;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Status";
@@ -936,6 +940,23 @@
             this.label20.TabIndex = 22;
             this.label20.Text = "/";
             // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(9, 88);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(116, 17);
+            this.label27.TabIndex = 2;
+            this.label27.Text = "Checksum result:";
+            // 
+            // checksumTextbox
+            // 
+            this.checksumTextbox.Location = new System.Drawing.Point(125, 86);
+            this.checksumTextbox.Name = "checksumTextbox";
+            this.checksumTextbox.ReadOnly = true;
+            this.checksumTextbox.Size = new System.Drawing.Size(189, 22);
+            this.checksumTextbox.TabIndex = 3;
+            // 
             // GPSParser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -1072,6 +1093,8 @@
         private System.Windows.Forms.TextBox mapPaneStatusTectBox;
         private System.Windows.Forms.Label label26;
         private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.TextBox checksumTextbox;
+        private System.Windows.Forms.Label label27;
     }
 }
 

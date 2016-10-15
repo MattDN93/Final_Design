@@ -16,7 +16,7 @@ namespace TEST_GPS_Parsing
     {
         #region Initialization and Vars
         //*********THIS VAR IS FOR TESTING FEATURES, set to false for debug features off
-        bool debug = true;
+        bool debug = false;
         //*************************************
         public string inputLogFilename;
         bool dbLoggingActive = true;
@@ -42,12 +42,11 @@ namespace TEST_GPS_Parsing
         GMapOverlay locationMarkersOverlay;           //overlay for the location markers on map
         VideoOutputWindow vo;                         //object for the video output window
 
-
-
         string sentenceBuffer;                        //global buffer to read incoming data used for parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
         int duplicatePacketCounter = 1;                     //used to ensure duplicate packets aren't saved into the DB
+        string checksumResultStatusForDisplay;
 
         public bool newLogEveryStart { get; private set; }
 
@@ -249,6 +248,29 @@ namespace TEST_GPS_Parsing
                     statusTextBox.BackColor = System.Drawing.Color.Orange;
                     statusTextBox.Text = "Warning: Video capture not set up yet!";
                 }
+
+                //check if any checksum calcs have failed and set string to display on UI
+                if (gpsData.checksumGPGGA == "FAIL" || gpsData.checksumGPRMC == "FAIL" || gpsData.checksumGPVTG == "FAIL")
+                {
+                    checksumResultStatusForDisplay = "";
+                    if (gpsData.checksumGPGGA == "FAIL")
+                    {
+                        checksumResultStatusForDisplay += " GPGGA fail |";
+                    }
+                    if (gpsData.checksumGPRMC == "FAIL")
+                    {
+                        checksumResultStatusForDisplay += " GPRMC fail |";
+                    }
+                    if (gpsData.checksumGPVTG == "FAIL")
+                    {
+                        checksumResultStatusForDisplay += " GPGGA fail";
+                    }
+                }
+                else
+                {
+                    checksumResultStatusForDisplay = "";
+                    checksumResultStatusForDisplay = "Checksums OK";
+                }
             }
 
             //also check on status of database logging requirement
@@ -318,6 +340,10 @@ namespace TEST_GPS_Parsing
             timeTextBox.Clear();
             timeTextBox.AppendText(gpsDataForUI.time);
 
+            //show the status of the checksum calculation
+            checksumTextbox.Clear();
+            checksumTextbox.Text = checksumResultStatusForDisplay;
+
 
         }
         #endregion
@@ -352,9 +378,8 @@ namespace TEST_GPS_Parsing
                     //Checks if the resource is available 
                     Console.WriteLine("Parser has data-lock");
                     gpsData = gpsData.parseSelection(sentenceBuffer, gpsData);  //perform the parsing operation
-
                     mapData.parseLatLong(gpsData.latitude, gpsData.longitude);  //pass the data to the mapping method
-
+                    
                     count++;
 
                     //this allows for a thread-safe variable access
