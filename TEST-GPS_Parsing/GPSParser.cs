@@ -41,6 +41,7 @@ namespace TEST_GPS_Parsing
         Mapping mapData = new Mapping();              //set up a new mapping object for mapping function access
         GMapOverlay locationMarkersOverlay;           //overlay for the location markers on map
         VideoOutputWindow vo;                         //object for the video output window
+        MySQLInterface sqlDb;                           //MySQL database instance
 
         string sentenceBuffer;                        //global buffer to read incoming data used for parsing
         string rawBuffer;                             //not used for parsing , but for display only
@@ -129,6 +130,13 @@ namespace TEST_GPS_Parsing
         #endregion
 
         #region Main User Button Interaction
+        private void dbSetupButton_Click(object sender, EventArgs e)
+        {
+            sqlDb = new MySQLInterface();
+            sqlDb.loginProcess();
+        }
+
+
         private void openFileButton_Click(object sender, EventArgs e)
         {
                 //open the dialog
@@ -224,7 +232,7 @@ namespace TEST_GPS_Parsing
             //{
                 //CameraBoundsSetup cmBound = new CameraBoundsSetup(vo);
                 vo = new VideoOutputWindow();
-            videoOutputRunning = true; //used to inform the parser it can send co-ords to the video method now
+                videoOutputRunning = true; //used to inform the parser it can send co-ords to the video method now
                 vo.Show();
                 //DialogResult cmResult = cmBound.ShowDialog();
                 updateUITimer.Start();
@@ -494,8 +502,12 @@ namespace TEST_GPS_Parsing
 
                         //Once this line is passed we assume the lock was released so the db thread has lock on the data
                         Console.WriteLine("DB thread obtained write lock");
-                        bool writeComplete = writeToDatabase(myXmlDb, gpsData);
-                        while (!writeComplete)
+                        //bool writeComplete = writeToDatabase(myXmlDb, gpsData);
+
+                        //New SQL Database call to update the database
+                        bool writeCompleteSQL = writeToDabataseSQL(gpsData);
+
+                        while (/*!writeComplete ||*/ !writeCompleteSQL)
                         {
                             Console.WriteLine("Writing to DB...");
                         }
@@ -530,6 +542,18 @@ namespace TEST_GPS_Parsing
 
 
         //-------------------------DB update method---------------
+        private bool writeToDabataseSQL(GPSPacket gpsDataForDB)
+        {
+            //don't write semi-filled packets to the DB
+            if (duplicatePacketCounter != gpsDataForDB.packetID)
+            {
+                duplicatePacketCounter++;
+                sqlDb.populateDbFieldsGPS(gpsDataForDB);
+
+                return true;
+            }
+            return true;
+        }
 
         private bool writeToDatabase(XMLNodes myXmlDb, GPSPacket gpsDataForDB)
         {
@@ -834,6 +858,7 @@ namespace TEST_GPS_Parsing
 
         }
         #endregion
+
     }
 
 

@@ -80,6 +80,8 @@
             this.recvRawDataWorker = new System.ComponentModel.BackgroundWorker();
             this.updateUITimer = new System.Windows.Forms.Timer(this.components);
             this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.checksumTextbox = new System.Windows.Forms.TextBox();
+            this.label27 = new System.Windows.Forms.Label();
             this.status2TextBox = new System.Windows.Forms.TextBox();
             this.statusTextBox = new System.Windows.Forms.TextBox();
             this.openVideoButton = new System.Windows.Forms.Button();
@@ -113,8 +115,9 @@
             this.mapPane = new GMap.NET.WindowsForms.GMapControl();
             this.label26 = new System.Windows.Forms.Label();
             this.label20 = new System.Windows.Forms.Label();
-            this.label27 = new System.Windows.Forms.Label();
-            this.checksumTextbox = new System.Windows.Forms.TextBox();
+            this.label28 = new System.Windows.Forms.Label();
+            this.label29 = new System.Windows.Forms.Label();
+            this.dbSetupButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -522,7 +525,7 @@
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(367, 345);
+            this.startButton.Location = new System.Drawing.Point(446, 374);
             this.startButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(67, 28);
@@ -533,10 +536,10 @@
             // 
             // openFileButton
             // 
-            this.openFileButton.Location = new System.Drawing.Point(396, 291);
+            this.openFileButton.Location = new System.Drawing.Point(384, 296);
             this.openFileButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.openFileButton.Name = "openFileButton";
-            this.openFileButton.Size = new System.Drawing.Size(89, 50);
+            this.openFileButton.Size = new System.Drawing.Size(129, 32);
             this.openFileButton.TabIndex = 7;
             this.openFileButton.Text = "Open NMEA Log";
             this.openFileButton.UseVisualStyleBackColor = true;
@@ -546,7 +549,7 @@
             // 
             this.label18.AutoSize = true;
             this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label18.Location = new System.Drawing.Point(342, 303);
+            this.label18.Location = new System.Drawing.Point(342, 299);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(26, 29);
             this.label18.TabIndex = 11;
@@ -556,11 +559,11 @@
             // 
             this.label19.AutoSize = true;
             this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.Location = new System.Drawing.Point(341, 344);
+            this.label19.Location = new System.Drawing.Point(341, 375);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(26, 29);
             this.label19.TabIndex = 12;
-            this.label19.Text = "2";
+            this.label19.Text = "3";
             // 
             // openLogDialog
             // 
@@ -592,7 +595,7 @@
             // 
             // stopButton
             // 
-            this.stopButton.Location = new System.Drawing.Point(455, 344);
+            this.stopButton.Location = new System.Drawing.Point(549, 373);
             this.stopButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.stopButton.Name = "stopButton";
             this.stopButton.Size = new System.Drawing.Size(67, 29);
@@ -630,6 +633,23 @@
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Status";
             // 
+            // checksumTextbox
+            // 
+            this.checksumTextbox.Location = new System.Drawing.Point(125, 86);
+            this.checksumTextbox.Name = "checksumTextbox";
+            this.checksumTextbox.ReadOnly = true;
+            this.checksumTextbox.Size = new System.Drawing.Size(189, 22);
+            this.checksumTextbox.TabIndex = 3;
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(9, 88);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(116, 17);
+            this.label27.TabIndex = 2;
+            this.label27.Text = "Checksum result:";
+            // 
             // status2TextBox
             // 
             this.status2TextBox.Location = new System.Drawing.Point(9, 54);
@@ -650,7 +670,7 @@
             // 
             // openVideoButton
             // 
-            this.openVideoButton.Location = new System.Drawing.Point(581, 309);
+            this.openVideoButton.Location = new System.Drawing.Point(585, 300);
             this.openVideoButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.openVideoButton.Name = "openVideoButton";
             this.openVideoButton.Size = new System.Drawing.Size(70, 54);
@@ -924,7 +944,7 @@
             // 
             this.label26.AutoSize = true;
             this.label26.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label26.Location = new System.Drawing.Point(524, 322);
+            this.label26.Location = new System.Drawing.Point(524, 310);
             this.label26.Name = "label26";
             this.label26.Size = new System.Drawing.Size(55, 29);
             this.label26.TabIndex = 21;
@@ -934,34 +954,50 @@
             // 
             this.label20.AutoSize = true;
             this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label20.Location = new System.Drawing.Point(436, 344);
+            this.label20.Location = new System.Drawing.Point(524, 373);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(20, 29);
             this.label20.TabIndex = 22;
             this.label20.Text = "/";
             // 
-            // label27
+            // label28
             // 
-            this.label27.AutoSize = true;
-            this.label27.Location = new System.Drawing.Point(9, 88);
-            this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(116, 17);
-            this.label27.TabIndex = 2;
-            this.label27.Text = "Checksum result:";
+            this.label28.AutoSize = true;
+            this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label28.Location = new System.Drawing.Point(341, 337);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(26, 29);
+            this.label28.TabIndex = 23;
+            this.label28.Text = "2";
             // 
-            // checksumTextbox
+            // label29
             // 
-            this.checksumTextbox.Location = new System.Drawing.Point(125, 86);
-            this.checksumTextbox.Name = "checksumTextbox";
-            this.checksumTextbox.ReadOnly = true;
-            this.checksumTextbox.Size = new System.Drawing.Size(189, 22);
-            this.checksumTextbox.TabIndex = 3;
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(368, 380);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(63, 17);
+            this.label29.TabIndex = 24;
+            this.label29.Text = "Logging:";
+            // 
+            // dbSetupButton
+            // 
+            this.dbSetupButton.Location = new System.Drawing.Point(384, 335);
+            this.dbSetupButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.dbSetupButton.Name = "dbSetupButton";
+            this.dbSetupButton.Size = new System.Drawing.Size(129, 32);
+            this.dbSetupButton.TabIndex = 25;
+            this.dbSetupButton.Text = "Database Setup";
+            this.dbSetupButton.UseVisualStyleBackColor = true;
+            this.dbSetupButton.Click += new System.EventHandler(this.dbSetupButton_Click);
             // 
             // GPSParser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1318, 598);
+            this.Controls.Add(this.dbSetupButton);
+            this.Controls.Add(this.label29);
+            this.Controls.Add(this.label28);
             this.Controls.Add(this.label20);
             this.Controls.Add(this.label26);
             this.Controls.Add(this.stopButton);
@@ -1095,6 +1131,9 @@
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.TextBox checksumTextbox;
         private System.Windows.Forms.Label label27;
+        private System.Windows.Forms.Label label28;
+        private System.Windows.Forms.Label label29;
+        private System.Windows.Forms.Button dbSetupButton;
     }
 }
 
