@@ -77,6 +77,7 @@ namespace TEST_GPS_Parsing
         protected bool isStreaming;               //whether stream is in progress
         protected bool randomSim;                 //using random simulation mode or ordered
         protected bool valHasChanged;             //for updating the marker
+        bool vidLogWriteOK;                       //for signalling the video writer
 
         private System.Threading.Semaphore uiUpdateSemaphone = new Semaphore(1,3); //mutex lock to prevent UI update race conditions
         private Object uiWriteLock = new object();
@@ -281,20 +282,21 @@ namespace TEST_GPS_Parsing
 
                     if (returnVal == true)
                     {
-                        overlayVideoFramesBox.Image = ol_mark.overlayGrid;
-                        if (isStreaming)
+                       overlayVideoFramesBox.Image = ol_mark.overlayGrid;
+                        
+                        if (isStreaming && vidLogWriteOK)
                         {
+                            vidLogWriteOK = false;
                             try
                             {
                                 videoWriterOutput.Write(ol_mark.overlayGrid);         //write that frame to the video log file
                             }
                             catch (Exception e)
                             {
-                                MessageBox.Show(e.InnerException.ToString(),"Something Happened!",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                                MessageBox.Show(e.InnerException.ToString(), "Something Happened!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             }
-                            
+
                         }
-                       
                     }
                 }
 
@@ -525,6 +527,7 @@ namespace TEST_GPS_Parsing
         //checks to see if the camera (or any others) have been disconnected
         private void disconnectionTimeout_Tick(object sender, EventArgs e)
         {
+            vidLogWriteOK = true;
         //    if (isStreaming)
         //    {
         //        Mat testFrame1 = new Mat();

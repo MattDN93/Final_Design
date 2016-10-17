@@ -218,7 +218,7 @@
             // 
             this.overlayVideoFramesBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.overlayVideoFramesBox.Location = new System.Drawing.Point(265, 16);
-            this.overlayVideoFramesBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.overlayVideoFramesBox.Margin = new System.Windows.Forms.Padding(2);
             this.overlayVideoFramesBox.Name = "overlayVideoFramesBox";
             this.overlayVideoFramesBox.Size = new System.Drawing.Size(1141, 690);
             this.overlayVideoFramesBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -230,9 +230,9 @@
             this.groupBox2.Controls.Add(this.setupCaptureButton);
             this.groupBox2.Controls.Add(this.startCaptureButton);
             this.groupBox2.Location = new System.Drawing.Point(10, 10);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox2.Size = new System.Drawing.Size(221, 50);
             this.groupBox2.TabIndex = 6;
             this.groupBox2.TabStop = false;
@@ -264,9 +264,9 @@
             this.groupBox3.Controls.Add(this.label7);
             this.groupBox3.Controls.Add(this.label6);
             this.groupBox3.Location = new System.Drawing.Point(14, 186);
-            this.groupBox3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox3.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox3.Size = new System.Drawing.Size(217, 277);
             this.groupBox3.TabIndex = 7;
             this.groupBox3.TabStop = false;
@@ -409,9 +409,9 @@
             this.groupBox4.Controls.Add(this.latOORStatusBox);
             this.groupBox4.Controls.Add(this.status1TextBox);
             this.groupBox4.Location = new System.Drawing.Point(14, 466);
-            this.groupBox4.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox4.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox4.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox4.Size = new System.Drawing.Size(217, 94);
             this.groupBox4.TabIndex = 8;
             this.groupBox4.TabStop = false;
@@ -420,7 +420,7 @@
             // longOORTextBox
             // 
             this.longOORTextBox.Location = new System.Drawing.Point(4, 64);
-            this.longOORTextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.longOORTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.longOORTextBox.Name = "longOORTextBox";
             this.longOORTextBox.Size = new System.Drawing.Size(208, 20);
             this.longOORTextBox.TabIndex = 2;
@@ -428,7 +428,7 @@
             // latOORStatusBox
             // 
             this.latOORStatusBox.Location = new System.Drawing.Point(4, 40);
-            this.latOORStatusBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.latOORStatusBox.Margin = new System.Windows.Forms.Padding(2);
             this.latOORStatusBox.Name = "latOORStatusBox";
             this.latOORStatusBox.Size = new System.Drawing.Size(208, 20);
             this.latOORStatusBox.TabIndex = 1;
@@ -436,7 +436,7 @@
             // status1TextBox
             // 
             this.status1TextBox.Location = new System.Drawing.Point(6, 18);
-            this.status1TextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.status1TextBox.Margin = new System.Windows.Forms.Padding(2);
             this.status1TextBox.Name = "status1TextBox";
             this.status1TextBox.Size = new System.Drawing.Size(206, 20);
             this.status1TextBox.TabIndex = 0;
@@ -548,7 +548,6 @@
             // 
             // disconnectionTimeout
             // 
-            this.disconnectionTimeout.Interval = 5000;
             this.disconnectionTimeout.Tick += new System.EventHandler(this.disconnectionTimeout_Tick);
             // 
             // VideoOutputWindow
@@ -574,7 +573,7 @@
             this.Controls.Add(this.rawVideoFramesBox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "VideoOutputWindow";
             this.Text = "Video Capture Window";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.VideoOutputWindow_FormClosing);

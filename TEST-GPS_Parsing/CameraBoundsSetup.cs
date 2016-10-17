@@ -509,9 +509,9 @@ namespace TEST_GPS_Parsing
                     case 1: videoWriterOutput_CB = new VideoWriter(videoLogFilename_CB + ".wmv", VideoWriter.Fourcc('W', 'M', 'V', '3'), 20, new Size(640, 480), true); break;
                     case 2: videoWriterOutput_CB = new VideoWriter(videoLogFilename_CB + ".mpg", VideoWriter.Fourcc('D', 'I', 'V', 'X'), 20, new Size(640, 480), true); break;*/
                     default:
-                        videoWriterOutput_CB = new VideoWriter(videoLogFilename_CB + ".avi", //File name
+                        videoWriterOutput_CB = new VideoWriter(videoLogFilename_CB + ".mkv", //File name
                                         VideoWriter.Fourcc('M', 'P', '4', '2'), //Video format
-                                        20, //FPS
+                                        15, //FPS
                                         new Size(640,480), //frame size
                                         true); //Color
                         break;
