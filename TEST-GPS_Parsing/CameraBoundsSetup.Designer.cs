@@ -762,10 +762,9 @@
             this.videoFormatCombobox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.videoFormatCombobox.FormattingEnabled = true;
             this.videoFormatCombobox.Items.AddRange(new object[] {
-            "Random",
-            "Ordered",
-            "Tracking",
-            "Object-Based Tracking"});
+            "MPEG-4 (Cross-Platform)",
+            "WMV (Windows Media)",
+            "XVID (Open-Source)"});
             this.videoFormatCombobox.Location = new System.Drawing.Point(157, 90);
             this.videoFormatCombobox.Margin = new System.Windows.Forms.Padding(2);
             this.videoFormatCombobox.Name = "videoFormatCombobox";

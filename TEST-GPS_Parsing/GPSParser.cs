@@ -16,7 +16,7 @@ namespace TEST_GPS_Parsing
     {
         #region Initialization and Vars
         //*********THIS VAR IS FOR TESTING FEATURES, set to false for debug features off
-        bool debug = false;
+        bool debug = true;
         //*************************************
         public string inputLogFilename;
         bool dbLoggingActive = true;

@@ -8,6 +8,7 @@ using Emgu.CV.Structure;
 using Emgu.Util;
 using DirectShowLib;
 
+
 namespace TEST_GPS_Parsing
 {
     public partial class CameraBoundsSetup : Form
@@ -39,6 +40,10 @@ namespace TEST_GPS_Parsing
         public int drawMode_CB = -1;
         public string filenameToOpen_CB;
 
+        //The videoWriter object for storing the video written
+        public VideoWriter videoWriterOutput_CB;
+        public string videoLogFilename_CB;
+
         //-----------Capture Var Copies--------------------
         //public Capture cscCentre_CB;
         //public Capture cscLeft_CB;
@@ -51,7 +56,7 @@ namespace TEST_GPS_Parsing
         public double[] outerLimitCoords_CB = new double[2];      //[0] = longitude top right; [1] = latitude bottom left
 
         //==========END COPY OF VIDEO PARAMETERS=============
-        public static int totalCameraNumber_CB = 3;                 //edit this to change # cams
+        public static int totalCameraNumber_CB = 5;                 //edit this to change # cams
 
         //-------SIMULATION
         public static int DRAW_MODE_RANDOM = 0;
@@ -60,10 +65,10 @@ namespace TEST_GPS_Parsing
         public static int DRAW_MODE_REVOBJTRACK = 3;
 
         //-------flags for program readiness
-        bool coordsReady;
-        bool camTrackReady;
-        bool ipCamReady;
-
+        bool coordsReady;           //if the co-ordinates are entered & tracking mode selected
+        bool camTrackReady;         //if the local cams are ready
+        bool ipCamReady;            //if the IP cameras are ready
+        bool vidLogModeReady;       //if video logging format is selected
 
         public CameraBoundsSetup(VideoOutputWindow incoming_vo)
         {
@@ -71,29 +76,12 @@ namespace TEST_GPS_Parsing
            //--------------ORIGINAL CODE----------
             // camStreamCaptureArray_CB = new Capture[totalCameraNumber_CB];   //set up an array of capture objects
         }
-        #endregion 
+        #endregion
 
-        #region Form load and Verify Methods
-
-        private void CameraBoundsSetup_Load(object sender, EventArgs e)
+        #region Camera, Coords and Video Log Readiness
+        
+        private void cameraReadiness()
         {
-            //checkFieldsTimer = new Timer(); //instantiate the timer
-            checkFieldsTimer.Start();       //start the timer to check status of the entry of points
-            coordsReady = false;
-            camTrackReady = false;
-            ipCamReady = false;
-
-            //------------------TEST------------------
-            _SystemCameras_CB = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
-            camStreamCaptureArray_CB = new VideoOutputWindow.Video_Device[_SystemCameras_CB.Length];
-            //------------------END TEST--------------
-        }
-
-        private void checkFieldsTimer_Tick(object sender, EventArgs e)
-        {
-            //run the readiness check to enable/disable the start button
-            checkReadiness();
-
             //if user has chosen internal cameras, try to connect them automagically
             if (vidSourceChoiceComboBox.SelectedIndex == 1)
             {
@@ -133,7 +121,7 @@ namespace TEST_GPS_Parsing
             }
             else if (vidSourceChoiceComboBox.SelectedIndex == 2)
             {
-                
+
                 localOrIpCamInfoLabel.Text =
                     "IP cameras selected. Enter 3 IP addresses below and click 'Check Addresses'.\n Enter IP address only, the http:// is not needed.\n The status of the cameras will appear in the status pane.";
                 //IP camera initialisation takes place when the user presses the "check IP addresses" button.
@@ -151,20 +139,22 @@ namespace TEST_GPS_Parsing
             for (int i = 0; i < camStreamCaptureArray_CB.Length; i++)
             {
                 //if the video object isn't null and actually is a video (frame height >0) then update GUI appropriately
-                if (camStreamCaptureArray_CB[i].Device_Name !=null /*&&
+                if (camStreamCaptureArray_CB[i].Device_Name != null /*&&
                     camStreamCaptureArray_CB[i].GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0*/)
                 {
-                    camStatusTextbox.AppendText("Camera " + (i+1) + " [" + camStreamCaptureArray_CB[i].Device_Name + "]: Ready \n");
+                    camStatusTextbox.AppendText("Camera " + (i + 1) + " [" + camStreamCaptureArray_CB[i].Device_Name + "]: Ready \n");
                 }
                 else
                 {
-                    camStatusTextbox.AppendText("Camera " + (i+1) + ": Unavailable \n");
-                    camView2StatusTextBox.AppendText("Cam " + (i+1) + " not available | ");
+                    camStatusTextbox.AppendText("Camera " + (i + 1) + ": Unavailable \n");
+                    camView2StatusTextBox.AppendText("Cam " + (i + 1) + " not available | ");
                 }
             }
+        }
 
-            
-            if (longUpperLeftTextbox.Text == "" || latUpperLeftTextbox.Text == "" || latBottomLeftTextbox.Text == "" || longUpperRightTextbox.Text == "" )
+        private void coordinateReadiness()
+        {
+            if (longUpperLeftTextbox.Text == "" || latUpperLeftTextbox.Text == "" || latBottomLeftTextbox.Text == "" || longUpperRightTextbox.Text == "")
             {
                 camViewStatusTextBox.Clear();           //clears from last tick
                 camViewStatusTextBox.BackColor = Color.Orange;
@@ -215,6 +205,10 @@ namespace TEST_GPS_Parsing
             latUpperRightTextbox.Text = latUpperLeftTextbox.Text;
             longBottomLeftTextbox.Text = longUpperLeftTextbox.Text;
 
+        }
+
+        private void dropdownReadiness()
+        {
             //now check the status of the dropdowns
             if (drawModeChoiceComboBox.SelectedIndex == -1)
             {
@@ -224,7 +218,7 @@ namespace TEST_GPS_Parsing
             else
             {
                 drawModeChoiceComboBox.BackColor = Color.WhiteSmoke;
-            }  
+            }
             if (vidSourceChoiceComboBox.SelectedIndex == -1)
             {
                 vidSourceChoiceComboBox.BackColor = Color.Red;          //highlight missing selection
@@ -239,6 +233,40 @@ namespace TEST_GPS_Parsing
                 //allow capture to start & reset colouring
                 camTrackReady = true;
             }
+
+
+        }
+
+        #endregion
+
+        #region Form load and Verify Methods
+
+        private void CameraBoundsSetup_Load(object sender, EventArgs e)
+        {
+            //checkFieldsTimer = new Timer(); //instantiate the timer
+            checkFieldsTimer.Start();       //start the timer to check status of the entry of points
+            coordsReady = false;
+            camTrackReady = false;
+            ipCamReady = false;
+            vidLogModeReady = false;
+
+            //------------------TEST------------------
+            _SystemCameras_CB = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
+            camStreamCaptureArray_CB = new VideoOutputWindow.Video_Device[_SystemCameras_CB.Length];
+            //------------------END TEST--------------
+        }
+
+        private void checkFieldsTimer_Tick(object sender, EventArgs e)
+        {
+            //run the readiness check to enable/disable the start button
+            checkOverallReadiness();
+
+            cameraReadiness();          //check if cameras setup      
+                
+            dropdownReadiness();        //check all dropdown menus
+
+            coordinateReadiness();      //check coordinate fields
+
         }
         #endregion
 
@@ -373,7 +401,7 @@ namespace TEST_GPS_Parsing
 
         private void setExtentsButton_Click(object sender, EventArgs e)
         {
-            checkReadiness();
+            checkOverallReadiness();
 
                 //The index of draw mode defines the selected item. 0=Random 1=Ordered 2=Tracking 3=object tracking onscreen
                 switch (drawModeChoiceComboBox.SelectedIndex)
@@ -417,11 +445,11 @@ namespace TEST_GPS_Parsing
            
         }
 
-        private void checkReadiness()
+        private void checkOverallReadiness()
         {
             //if choosing internal cams & those aren't setup OR when choosing IP and THOSE aren't ready
             //disable the start button
-            if (coordsReady && 
+            if (coordsReady && vidLogModeReady &&
                 (vidSourceChoiceComboBox.SelectedIndex == 1 && camTrackReady)
                 ||
                 (vidSourceChoiceComboBox.SelectedIndex == 2 && ipCamReady)
@@ -431,7 +459,8 @@ namespace TEST_GPS_Parsing
             }
             else
             {
-                setExtentsButton.Enabled = false;            }
+                setExtentsButton.Enabled = false;
+            }
         }
 
         private void chooseVideoFileFialog_FileOk(object sender, CancelEventArgs e)
@@ -462,6 +491,33 @@ namespace TEST_GPS_Parsing
 
         private void videoFormatCombobox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            videoLogFilename_CB = "videoLogFile" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            if (videoFormatCombobox.SelectedIndex != -1)
+            {
+                switch (videoFormatCombobox.SelectedIndex)
+                {
+                    /*
+                     Invoke the writer to set up the codec:
+                     public VideoWriter(string fileName,int compressionCode,int fps,Size size,bool isColor)
+
+                    compressionCodes available for use 
+                    case 0 =  VideoWriter.Fourcc('M', 'P', 'G', '4')
+                    case 1 =  VideoWriter.Fourcc('W', 'M', 'V', '3')
+                    case 2 =  VideoWriter.Fourcc('D', 'I', 'V', 'X')
+                     */
+                    /*case 0: videoWriterOutput_CB = new VideoWriter(videoLogFilename_CB + ".mpg", VideoWriter.Fourcc('M', 'P', 'G', '4'), 20,new Size(640,480), true);break;                    
+                    case 1: videoWriterOutput_CB = new VideoWriter(videoLogFilename_CB + ".wmv", VideoWriter.Fourcc('W', 'M', 'V', '3'), 20, new Size(640, 480), true); break;
+                    case 2: videoWriterOutput_CB = new VideoWriter(videoLogFilename_CB + ".mpg", VideoWriter.Fourcc('D', 'I', 'V', 'X'), 20, new Size(640, 480), true); break;*/
+                    default:
+                        videoWriterOutput_CB = new VideoWriter(videoLogFilename_CB + ".avi", //File name
+                                        VideoWriter.Fourcc('M', 'P', '4', '2'), //Video format
+                                        20, //FPS
+                                        new Size(640,480), //frame size
+                                        true); //Color
+                        break;
+                }
+                vidLogModeReady = true;
+            }
 
         }
 

@@ -63,6 +63,9 @@ namespace TEST_GPS_Parsing
         //-----------------Capture setup object----------------
         public CameraBoundsSetup setup;                 //uninitialized cam bounds setup object
 
+        //-----------------Video writer object for logging----------------
+        public VideoWriter videoWriterOutput;
+        public string videoLogFilename;
 
         //-----------------User options and parameters---------
         public int captureChoice;              //user's selection of which capture to use
@@ -86,7 +89,7 @@ namespace TEST_GPS_Parsing
         //-----------------Camera GPS boundary variables--------
         //struct allows upperLeftBound & outerLimitBound to exist for all camera frames
         //Choose number of cameras below
-        public static int totalCameraNumber = 3;
+        public static int totalCameraNumber = 5;
 
         struct camBound     //struct for one camera
         {
@@ -122,23 +125,6 @@ namespace TEST_GPS_Parsing
         public static int DRAW_MODE_ORDERED = 1;
         public static int DRAW_MODE_TRACKING = 2;
         public static int DRAW_MODE_REVOBJTRACK = 3;
-
-        /*IMPORTANT - Semaphore for UI access
-            This semaphone maintains thread access to the variables on the video output screen
-            A thread enters with WaitOne(); if 
-             */
-        public Semaphore UiUpdateSemaphone
-        {
-            get
-            {
-                return UiUpdateSemaphone;
-            }
-
-            set
-            {
-                UiUpdateSemaphone = value;
-            }
-        }
 
         #endregion
 
@@ -189,6 +175,11 @@ namespace TEST_GPS_Parsing
                 captureChoice = setup.videoSource_CB;
                 fileName = setup.filenameToOpen_CB;
 
+                //---------get video writer properties------
+                videoLogFilename = setup.videoLogFilename_CB;
+                videoWriterOutput = setup.videoWriterOutput_CB;
+                Console.Write(videoWriterOutput.ToString());
+
                 //---------get capture objects---------
                 //get as many capture objects as cameras active
 
@@ -203,7 +194,7 @@ namespace TEST_GPS_Parsing
                 //----------------END TEST CODE----------------
 
                 //----------------ORIGINAL CODE----------------
-                //for (int i = 0; i < totalCameraNumber ; i++)
+                //for (int i = 0; i < totalCameraNumber; i++)
                 //{
                 //    camStreamCaptureArray[i] = setup.camStreamCaptureArray_CB[i];
                 //}
@@ -264,7 +255,6 @@ namespace TEST_GPS_Parsing
                         ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
                     }
                     
-
                     camStreamCapture.Retrieve(webcamVid, 0);    //grab a frame and store to webcamVid matrix
                     rawVideoFramesBox.Image = webcamVid;        //display on-screen
 
@@ -292,6 +282,19 @@ namespace TEST_GPS_Parsing
                     if (returnVal == true)
                     {
                         overlayVideoFramesBox.Image = ol_mark.overlayGrid;
+                        if (isStreaming)
+                        {
+                            try
+                            {
+                                videoWriterOutput.Write(ol_mark.overlayGrid);         //write that frame to the video log file
+                            }
+                            catch (Exception e)
+                            {
+                                MessageBox.Show(e.InnerException.ToString(),"Something Happened!",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                            }
+                            
+                        }
+                       
                     }
                 }
 
@@ -517,6 +520,23 @@ namespace TEST_GPS_Parsing
             }
             switchCase = 2;        //set back to "current"
             return activeCamLocal;
+        }
+
+        //checks to see if the camera (or any others) have been disconnected
+        private void disconnectionTimeout_Tick(object sender, EventArgs e)
+        {
+        //    if (isStreaming)
+        //    {
+        //        Mat testFrame1 = new Mat();
+        //        testFrame1 = camStreamCapture.QueryFrame();
+        //        Mat testFrame2 = new Mat(vidPixelHeight, vidPixelWidth, DepthType.Cv8U, 3);
+        //        testFrame2 = camStreamCapture.QueryFrame();
+        //        if (CvInvoke.Norm(testFrame1, testFrame2) == 0.0)
+        //        {
+        //            Console.Write("Connection Error on current camera!");
+        //        }
+        //    }
+
         }
 
         //This recalculates the incoming datapoints once every 500ms since GPS data only arrives that often
@@ -876,7 +896,8 @@ namespace TEST_GPS_Parsing
                 pausedCaptureLabel.Visible = true;
                 camStreamCapture.Pause();
                 ol_mark.clearScreen();      //remove the marker and lines off the screen.
-                    
+                disconnectionTimeout.Stop();        //pause the disconnection check timer
+                videoWriterOutput.Dispose();   
             }
             else
             {
@@ -885,6 +906,7 @@ namespace TEST_GPS_Parsing
                 setupInstructLabel.Visible = false;     //hide the setup instruction label
                 pausedCaptureLabel.Visible = false;     //hide the paused label (for if capture was already on)
                 setupCaptureButton.Enabled = false;     //don't allow settings to be changed during capture
+                disconnectionTimeout.Start();           //start the disconnection check timer
                 startCaptureButton.Text = "Stop Capture";
                 try
                 {
@@ -926,7 +948,8 @@ namespace TEST_GPS_Parsing
             //if (cscRight != null) { cscRight.Stop();  cscRight.Dispose(); }
             //if (cscCentre != null) { cscCentre.Stop();  cscCentre.Dispose(); }
             //rawVideoFramesBox.Dispose();
-                
+            disconnectionTimeout.Stop();
+            disconnectionTimeout.Dispose();    
         }
 
         private void getVideoInfo()            //get the video properties
@@ -954,6 +977,7 @@ namespace TEST_GPS_Parsing
             
             
         }
+
         #endregion
 
 
