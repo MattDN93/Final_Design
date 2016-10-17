@@ -154,7 +154,7 @@ namespace TEST_GPS_Parsing
                 if (camStreamCaptureArray_CB[i].Device_Name !=null /*&&
                     camStreamCaptureArray_CB[i].GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight) != 0*/)
                 {
-                    camStatusTextbox.AppendText("Camera " + (i+1) + ": Ready \n");
+                    camStatusTextbox.AppendText("Camera " + (i+1) + " [" + camStreamCaptureArray_CB[i].Device_Name + "]: Ready \n");
                 }
                 else
                 {
@@ -460,6 +460,11 @@ namespace TEST_GPS_Parsing
             this.Close();
         }
 
+        private void videoFormatCombobox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
         private void insertTestValues_Click(object sender, EventArgs e)
         {
             //Test Suite for co-ord checks - Howard College Traversal With Google Earth
@@ -563,6 +568,7 @@ namespace TEST_GPS_Parsing
         {
 
         }
+
 
         #endregion
 

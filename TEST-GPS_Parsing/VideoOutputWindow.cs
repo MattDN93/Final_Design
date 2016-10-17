@@ -44,22 +44,13 @@ namespace TEST_GPS_Parsing
                 Identifier = Identity;
             }
 
-            /// <summary>
-            /// Represent the Device as a String
-            /// </summary>
-            /// <returns>The string representation of this color</returns>
             public override string ToString()
             {
                 return String.Format("[{0}] {1}: {2}", Device_ID, Device_Name, Identifier);
             }
-        }
+        } 
 
         
-
-
-
-
-
         private Capture camStreamCapture = null;        //the current OpenCV capture stream
         //private Capture cscLeft = null;                  //left camera capture
         //private Capture cscRight = null;                 //right camera capture

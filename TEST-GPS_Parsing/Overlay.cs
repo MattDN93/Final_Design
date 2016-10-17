@@ -212,11 +212,14 @@ namespace TEST_GPS_Parsing
                 {
                     overlayGrid = webcamVidforOverlay.Clone();      //clone the incoming frame onto the overlay
                 }
-                
 
-                //write static text over video
+
+                //write timestamp text over video
+                string dateTimeDisplay = DateTime.Now.ToString();
                 //void putText(Mat& img, const string& text, Point org, int fontFace, double fontScale, new MCvScalar color, int thickness=1, int lineType=8, bool bottomLeftOrigin=false )
-                CvInvoke.PutText(overlayGrid, "Capture in progress. Press ESC to end.", new Point(10, 10), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(0, 0, 255), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
+                CvInvoke.PutText(overlayGrid, dateTimeDisplay , new Point(10, 10), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(0, 0, 255), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
+                //write camera number onscreen
+                
 
                 usingCoords = true;         //setting this to ensure the x & y values aren't touched by other thread. Bool setting is atomic
 

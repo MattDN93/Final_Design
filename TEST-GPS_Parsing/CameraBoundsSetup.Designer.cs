@@ -67,6 +67,7 @@
             this.drawModeChoiceComboBox = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.insertTestValues = new System.Windows.Forms.Button();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.label16 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
@@ -84,7 +85,9 @@
             this.longUpperLeftTextbox = new System.Windows.Forms.TextBox();
             this.coordsHelpLink = new System.Windows.Forms.LinkLabel();
             this.label1 = new System.Windows.Forms.Label();
-            this.insertTestValues = new System.Windows.Forms.Button();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.videoFormatCombobox = new System.Windows.Forms.ComboBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox8.SuspendLayout();
@@ -470,6 +473,9 @@
             this.groupBox7.BackColor = System.Drawing.Color.LemonChiffon;
             this.groupBox7.BackgroundImage = global::TEST_GPS_Parsing.Properties.Resources.tracking;
             this.groupBox7.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.groupBox7.Controls.Add(this.videoFormatCombobox);
+            this.groupBox7.Controls.Add(this.label11);
+            this.groupBox7.Controls.Add(this.label8);
             this.groupBox7.Controls.Add(this.label23);
             this.groupBox7.Controls.Add(this.drawModeChoiceComboBox);
             this.groupBox7.Controls.Add(this.label7);
@@ -501,7 +507,7 @@
             "Ordered",
             "Tracking",
             "Object-Based Tracking"});
-            this.drawModeChoiceComboBox.Location = new System.Drawing.Point(90, 38);
+            this.drawModeChoiceComboBox.Location = new System.Drawing.Point(157, 37);
             this.drawModeChoiceComboBox.Margin = new System.Windows.Forms.Padding(2);
             this.drawModeChoiceComboBox.Name = "drawModeChoiceComboBox";
             this.drawModeChoiceComboBox.Size = new System.Drawing.Size(129, 23);
@@ -512,7 +518,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(6, 42);
+            this.label7.Location = new System.Drawing.Point(9, 42);
             this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(81, 13);
@@ -537,6 +543,16 @@
             this.groupBox3.TabIndex = 20;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Step 1: Camera Co-Ordinate Bounds";
+            // 
+            // insertTestValues
+            // 
+            this.insertTestValues.Location = new System.Drawing.Point(276, 183);
+            this.insertTestValues.Name = "insertTestValues";
+            this.insertTestValues.Size = new System.Drawing.Size(105, 23);
+            this.insertTestValues.TabIndex = 24;
+            this.insertTestValues.Text = "[DEV] Test Values";
+            this.insertTestValues.UseVisualStyleBackColor = true;
+            this.insertTestValues.Click += new System.EventHandler(this.insertTestValues_Click);
             // 
             // groupBox6
             // 
@@ -719,15 +735,43 @@
             this.label1.TabIndex = 7;
             this.label1.Text = "Insert the GPS co-ordinate extents of the main frame in the appropriate boxes.";
             // 
-            // insertTestValues
+            // label8
             // 
-            this.insertTestValues.Location = new System.Drawing.Point(276, 183);
-            this.insertTestValues.Name = "insertTestValues";
-            this.insertTestValues.Size = new System.Drawing.Size(105, 23);
-            this.insertTestValues.TabIndex = 24;
-            this.insertTestValues.Text = "[DEV] Test Values";
-            this.insertTestValues.UseVisualStyleBackColor = true;
-            this.insertTestValues.Click += new System.EventHandler(this.insertTestValues_Click);
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(6, 96);
+            this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(142, 13);
+            this.label8.TabIndex = 25;
+            this.label8.Text = "Choose video save format:";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label11.Location = new System.Drawing.Point(58, 72);
+            this.label11.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(298, 13);
+            this.label11.TabIndex = 26;
+            this.label11.Text = "Video logs are saved for certain events. Choose settings below.";
+            // 
+            // videoFormatCombobox
+            // 
+            this.videoFormatCombobox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.videoFormatCombobox.FormattingEnabled = true;
+            this.videoFormatCombobox.Items.AddRange(new object[] {
+            "Random",
+            "Ordered",
+            "Tracking",
+            "Object-Based Tracking"});
+            this.videoFormatCombobox.Location = new System.Drawing.Point(157, 90);
+            this.videoFormatCombobox.Margin = new System.Windows.Forms.Padding(2);
+            this.videoFormatCombobox.Name = "videoFormatCombobox";
+            this.videoFormatCombobox.Size = new System.Drawing.Size(129, 23);
+            this.videoFormatCombobox.TabIndex = 27;
+            this.videoFormatCombobox.SelectedIndexChanged += new System.EventHandler(this.videoFormatCombobox_SelectedIndexChanged);
             // 
             // CameraBoundsSetup
             // 
@@ -827,5 +871,8 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox camStatusTextbox;
         private System.Windows.Forms.Button insertTestValues;
+        private System.Windows.Forms.ComboBox videoFormatCombobox;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label label8;
     }
 }

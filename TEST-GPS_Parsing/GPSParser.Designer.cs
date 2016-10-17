@@ -116,18 +116,18 @@
             this.label29 = new System.Windows.Forms.Label();
             this.dbSetupButton = new System.Windows.Forms.Button();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.dbStatusTextbox = new System.Windows.Forms.TextBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
             this.label25 = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
             this.label26 = new System.Windows.Forms.Label();
             this.panel5 = new System.Windows.Forms.Panel();
-            this.dbUsernameTextbox = new System.Windows.Forms.TextBox();
-            this.dbPwdTextbox = new System.Windows.Forms.TextBox();
-            this.label30 = new System.Windows.Forms.Label();
-            this.label31 = new System.Windows.Forms.Label();
-            this.dbStatusTextbox = new System.Windows.Forms.TextBox();
             this.dbLoggedOnLabel = new System.Windows.Forms.Label();
+            this.label31 = new System.Windows.Forms.Label();
+            this.dbPwdTextbox = new System.Windows.Forms.TextBox();
+            this.dbUsernameTextbox = new System.Windows.Forms.TextBox();
+            this.label30 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -907,9 +907,10 @@
             this.label24.AutoSize = true;
             this.label24.Location = new System.Drawing.Point(6, 23);
             this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(282, 17);
+            this.label24.Size = new System.Drawing.Size(579, 17);
             this.label24.TabIndex = 14;
-            this.label24.Text = "Use mouse scroll-wheel to zoom in and out.";
+            this.label24.Text = "Use mouse scroll-wheel to zoom in and out on centre. Right-click and drag to pan " +
+    "the map.";
             // 
             // mapPane
             // 
@@ -921,9 +922,9 @@
             this.mapPane.LevelsKeepInMemmory = 5;
             this.mapPane.Location = new System.Drawing.Point(6, 43);
             this.mapPane.MarkersEnabled = true;
-            this.mapPane.MaxZoom = 18;
+            this.mapPane.MaxZoom = 20;
             this.mapPane.MinZoom = 0;
-            this.mapPane.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionWithoutCenter;
+            this.mapPane.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.ViewCenter;
             this.mapPane.Name = "mapPane";
             this.mapPane.NegativeMode = false;
             this.mapPane.PolygonsEnabled = true;
@@ -985,6 +986,14 @@
             this.groupBox8.TabIndex = 26;
             this.groupBox8.TabStop = false;
             this.groupBox8.Text = "Database Status";
+            // 
+            // dbStatusTextbox
+            // 
+            this.dbStatusTextbox.Location = new System.Drawing.Point(8, 22);
+            this.dbStatusTextbox.Name = "dbStatusTextbox";
+            this.dbStatusTextbox.ReadOnly = true;
+            this.dbStatusTextbox.Size = new System.Drawing.Size(306, 22);
+            this.dbStatusTextbox.TabIndex = 4;
             // 
             // panel2
             // 
@@ -1049,14 +1058,23 @@
             this.panel5.Size = new System.Drawing.Size(184, 78);
             this.panel5.TabIndex = 30;
             // 
-            // dbUsernameTextbox
+            // dbLoggedOnLabel
             // 
-            this.dbUsernameTextbox.Location = new System.Drawing.Point(8, 23);
-            this.dbUsernameTextbox.Name = "dbUsernameTextbox";
-            this.dbUsernameTextbox.Size = new System.Drawing.Size(100, 22);
-            this.dbUsernameTextbox.TabIndex = 26;
-            this.dbUsernameTextbox.Text = "DB Username";
-            this.dbUsernameTextbox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.dbUsernameTextbox_MouseClick);
+            this.dbLoggedOnLabel.AutoSize = true;
+            this.dbLoggedOnLabel.Location = new System.Drawing.Point(5, 38);
+            this.dbLoggedOnLabel.Name = "dbLoggedOnLabel";
+            this.dbLoggedOnLabel.Size = new System.Drawing.Size(176, 17);
+            this.dbLoggedOnLabel.TabIndex = 28;
+            this.dbLoggedOnLabel.Text = "DB logged on this session.";
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(43, 3);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(114, 17);
+            this.label31.TabIndex = 9;
+            this.label31.Text = "Database Setup:";
             // 
             // dbPwdTextbox
             // 
@@ -1068,6 +1086,15 @@
             this.dbPwdTextbox.UseSystemPasswordChar = true;
             this.dbPwdTextbox.TextChanged += new System.EventHandler(this.dbPwdTextbox_TextChanged);
             // 
+            // dbUsernameTextbox
+            // 
+            this.dbUsernameTextbox.Location = new System.Drawing.Point(8, 23);
+            this.dbUsernameTextbox.Name = "dbUsernameTextbox";
+            this.dbUsernameTextbox.Size = new System.Drawing.Size(100, 22);
+            this.dbUsernameTextbox.TabIndex = 26;
+            this.dbUsernameTextbox.Text = "DB Username";
+            this.dbUsernameTextbox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.dbUsernameTextbox_MouseClick);
+            // 
             // label30
             // 
             this.label30.AutoSize = true;
@@ -1077,32 +1104,6 @@
             this.label30.Size = new System.Drawing.Size(26, 29);
             this.label30.TabIndex = 31;
             this.label30.Text = "4";
-            // 
-            // label31
-            // 
-            this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(43, 3);
-            this.label31.Name = "label31";
-            this.label31.Size = new System.Drawing.Size(114, 17);
-            this.label31.TabIndex = 9;
-            this.label31.Text = "Database Setup:";
-            // 
-            // dbStatusTextbox
-            // 
-            this.dbStatusTextbox.Location = new System.Drawing.Point(8, 22);
-            this.dbStatusTextbox.Name = "dbStatusTextbox";
-            this.dbStatusTextbox.ReadOnly = true;
-            this.dbStatusTextbox.Size = new System.Drawing.Size(306, 22);
-            this.dbStatusTextbox.TabIndex = 4;
-            // 
-            // dbLoggedOnLabel
-            // 
-            this.dbLoggedOnLabel.AutoSize = true;
-            this.dbLoggedOnLabel.Location = new System.Drawing.Point(5, 38);
-            this.dbLoggedOnLabel.Name = "dbLoggedOnLabel";
-            this.dbLoggedOnLabel.Size = new System.Drawing.Size(176, 17);
-            this.dbLoggedOnLabel.TabIndex = 28;
-            this.dbLoggedOnLabel.Text = "DB logged on this session.";
             // 
             // GPSParser
             // 
