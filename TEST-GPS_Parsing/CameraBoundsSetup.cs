@@ -8,7 +8,6 @@ using Emgu.CV.Structure;
 using Emgu.Util;
 using DirectShowLib;
 
-
 namespace TEST_GPS_Parsing
 {
     public partial class CameraBoundsSetup : Form
@@ -492,6 +491,7 @@ namespace TEST_GPS_Parsing
         private void videoFormatCombobox_SelectedIndexChanged(object sender, EventArgs e)
         {
             videoLogFilename_CB = "videoLogFile" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+
             if (videoFormatCombobox.SelectedIndex != -1)
             {
                 switch (videoFormatCombobox.SelectedIndex)

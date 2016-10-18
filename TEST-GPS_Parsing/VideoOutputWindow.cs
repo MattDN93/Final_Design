@@ -66,6 +66,8 @@ namespace TEST_GPS_Parsing
         //-----------------Video writer object for logging----------------
         public VideoWriter videoWriterOutput;
         public string videoLogFilename;
+        private static int initialSetup = 0;        //ints to determine videoWriterSetup behaviour
+        private static int fromButtonRepress = 1;
 
         //-----------------User options and parameters---------
         public int captureChoice;              //user's selection of which capture to use
@@ -177,9 +179,7 @@ namespace TEST_GPS_Parsing
                 fileName = setup.filenameToOpen_CB;
 
                 //---------get video writer properties------
-                videoLogFilename = setup.videoLogFilename_CB;
-                videoWriterOutput = setup.videoWriterOutput_CB;
-                Console.Write(videoWriterOutput.ToString());
+                setupVideoWriter(initialSetup);
 
                 //---------get capture objects---------
                 //get as many capture objects as cameras active
@@ -227,6 +227,34 @@ namespace TEST_GPS_Parsing
                 return false;
             }
             
+        }
+
+        private void setupVideoWriter(int mode)
+        {
+            //this method is being called at form initialisation, so get data from bounds window
+            if(mode == initialSetup)
+            {
+                videoLogFilename = setup.videoLogFilename_CB;
+                videoWriterOutput = setup.videoWriterOutput_CB;
+            }
+            else if (mode == fromButtonRepress) //this method was called by repeated pressed of Stop/Start after capture was setup so re-init writer
+            {
+                if (videoLogFilename!= null) //account for initial "start" press when object already setup
+                {
+                    return;
+                }
+                else //create a whole new object since user has pressed stop before
+                {
+                    videoLogFilename = "videoLogFile" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                    videoWriterOutput = new VideoWriter(videoLogFilename + ".mkv", //File name
+                                            VideoWriter.Fourcc('M', 'P', '4', '2'), //Video format
+                                            15, //FPS
+                                            new Size(640, 480), //frame size
+                                            true); //Color
+                }
+
+
+            }
         }
 
         #endregion
@@ -284,7 +312,7 @@ namespace TEST_GPS_Parsing
                     {
                        overlayVideoFramesBox.Image = ol_mark.overlayGrid;
                         
-                        if (isStreaming && vidLogWriteOK)
+                        if (isStreaming /*&& vidLogWriteOK*/) //the commented part allows for dropped frames for condensed filesizes
                         {
                             vidLogWriteOK = false;
                             try
@@ -900,7 +928,9 @@ namespace TEST_GPS_Parsing
                 camStreamCapture.Pause();
                 ol_mark.clearScreen();      //remove the marker and lines off the screen.
                 disconnectionTimeout.Stop();        //pause the disconnection check timer
-                videoWriterOutput.Dispose();   
+
+                videoWriterOutput.Dispose();        //this closes the video file & makes it playable
+                videoLogFilename = null;            //resets filename
             }
             else
             {
@@ -911,6 +941,7 @@ namespace TEST_GPS_Parsing
                 setupCaptureButton.Enabled = false;     //don't allow settings to be changed during capture
                 disconnectionTimeout.Start();           //start the disconnection check timer
                 startCaptureButton.Text = "Stop Capture";
+                setupVideoWriter(fromButtonRepress);                     //create new video Log file
                 try
                 {
                    camStreamCapture.Start();

@@ -246,15 +246,6 @@ namespace TEST_GPS_Parsing
         //------------------Open the Video Streaming Component------------------
         private void openPortButton_Click(object sender, EventArgs e)
         {
-            //if (vo.IsDisposed)         //if the object was created before, destroy and recreate it
-            //{
-            //    vo_renew = new VideoOutputWindow();
-            //    CameraBoundsSetup cmBound = new CameraBoundsSetup(vo_renew);
-            //    updateUITimer.Stop();
-            //    status2TextBox.AppendText("Camera Bound setup window open; waiting....");
-            //    DialogResult cmResult = cmBound.ShowDialog();
-            //    updateUITimer.Start();
-            //}
             //if (!vo.IsDisposed)
             //{
                 //CameraBoundsSetup cmBound = new CameraBoundsSetup(vo);
@@ -263,6 +254,7 @@ namespace TEST_GPS_Parsing
                 vo.Show();
                 //DialogResult cmResult = cmBound.ShowDialog();
                 updateUITimer.Start();
+            openVideoButton.Enabled = false;
             //}
 
 
@@ -298,6 +290,19 @@ namespace TEST_GPS_Parsing
                 status2TextBox.Clear();
                 status2TextBox.AppendText("Database logging disabled.");
             }
+
+            if (vo != null)
+            {
+                if (vo.Visible)
+                {
+                    openVideoButton.Enabled = false;
+                }
+                else
+                {
+                    openVideoButton.Enabled = true;
+                }
+            }
+
 
         }
 
