@@ -548,6 +548,8 @@
             // 
             // disconnectionTimeout
             // 
+            this.disconnectionTimeout.Enabled = true;
+            this.disconnectionTimeout.Interval = 600000;
             this.disconnectionTimeout.Tick += new System.EventHandler(this.disconnectionTimeout_Tick);
             // 
             // VideoOutputWindow

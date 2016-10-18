@@ -68,6 +68,7 @@ namespace TEST_GPS_Parsing
         public string videoLogFilename;
         private static int initialSetup = 0;        //ints to determine videoWriterSetup behaviour
         private static int fromButtonRepress = 1;
+        private static int autoFileSave = 2;
 
         //-----------------User options and parameters---------
         public int captureChoice;              //user's selection of which capture to use
@@ -252,8 +253,16 @@ namespace TEST_GPS_Parsing
                                             new Size(640, 480), //frame size
                                             true); //Color
                 }
-
-
+            }
+            else if (mode == autoFileSave) //the auto file save option
+            {
+                videoWriterOutput.Dispose();        //this closes the video file & makes it playable
+                videoLogFilename = "videoLogFile" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                videoWriterOutput = new VideoWriter(videoLogFilename + ".mkv", //File name
+                                        VideoWriter.Fourcc('M', 'P', '4', '2'), //Video format
+                                        15, //FPS
+                                        new Size(640, 480), //frame size
+                                        true); //Color
             }
         }
 
@@ -556,6 +565,12 @@ namespace TEST_GPS_Parsing
         private void disconnectionTimeout_Tick(object sender, EventArgs e)
         {
             vidLogWriteOK = true;
+            if (isStreaming)
+            {
+                setupVideoWriter(autoFileSave);         //save current capture file
+            }
+
+
         //    if (isStreaming)
         //    {
         //        Mat testFrame1 = new Mat();
@@ -822,9 +837,7 @@ namespace TEST_GPS_Parsing
             }
 
         }
-
-
-
+                
         private void camBoundUIDisplaySetup(int camScreenNumber)
         {
             /* INFORMATION
@@ -927,10 +940,9 @@ namespace TEST_GPS_Parsing
                 pausedCaptureLabel.Visible = true;
                 camStreamCapture.Pause();
                 ol_mark.clearScreen();      //remove the marker and lines off the screen.
-                disconnectionTimeout.Stop();        //pause the disconnection check timer
-
-                videoWriterOutput.Dispose();        //this closes the video file & makes it playable
+                disconnectionTimeout.Stop();        //pause the disconnection check timer                
                 videoLogFilename = null;            //resets filename
+                videoWriterOutput.Dispose();        //closes the file
             }
             else
             {
@@ -983,7 +995,6 @@ namespace TEST_GPS_Parsing
             //if (cscCentre != null) { cscCentre.Stop();  cscCentre.Dispose(); }
             //rawVideoFramesBox.Dispose();
             disconnectionTimeout.Stop();
-            disconnectionTimeout.Dispose();    
         }
 
         private void getVideoInfo()            //get the video properties
