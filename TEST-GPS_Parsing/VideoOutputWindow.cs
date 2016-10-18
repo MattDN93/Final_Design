@@ -319,7 +319,21 @@ namespace TEST_GPS_Parsing
 
                     if (returnVal == true)
                     {
-                       overlayVideoFramesBox.Image = ol_mark.overlayGrid;
+                        try
+                        {
+                            overlayVideoFramesBox.Image = ol_mark.overlayGrid;
+                           // FOR DEBUGGING MEMORY EXCEPTIONS ThrowMemoryException("Memory");
+                        }
+                        catch (OutOfMemoryException)
+                        {
+                            //videoWriterOutput.Dispose();
+                            MessageBox.Show("Error! Your system has run out of memory.\n" +
+                                "Close some programs and try capturing again.\n" +
+                                "Don't worry, video was logged right up to this point and has been saved.\n" +
+                                "To restart capture, close any memry-intensive programs, and click 'Stop Capture' once.","Capture halted",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                            isStreaming = false;
+                        }
+                       
                         
                         if (isStreaming /*&& vidLogWriteOK*/) //the commented part allows for dropped frames for condensed filesizes
                         {
@@ -327,10 +341,11 @@ namespace TEST_GPS_Parsing
                             try
                             {
                                 videoWriterOutput.Write(ol_mark.overlayGrid);         //write that frame to the video log file
+                                // FOR DEBUGGING ONLY ThrowGenericException("Error");
                             }
                             catch (Exception e)
                             {
-                                MessageBox.Show(e.InnerException.ToString(), "Something Happened!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                MessageBox.Show(e.InnerException.ToString() + "\n Try restarting capture.", "Something Happened! Video was saved up until this point", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             }
 
                         }
@@ -1025,6 +1040,27 @@ namespace TEST_GPS_Parsing
 
         #endregion
 
+        #region Debug tools
+        public static void ThrowMemoryException(string message)
+        {
+            throw new OutOfMemoryException();
+        }
+
+        public static void ThrowNullReference(string message)
+        {
+            throw new NullReferenceException();
+        }
+
+        public static void ThrowGenericException(string message)
+        {
+            throw new Exception();
+        }
+
+        public static void ThrowOverflowException(string message)
+        {
+            throw new OverflowException();
+        }
+        #endregion
 
     }
 
