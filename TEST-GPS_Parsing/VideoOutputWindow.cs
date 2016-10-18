@@ -384,7 +384,12 @@ namespace TEST_GPS_Parsing
             }
             catch (Exception e)
             {
-                status1TextBox.Text = "Error initialising camera...";
+                //try avoid the fast-switch issue
+                camStreamCapture.Stop(); camStreamCapture.Dispose();
+                camStreamCapture = null;
+                status1TextBox.Text = "Error initialising camera...Trying again...";
+                Thread.Sleep(500);
+                SetupCapture(CameraDevice);
             }
         }
 
