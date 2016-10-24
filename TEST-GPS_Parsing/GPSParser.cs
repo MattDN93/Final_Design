@@ -309,18 +309,18 @@ namespace TEST_GPS_Parsing
         public void doChecksumCheck()
         {
             //check if any checksum calcs have failed and set string to display on UI
-            if (gpsData.checksumGPGGA == "FAIL" || gpsData.checksumGPRMC == "FAIL" || gpsData.checksumGPVTG == "FAIL")
+            if (gpsData.checksumGNGGA == "FAIL" || gpsData.checksumGNRMC == "FAIL" || gpsData.checksumGNVTG == "FAIL")
             {
                 gpsData.checksumResultStatusForDisplay = "";
-                if (gpsData.checksumGPGGA == "FAIL")
+                if (gpsData.checksumGNGGA == "FAIL")
                 {
                     gpsData.checksumResultStatusForDisplay += "GPGGA fail| ";
                 }
-                if (gpsData.checksumGPRMC == "FAIL")
+                if (gpsData.checksumGNRMC == "FAIL")
                 {
                     gpsData.checksumResultStatusForDisplay += "GPRMC fail| ";
                 }
-                if (gpsData.checksumGPVTG == "FAIL")
+                if (gpsData.checksumGNVTG == "FAIL")
                 {
                     gpsData.checksumResultStatusForDisplay += "GPGGA fail";
                 }
@@ -392,7 +392,7 @@ namespace TEST_GPS_Parsing
         }
         #endregion
 
-        //-------------------------THREADING SECTION--------------------------------
+        //-------------------------THREAD 1: FOR UPDATING UI and DATA--------------------------------
         #region Background Worker Thread
 
 

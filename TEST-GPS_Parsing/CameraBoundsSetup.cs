@@ -54,6 +54,8 @@ namespace TEST_GPS_Parsing
         public double[] upperLeftCoords_CB = new double[2];       //[0] = latitude top left; [1] = longitude top left
         public double[] outerLimitCoords_CB = new double[2];      //[0] = longitude top right; [1] = latitude bottom left
 
+        public Mat transformMatrix;                                 //matrix M to transform varying world co-ords to normalised co-ords
+
         //==========END COPY OF VIDEO PARAMETERS=============
         public static int totalCameraNumber_CB = 5;                 //edit this to change # cams
 

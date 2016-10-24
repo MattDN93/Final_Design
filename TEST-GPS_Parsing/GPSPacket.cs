@@ -42,9 +42,9 @@ namespace TEST_GPS_Parsing
         public string fixqual_f;
 
         //checksum for integrity
-        public string checksumGPRMC;
-        public string checksumGPVTG;
-        public string checksumGPGGA;
+        public string checksumGNRMC;
+        public string checksumGNVTG;
+        public string checksumGNGGA;
         public string checksumResultStatusForDisplay;
 
         //Default constructor
@@ -72,9 +72,9 @@ namespace TEST_GPS_Parsing
             //friendly status flags return
             fixtype_f = "";
             fixqual_f = "";
-            checksumGPRMC = "";
-            checksumGPGGA = "";
-            checksumGPVTG = "";
+            checksumGNRMC = "";
+            checksumGNGGA = "";
+            checksumGNVTG = "";
             checksumResultStatusForDisplay = "";
         }
 
@@ -132,9 +132,9 @@ namespace TEST_GPS_Parsing
             switch (sentenceType)
             {
                 //case 0 = GPRMC
-                case 0: checksum = checksumGPRMC; break;
-                case 1: checksum = checksumGPGGA; break;
-                case 2: checksum = checksumGPVTG; break;
+                case 0: checksum = checksumGNRMC; break;
+                case 1: checksum = checksumGNGGA; break;
+                case 2: checksum = checksumGNVTG; break;
                 default:
                     break;
             }
@@ -150,11 +150,11 @@ namespace TEST_GPS_Parsing
                 switch (sentenceType)
                 {
                     //case 0 = GPRMC
-                    case 0: checksumGPRMC = "FAIL"; break;
+                    case 0: checksumGNRMC = "FAIL"; break;
                     //case 1 = GPGGA
-                    case 1: checksumGPGGA = "FAIL"; break;
+                    case 1: checksumGNGGA = "FAIL"; break;
                     //case 2 = GTVTG
-                    case 2: checksumGPVTG = "FAIL"; break;
+                    case 2: checksumGNVTG = "FAIL"; break;
                     default:
                         break;
                 }
@@ -173,40 +173,34 @@ namespace TEST_GPS_Parsing
                 return updatedGpsData;     //the sentence is invalid 
             }
 
-            if (sentenceBuffer.Contains("GPRMC")) //We assume that each "packet" of sentences begins with a GPRMC hence update the packet ID each time a GPRMC is found!
+            if (sentenceBuffer.Contains("GNGGA")) //We assume that each "packet" of sentences begins with a GNGGA hence update the packet ID each time a GPRMC is found!
             {
                 packetID++;
-                updatedGpsData.ID = packetID;              
-                updatedGpsData = parseGPRMC(sentenceBuffer, gpsData);
-                updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 0);    //checksum compute with GPRMC
-
+                updatedGpsData.ID = packetID;
+                updatedGpsData = parseGNGGA(sentenceBuffer, gpsData);
+                updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 0);    //checksum compute with GPGGA
                 //do some last-minute formatting to the fields based on known issues
                 updatedGpsData.date = updatedGpsData.date.TrimEnd('/'); //remove trailing "/"
-                if (updatedGpsData.time.StartsWith("0") || updatedGpsData.longitude.StartsWith("0") || updatedGpsData.latitude.StartsWith("0"))
-                {
-                    //updatedGpsData.time = updatedGpsData.time.TrimStart('0'); //remove leading zeroes
-//                    updatedGpsData.latitude = updatedGpsData.latitude.TrimStart('0');
-//                    updatedGpsData.longitude = updatedGpsData.longitude.TrimStart('0');
-                }
 
                 //convert the track angle in degrees true to a cardinal heading
                 trackToCardinal(updatedGpsData);
 
+                //convert the latitude and longitude from DDMM.MMM(H) to decimal (for Maps and calculations)
+                ///updatedGpsData = latLongConvertToDbl(updatedGpsData);
+                return updatedGpsData;               
+            }
+            else if (sentenceBuffer.Contains("GNRMC"))
+            {
+
+                updatedGpsData = parseGNRMC(sentenceBuffer, gpsData);
+                updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 1);    //checksum compute with GPRMC
+
                 //convert the time from a horrible string to something nice
                 timeNiceDisplay(updatedGpsData);
 
-                //convert the latitude and longitude from DDMM.MMM(H) to decimal (for Maps and calculations)
-                ///updatedGpsData = latLongConvertToDbl(updatedGpsData);
-
                 return updatedGpsData;
             }
-            else if (sentenceBuffer.Contains("GPGGA"))
-            {
-                updatedGpsData = parseGPGGA(sentenceBuffer, gpsData);
-                updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 1);    //checksum compute with GPGGA
-                return updatedGpsData;
-            }
-            else if (sentenceBuffer.Contains("GPVTG"))
+            else if (sentenceBuffer.Contains("GNVTG"))
             {
                 updatedGpsData = parseGPVTG(sentenceBuffer, gpsData);
                 updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 2);    //checksum compute with GPVTG
@@ -222,6 +216,11 @@ namespace TEST_GPS_Parsing
                 return updatedGpsData;     //we don't consider all the other NMEA strings
             }
 
+        }
+
+        private GPSPacket parseGPVTG(string sentenceBuffer, GPSPacket gpsData)
+        {
+            throw new NotImplementedException();
         }
 
         /*----------------Time and Date Parsing Method 
@@ -309,7 +308,7 @@ namespace TEST_GPS_Parsing
             return updatedGpsData;
         }
 
-        private GPSPacket parseGPVTG(string sentenceBuffer, GPSPacket gpsData)
+        private GPSPacket parseGNVTG(string sentenceBuffer, GPSPacket gpsData)
         {
             int sectionCount = 0;
             string subField = "";
@@ -344,11 +343,11 @@ namespace TEST_GPS_Parsing
             }
             //after the asterisk there's a few chars of checksum
             //checksum is the first char after the asterisk to the end
-            checksumGPVTG = sentenceBuffer.Substring(sentenceBuffer.IndexOf('*') + 1);
+            checksumGNVTG = sentenceBuffer.Substring(sentenceBuffer.IndexOf('*') + 1);
             return gpsData;
         }
 
-        private GPSPacket parseGPGGA(string sentenceBuffer, GPSPacket gpsData)
+        private GPSPacket parseGNGGA(string sentenceBuffer, GPSPacket gpsData)
         {
             int sectionCount = 0;
             string subField = "";
@@ -364,6 +363,46 @@ namespace TEST_GPS_Parsing
 
                     switch (sectionCount)       //store the fields based on the expected section
                     {
+                        //GPGGA section 1 = time in HHMMSS
+                        case 1:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.time = subField;
+                            }
+                            break;
+                        //GPGGA section 3 = Latitude DDMMSS.SSS
+                        case 2:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.latitude = subField; //parse double to a string for display
+                            }
+                            break;
+                        //GPGGA section 4 = Latitude Cardinal Heading
+                        case 3:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.latitude += subField; //add the cardinal heading to the latitude
+                            }
+                            break;
+                        //GPGGA section 5 = Longitude DDMMSS.SSS
+                        case 4:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.longitude = subField; //parse double to a string for display
+                            }
+                            break;
+                        //GPGGA section 6 = Longitude Cardinal Heading
+                        case 5:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.longitude += subField; //add the cardinal heading to the longitude
+                            }
+                            break;
                         //GPGGA section 5 is is the fix quality
                         case 6:
                             if (item.ToString() != ",")  //make sure the comma isn't included
@@ -408,11 +447,11 @@ namespace TEST_GPS_Parsing
             }
             //after the asterisk there's a few chars of checksum
             //checksum is the first char after the asterisk to the end
-            checksumGPGGA = sentenceBuffer.Substring(sentenceBuffer.IndexOf('*') + 1);
+            checksumGNGGA = sentenceBuffer.Substring(sentenceBuffer.IndexOf('*') + 1);
             return gpsData;
         }
 
-        private GPSPacket parseGPRMC(string sentenceBuffer, GPSPacket gpsData)
+        private GPSPacket parseGNRMC(string sentenceBuffer, GPSPacket gpsData)
         {
             int sectionCount = 0;                 //count for subsections of the GPRMC string
             int dateCtr = 0;                    //for formatting the date nicely
@@ -449,37 +488,37 @@ namespace TEST_GPS_Parsing
                             }
                             break;
                         //GPRMC section 3 = Latitude DDMMSS.SSS
-                        case 3:
-                            if (item.ToString() != ",")  //make sure the comma isn't included
-                            {
-                                subField += item;
-                                gpsData.latitude = subField; //parse double to a string for display
-                            }
-                            break;
+                        ////case 3:
+                        ////    if (item.ToString() != ",")  //make sure the comma isn't included
+                        ////    {
+                        ////        subField += item;
+                        ////        gpsData.latitude = subField; //parse double to a string for display
+                        ////    }
+                        ////    break;
                         //GPRMC section 4 = Latitude Cardinal Heading
-                        case 4:
-                            if (item.ToString() != ",")  //make sure the comma isn't included
-                            {
-                                subField += item;
-                                gpsData.latitude += subField; //add the cardinal heading to the latitude
-                            }
-                            break;
+                        ////case 4:
+                        ////    if (item.ToString() != ",")  //make sure the comma isn't included
+                        ////    {
+                        ////        subField += item;
+                        ////        gpsData.latitude += subField; //add the cardinal heading to the latitude
+                        ////    }
+                        ////    break;
                         //GPRMC section 5 = Longitude DDMMSS.SSS
-                        case 5:
-                            if (item.ToString() != ",")  //make sure the comma isn't included
-                            {
-                                subField += item;
-                                gpsData.longitude = subField; //parse double to a string for display
-                            }
-                            break;
+                        ////case 5:
+                        ////    if (item.ToString() != ",")  //make sure the comma isn't included
+                        ////    {
+                        ////        subField += item;
+                        ////        gpsData.longitude = subField; //parse double to a string for display
+                        ////    }
+                        ////    break;
                         //GPRMC section 6 = Longitude Cardinal Heading
                         case 6:
-                            if (item.ToString() != ",")  //make sure the comma isn't included
-                            {
-                                subField += item;
-                                gpsData.longitude += subField; //add the cardinal heading to the longitude
-                            }
-                            break;
+                            ////if (item.ToString() != ",")  //make sure the comma isn't included
+                            ////{
+                            ////    subField += item;
+                            ////    gpsData.longitude += subField; //add the cardinal heading to the longitude
+                            ////}
+                            ////break;
                         //GPRMC section 7 = Ground speed in Knots
                         case 7:
                             if (item.ToString() != ",")  //make sure the comma isn't included
@@ -528,7 +567,7 @@ namespace TEST_GPS_Parsing
             }
             //after the asterisk there's a few chars of checksum
             //checksum is the first char after the asterisk to the end
-            checksumGPRMC = sentenceBuffer.Substring(sentenceBuffer.IndexOf('*') + 1);
+            checksumGNRMC = sentenceBuffer.Substring(sentenceBuffer.IndexOf('*') + 1);
             //return completed packet
             return gpsData;
 
