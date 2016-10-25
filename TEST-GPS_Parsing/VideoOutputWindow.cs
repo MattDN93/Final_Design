@@ -80,6 +80,7 @@ namespace TEST_GPS_Parsing
         protected bool isStreaming;               //whether stream is in progress
         protected bool randomSim;                 //using random simulation mode or ordered
         protected bool valHasChanged;             //for updating the marker
+        public bool logCamSwitchToDb = false;
         bool vidLogWriteOK;                       //for signalling the video writer
 
         private System.Threading.Semaphore uiUpdateSemaphone = new Semaphore(1,3); //mutex lock to prevent UI update race conditions
@@ -290,8 +291,8 @@ namespace TEST_GPS_Parsing
                         switch (ol_mark.camSwitchStatus)
                         {
                             case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
-                            case 0: currentlyActiveCamera = screenStateSwitch(0, currentlyActiveCamera); webcamVid = new Mat(); break;  //switch the current camera to the left
-                            case 1: currentlyActiveCamera = screenStateSwitch(1, currentlyActiveCamera); webcamVid = new Mat(); break; //switch the current camera to the right
+                            case 0: logCamSwitchToDb = true;  currentlyActiveCamera = screenStateSwitch(0, currentlyActiveCamera); webcamVid = new Mat(); break;  //switch the current camera to the left
+                            case 1: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(1, currentlyActiveCamera); webcamVid = new Mat(); break; //switch the current camera to the right
                             case 2: break;      //the feed need not be changed from the current one (since the value is in this screen)
                             default:
                                 break;

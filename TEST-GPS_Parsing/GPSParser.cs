@@ -576,6 +576,12 @@ namespace TEST_GPS_Parsing
         //-------------------------DB update method---------------
         private bool writeToDabataseSQL(GPSPacket gpsDataForDB)
         {
+            //log a camera switch event
+            if (vo.logCamSwitchToDb == true)
+            {
+                vo.logCamSwitchToDb = false;
+                sqlDb.populateDbFieldsVideo(gpsDataForDB, vo);
+            }
             //don't write semi-filled packets to the DB
             if (duplicatePacketCounter != gpsDataForDB.packetID)
             {

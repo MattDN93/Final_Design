@@ -51,11 +51,12 @@ namespace TEST_GPS_Parsing
         public Capture currentCamStreamCapture_CB;                  //current "marker" capture object
 
         //----------------Co-ordinate matrices and vars-------------------
-        //video GPS coordinate extents - for the transformed Image Screen model
+        //video GPS coordinate extents - for the transformed Image Screen model (the original onscreen bounds)
         public double[] upperLeftCoordsTransformed_CB = new double[2];       //[0] = latitude top left; [1] = longitude top left
         public double[] outerLimitCoordsTransformed_CB = new double[2];      //[0] = longitude top right; [1] = latitude bottom left
 
-        //for the real-world mappng input coords 
+        //----------------------METHOD 1: TAKING TOP DOWN GPS COORDINATES AND MAPPING TO A NEAT SQUARE-------------------------
+        //for the real-world mappng input coords (going from top-down varying GPS to a nice workable square on the image )
         public double[] upperLeftCoordsRealworld_CB = new double[2];        //[0] = latitude top left, [1] = longitude top left
         public double[] upperRightCoordsRealworld_CB = new double[2];       //[0] = latitude top right, [1] = longitude top right
         public double[] lowerLeftCoordsRealworld_CB = new double[2];        //[0] = latitude bott left, [1] = longitude bott left
@@ -77,6 +78,14 @@ namespace TEST_GPS_Parsing
         double latDelta_CB;             
                 
         public Mat transformMatrix_CB;                                 //matrix M to transform varying world co-ords to normalised co-ords
+
+        //----------------------END METHOD 1-------------------------
+        //----------------------METHOD 2: TAKING SQUARE CO-ORDINATES AND MAPPING THEM ONTO CAMERA VIEWSPACE-------------------------
+        /*This method is executed after the first one. It takes the pixel grid and maps it down onto the camera plane to avoid
+            Floating points in the sky. Simply a reverse plane projective transform.
+        */
+        // 
+        
         //------------------------------------------------------------
 
         //==========END COPY OF VIDEO PARAMETERS=============

@@ -149,7 +149,45 @@ namespace TEST_GPS_Parsing
 
         public void populateDbFieldsVideo(GPSPacket gpsDataDb, VideoOutputWindow voForDb)
         {
-            
+            try
+            {
+                //check where to append from - if table data already exists
+                sql = "SELECT COUNT(*) FROM videoLog";
+                cmd = new MySqlCommand(sql, conn);
+                result = cmd.ExecuteScalar();
+                if (result != null)
+                {
+                    r = Convert.ToInt32(result);
+                }
+                else
+                {
+                    r = 2;
+                }
+
+                //append to the table if already existing
+                result = null;
+
+                //test writing new tables
+
+                sql = @"insert into videoLog values("
+                + (r++) + ",'"                                    //this is the overall DB ID
+                + gpsDataDb.date + "','"
+                + gpsDataDb.time + "','"
+                + gpsDataDb.latitude + "','"
+                + gpsDataDb.longitude + "','"
+                + voForDb.currentlyActiveCamera + "','"
+                + voForDb.videoLogFilename + "','"                
+                + "CameraSwitch" + "','"                       //event descriptions
+                + "27760934353" +    //sms number
+                "');";
+
+                cmd = new MySqlCommand(sql, conn);
+                result = cmd.ExecuteScalar();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 
