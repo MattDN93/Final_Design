@@ -208,8 +208,8 @@ namespace TEST_GPS_Parsing
                 // get by default from centre cam (camArray[1])
                 for (int i = 0; i <= 1; i++)
                 {
-                    camBoundArray[1].upperLeftBound[i] = setup.upperLeftCoords_CB[i];
-                    camBoundArray[1].outerLimitBound[i] = setup.outerLimitCoords_CB[i];
+                    camBoundArray[1].upperLeftBound[i] = setup.upperLeftCoordsTransformed_CB[i];
+                    camBoundArray[1].outerLimitBound[i] = setup.outerLimitCoordsTransformed_CB[i];
                 }
                 //---------update the UI initially with info--
                 //by default first camera is the centre (camBound[1])

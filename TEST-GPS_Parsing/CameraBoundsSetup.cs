@@ -50,11 +50,29 @@ namespace TEST_GPS_Parsing
         //public Capture[] camStreamCaptureArray_CB;                          //array to hold all camera capture objects
         public Capture currentCamStreamCapture_CB;                  //current "marker" capture object
 
-        //video GPS coordinate extents
-        public double[] upperLeftCoords_CB = new double[2];       //[0] = latitude top left; [1] = longitude top left
-        public double[] outerLimitCoords_CB = new double[2];      //[0] = longitude top right; [1] = latitude bottom left
+        //----------------Co-ordinate matrices and vars-------------------
+        //video GPS coordinate extents - for the transformed Image Screen model
+        public double[] upperLeftCoordsTransformed_CB = new double[2];       //[0] = latitude top left; [1] = longitude top left
+        public double[] outerLimitCoordsTransformed_CB = new double[2];      //[0] = longitude top right; [1] = latitude bottom left
 
+        //for the real-world mappng input coords 
+        public double[] upperLeftCoordsRealworld_CB = new double[2];        //[0] = latitude top left, [1] = longitude top left
+        public double[] upperRightCoordsRealworld_CB = new double[2];       //[0] = latitude top right, [1] = longitude top right
+        public double[] lowerLeftCoordsRealworld_CB = new double[2];        //[0] = latitude bott left, [1] = longitude bott left
+        public double[] lowerRightCoordsRealworld_CB = new double[2];        //[0] = latitude bott right, [1] = longitude bott right
+
+        //input into the perspectiveTransform
+        /*  realworld[0].x = lat top left                       realworld[1].x = lat top right
+            realworld[0].y = long top left                      realworld[1].y = long top right
+            
+            realworld[2].x = lat bott left                      realworld[0].y = long bott right
+            realworld[2].y = long bott left                     realworld[0].y = long bott right
+             
+        */
+        private PointF[] realWorldInputs_CB = new PointF[4];                
+                
         public Mat transformMatrix;                                 //matrix M to transform varying world co-ords to normalised co-ords
+        //------------------------------------------------------------
 
         //==========END COPY OF VIDEO PARAMETERS=============
         public static int totalCameraNumber_CB = 5;                 //edit this to change # cams
@@ -155,28 +173,48 @@ namespace TEST_GPS_Parsing
 
         private void coordinateReadiness()
         {
-            if (longUpperLeftTextbox.Text == "" || latUpperLeftTextbox.Text == "" || latBottomLeftTextbox.Text == "" || longUpperRightTextbox.Text == "")
+            if (longUpperLeftTextbox.Text == "" || latUpperLeftTextbox.Text == "" 
+                || latBottomLeftTextbox.Text == "" || longBottomLeftTextbox.Text == ""
+                || longUpperRightTextbox.Text == "" || latUpperRightTextbox.Text == ""
+                || longBottomRightTextbox.Text == "" || latBottomRightTextbox.Text == "")
             {
                 camViewStatusTextBox.Clear();           //clears from last tick
                 camViewStatusTextBox.BackColor = Color.Orange;
                 camViewStatusTextBox.AppendText("Fields empty:");   //append which fields are still empty until they're fixed
                 if (longUpperLeftTextbox.Text == "")
                 {
-                    camViewStatusTextBox.AppendText(" Long. Step 1;");
+                    camViewStatusTextBox.AppendText(" Long. upper L;");
                 }
                 if (latUpperLeftTextbox.Text == "")
                 {
-                    camViewStatusTextBox.AppendText(" Lat. Step 1;");
+                    camViewStatusTextBox.AppendText(" Lat. upper L;");
                 }
                 if (longUpperRightTextbox.Text == "")
                 {
-                    camViewStatusTextBox.AppendText(" Long. Step 2;");
+                    camViewStatusTextBox.AppendText(" Long. upper R;");
+                }
+                if (latUpperRightTextbox.Text == "")
+                {
+                    camViewStatusTextBox.AppendText(" Lat. upper R;");
+                }
+                if (longBottomLeftTextbox.Text == "")
+                {
+                    camViewStatusTextBox.AppendText(" Long. lower L;");
                 }
                 if (latBottomLeftTextbox.Text == "")
                 {
-                    camViewStatusTextBox.AppendText(" Lat. Step 3;");
+                    camViewStatusTextBox.AppendText(" Lat. lower L;");
+                }
+                if (longBottomRightTextbox.Text == "")
+                {
+                    camViewStatusTextBox.AppendText(" Long. lower R;");
+                }
+                if (latBottomRightTextbox.Text == "")
+                {
+                    camViewStatusTextBox.AppendText(" Lat. lower R;");
                 }
 
+                
                 coordsReady = false;                    //ensures start button stays disabled
             }
             else
@@ -187,7 +225,8 @@ namespace TEST_GPS_Parsing
 
                 //save all values to vars - if this process fails, inform user and don't let them start
                 bool setBoundsResult = false;
-                setBoundsResult = setCameraCoordBounds(latUpperLeftTextbox.Text, longUpperLeftTextbox.Text, longUpperRightTextbox.Text, latBottomLeftTextbox.Text);
+                setBoundsResult = setCameraCoordBounds(latUpperLeftTextbox.Text, longUpperLeftTextbox.Text, latUpperRightTextbox.Text, longUpperRightTextbox.Text, 
+                                                    latBottomLeftTextbox.Text,longBottomLeftTextbox.Text,latBottomRightTextbox.Text, longBottomRightTextbox.Text);
                 if (setBoundsResult == true)
                 {
                     coordsReady = true;
@@ -202,9 +241,6 @@ namespace TEST_GPS_Parsing
                 }
 
             }
-
-            latUpperRightTextbox.Text = latUpperLeftTextbox.Text;
-            longBottomLeftTextbox.Text = longUpperLeftTextbox.Text;
 
         }
 
@@ -542,27 +578,47 @@ namespace TEST_GPS_Parsing
         #endregion
 
         #region Camera modification methods
-        public bool setCameraCoordBounds(string _upperLeft0, string _upperLeft1, string _upperRight0, string _bottomLeft1)
+        public bool setCameraCoordBounds(string _upperLeft0, string _upperLeft1, string _upperRight0, string _upperRight1, 
+                                         string _bottomLeft0, string _bottomLeft1, string _bottomRight0, string _bottomRight1)
         {
             //save the co-ordinate limits to the relative variables
             bool parseSuccess = false;
             int parseSuccessCount = 0;
 
-            //convert the text to double and check
-            parseSuccess = double.TryParse(_upperLeft0, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out upperLeftCoords_CB[0]);
+            //convert the text to double and check - this is the realworld co-ords not the transformed ones yet
+            //latitude upper left
+            parseSuccess = double.TryParse(_upperLeft0, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out upperLeftCoordsRealworld_CB[0]);
             if (parseSuccess) { parseSuccessCount++; } else { parseSuccess = false; }
-            parseSuccess = double.TryParse(_upperLeft1, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out upperLeftCoords_CB[1]);
+            //longitude upper left
+            parseSuccess = double.TryParse(_upperLeft1, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out upperLeftCoordsRealworld_CB[1]);
             if (parseSuccess) { parseSuccessCount++; } else { parseSuccess = false; }
-            parseSuccess = double.TryParse(_upperRight0, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out outerLimitCoords_CB[0]);
+            //latitude top right
+            parseSuccess = double.TryParse(_upperRight0, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out upperRightCoordsRealworld_CB[0]);
             if (parseSuccess) { parseSuccessCount++; } else { parseSuccess = false; }
-            parseSuccess = double.TryParse(_bottomLeft1, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out outerLimitCoords_CB[1]);
+            //longitude top right
+            parseSuccess = double.TryParse(_upperRight1, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out upperRightCoordsRealworld_CB[1]);
+            if (parseSuccess) { parseSuccessCount++; } else { parseSuccess = false; }
+            //latitude bottom left
+            parseSuccess = double.TryParse(_bottomLeft0, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out lowerLeftCoordsRealworld_CB[0]);
+            if (parseSuccess) { parseSuccessCount++; } else { parseSuccess = false; }
+            //longitude bottom left
+            parseSuccess = double.TryParse(_bottomLeft1, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out lowerLeftCoordsRealworld_CB[1]);
+            if (parseSuccess) { parseSuccessCount++; } else { parseSuccess = false; }
+            //latitude lower right
+            parseSuccess = double.TryParse(_bottomRight0, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out lowerRightCoordsRealworld_CB[0]);
+            if (parseSuccess) { parseSuccessCount++; } else { parseSuccess = false; }
+            //longitude lower right
+            parseSuccess = double.TryParse(_bottomRight1, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out lowerRightCoordsRealworld_CB[1]);
             if (parseSuccess) { parseSuccessCount++; } else { parseSuccess = false; }
 
             //make sure all co-ordinates were parsed OK
-            if (parseSuccessCount == 4)
+            if (parseSuccessCount == 8)
             {
                 parseSuccessCount = 0;
                 Console.Write("Parsed camera bound co-ordinates OK.");
+
+                doPerspectiveTransform();           //change the co-ord mapping from the world to image plane
+
                 return true;
             }
             else
@@ -571,6 +627,31 @@ namespace TEST_GPS_Parsing
                 parseSuccessCount = 0;
                 return false;
             }
+        }
+
+        private void doPerspectiveTransform()
+        {
+            /*This method consists of 4 parts:
+             * 1. Taking the real world arrays and putting them into the PointF structures
+             * 2. Calculating the desired image-plane co-ordinate points
+             * 3. Putting the image-plane points into PointF structures
+             * 4. Do getperspectivetransform() and get the transform matrix             * 
+             * 
+             * */
+
+            //Part 1: put the co-ordinates into the Pointf() form
+            realWorldInputs_CB[0].X = (float)upperLeftCoordsRealworld_CB[0];
+            realWorldInputs_CB[0].Y = (float)upperLeftCoordsRealworld_CB[1];
+
+            realWorldInputs_CB[1].X = (float)upperRightCoordsRealworld_CB[0];
+            realWorldInputs_CB[1].Y = (float)upperRightCoordsRealworld_CB[1];
+
+            realWorldInputs_CB[2].X = (float)lowerLeftCoordsRealworld_CB[0];
+            realWorldInputs_CB[2].Y = (float)lowerLeftCoordsRealworld_CB[1];
+
+            realWorldInputs_CB[3].X = (float)lowerRightCoordsRealworld_CB[0];
+            realWorldInputs_CB[3].Y = (float)lowerRightCoordsRealworld_CB[1];
+
         }
 
         public void setVideoParameters(int _videoSource, int _drawMode, string _filenameToOpen = "false")
