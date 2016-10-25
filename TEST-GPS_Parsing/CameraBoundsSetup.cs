@@ -69,7 +69,12 @@ namespace TEST_GPS_Parsing
             realworld[2].y = long bott left                     realworld[0].y = long bott right
              
         */
-        private PointF[] realWorldInputs_CB = new PointF[4];                
+        private PointF[] realWorldInputsForCalc_CB = new PointF[4];
+        private PointF[] transformedPtsForCalc_CB = new PointF[4];
+
+        //deltas for calculating the transformed points
+        double longDelta_CB;
+        double latDelta_CB;             
                 
         public Mat transformMatrix;                                 //matrix M to transform varying world co-ords to normalised co-ords
         //------------------------------------------------------------
@@ -567,10 +572,18 @@ namespace TEST_GPS_Parsing
             //bounds BottomLeft Lat -29.866673
             //goes up, right off, across main, left off, across right and right off, and back up out top
 
-            longUpperLeftTextbox.Text = "30.981370";
+            longUpperLeftTextbox.Text = "30.981370";            
+            longBottomLeftTextbox.Text = "30.981350";
+
             longUpperRightTextbox.Text = "30.983583";
+            longBottomRightTextbox.Text = "30.983501";
+
             latUpperLeftTextbox.Text = "-29.866178";
+            latUpperRightTextbox.Text = "-29.866150";
+
             latBottomLeftTextbox.Text = "-29.866673";
+            latBottomRightTextbox.Text = "-29.866600";
+
 
             drawModeChoiceComboBox.SelectedIndex = 2;
             vidSourceChoiceComboBox.SelectedIndex = 1;
@@ -631,26 +644,65 @@ namespace TEST_GPS_Parsing
 
         private void doPerspectiveTransform()
         {
-            /*This method consists of 4 parts:
+            /*This method consists of 5 parts:
              * 1. Taking the real world arrays and putting them into the PointF structures
              * 2. Calculating the desired image-plane co-ordinate points
              * 3. Putting the image-plane points into PointF structures
-             * 4. Do getperspectivetransform() and get the transform matrix             * 
+             * 4 Write the image points into the existing algorithms
+             * 5. Do getperspectivetransform() and get the transform matrix             * 
              * 
+             * NOTE:    X = LATITUDE ("Y DISPLACEMENT")
+             *          Y = LONGITUDE ("X DISPLACEMENT")
              * */
 
             //Part 1: put the co-ordinates into the Pointf() form
-            realWorldInputs_CB[0].X = (float)upperLeftCoordsRealworld_CB[0];
-            realWorldInputs_CB[0].Y = (float)upperLeftCoordsRealworld_CB[1];
+            realWorldInputsForCalc_CB[0].X = (float)upperLeftCoordsRealworld_CB[0];
+            realWorldInputsForCalc_CB[0].Y = (float)upperLeftCoordsRealworld_CB[1];
 
-            realWorldInputs_CB[1].X = (float)upperRightCoordsRealworld_CB[0];
-            realWorldInputs_CB[1].Y = (float)upperRightCoordsRealworld_CB[1];
+            realWorldInputsForCalc_CB[1].X = (float)upperRightCoordsRealworld_CB[0];
+            realWorldInputsForCalc_CB[1].Y = (float)upperRightCoordsRealworld_CB[1];
 
-            realWorldInputs_CB[2].X = (float)lowerLeftCoordsRealworld_CB[0];
-            realWorldInputs_CB[2].Y = (float)lowerLeftCoordsRealworld_CB[1];
+            realWorldInputsForCalc_CB[2].X = (float)lowerLeftCoordsRealworld_CB[0];
+            realWorldInputsForCalc_CB[2].Y = (float)lowerLeftCoordsRealworld_CB[1];
 
-            realWorldInputs_CB[3].X = (float)lowerRightCoordsRealworld_CB[0];
-            realWorldInputs_CB[3].Y = (float)lowerRightCoordsRealworld_CB[1];
+            realWorldInputsForCalc_CB[3].X = (float)lowerRightCoordsRealworld_CB[0];
+            realWorldInputsForCalc_CB[3].Y = (float)lowerRightCoordsRealworld_CB[1];
+
+            //Part 2: get the desired image-plane transformed points
+            longDelta_CB = Math.Sqrt(Math.Pow(((double)realWorldInputsForCalc_CB[1].Y - (double)realWorldInputsForCalc_CB[0].Y), 2) +
+                                  Math.Pow(((double)realWorldInputsForCalc_CB[1].X - (double)realWorldInputsForCalc_CB[0].X), 2));
+
+            latDelta_CB = Math.Sqrt(Math.Pow(((double)realWorldInputsForCalc_CB[2].Y - (double)realWorldInputsForCalc_CB[0].Y), 2) +
+                                  Math.Pow(((double)realWorldInputsForCalc_CB[2].X - (double)realWorldInputsForCalc_CB[0].X), 2));
+
+            //Part 3: Put the image plane transformed points into PointF
+            /*  transformed[0].x = lat top left                       transformed[1].x = realworld[0].x
+                transformed[0].y = long top left                      transformed[1].y = realworld[0].y + longDelta
+            
+                realworld[2].x = realworld[0].x + latDelta          realworld[0].y = long bott right
+                realworld[2].y = realworld[0].y                     realworld[0].y = long bott right
+             
+        */
+            transformedPtsForCalc_CB[0].X = realWorldInputsForCalc_CB[0].X;
+            transformedPtsForCalc_CB[0].Y = realWorldInputsForCalc_CB[0].Y;
+
+            transformedPtsForCalc_CB[1].X = realWorldInputsForCalc_CB[0].X;
+            transformedPtsForCalc_CB[1].Y = realWorldInputsForCalc_CB[0].Y + (float)longDelta_CB;
+
+            transformedPtsForCalc_CB[2].X = realWorldInputsForCalc_CB[0].X + (float)latDelta_CB;
+            transformedPtsForCalc_CB[2].Y = realWorldInputsForCalc_CB[0].Y;
+
+            transformedPtsForCalc_CB[3].X = transformedPtsForCalc_CB[2].X;
+            transformedPtsForCalc_CB[3].Y = transformedPtsForCalc_CB[1].Y;
+
+            //Part 4: Write the boundary points into existing algo methods
+            upperLeftCoordsTransformed_CB[0] = transformedPtsForCalc_CB[0].X;
+            upperLeftCoordsTransformed_CB[1] = transformedPtsForCalc_CB[0].Y;
+            outerLimitCoordsTransformed_CB[0] = transformedPtsForCalc_CB[1].Y;
+            outerLimitCoordsTransformed_CB[1] = transformedPtsForCalc_CB[2].X;
+
+            //Part 5: get the tansform matrix 
+            transformMatrix =  CvInvoke.GetPerspectiveTransform(realWorldInputsForCalc_CB, transformedPtsForCalc_CB);
 
         }
 
