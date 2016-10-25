@@ -113,6 +113,8 @@ namespace TEST_GPS_Parsing
 
         }
 
+        public Mat transformMatrix;                 //the matrix to transform the points from the world to image planes
+
         public int currentlyActiveCamera = -1;
 
         /*array to hold all camera structs, add new ones for expansion later
@@ -211,6 +213,10 @@ namespace TEST_GPS_Parsing
                     camBoundArray[1].upperLeftBound[i] = setup.upperLeftCoordsTransformed_CB[i];
                     camBoundArray[1].outerLimitBound[i] = setup.outerLimitCoordsTransformed_CB[i];
                 }
+
+                //bring across the transformation matrix to do the point plane conversion (gps real world to image plane)
+                transformMatrix = setup.transformMatrix_CB;
+
                 //---------update the UI initially with info--
                 //by default first camera is the centre (camBound[1])
                 camBoundUIDisplaySetup(1);
@@ -624,7 +630,7 @@ namespace TEST_GPS_Parsing
                     //{
                         try
                         {
-                            varsInUse = ol_mark.setNewCoords(incoming_lat, incoming_long);      //set coords if not being read from/written to
+                            varsInUse = ol_mark.setNewCoords(incoming_lat, incoming_long, transformMatrix);      //set coords if not being read from/written to
                         }
                         catch (OverflowException)
                         {

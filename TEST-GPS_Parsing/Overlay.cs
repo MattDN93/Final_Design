@@ -101,7 +101,7 @@ namespace TEST_GPS_Parsing
 
         #region Setting and Scaling Co-ords
         //a method to allow the parser class to access the coords vars without race conditions
-        public bool setNewCoords(double lat_forDisplay, double long_forDisplay)
+        public bool setNewCoords(double lat_forDisplay, double long_forDisplay, Mat transformMatrixForCalc)
         {
             if (usingCoords == true) //make thread wait until we're done using the data
             {
@@ -114,7 +114,7 @@ namespace TEST_GPS_Parsing
 
                 try
                 {
-                    scaleGpsCoordsToDisplayBounds(lat_forDisplay, long_forDisplay);
+                    scaleGpsCoordsToDisplayBounds(lat_forDisplay, long_forDisplay, transformMatrixForCalc);
                 }
                 catch (OverflowException e)
                 {
@@ -140,7 +140,7 @@ namespace TEST_GPS_Parsing
 
         //This method takes the lat/long limits of the camera frame, calculates an offset based on
         //where the given GPS coords are, and then scales it to a pixel value to be overlayed onscreen
-        public void scaleGpsCoordsToDisplayBounds(double incoming_lat,double incoming_long)
+        public void scaleGpsCoordsToDisplayBounds(double incoming_lat,double incoming_long, Mat transformMatrix)
         {
             /* DEFINITIONS:
              * UpperLeftBound[0] = latitude top left; [1] = longitude top left
@@ -162,8 +162,25 @@ namespace TEST_GPS_Parsing
                                 r = marker_x or x
              */
 
-                y = Convert.ToInt32(Math.Round((Math.Abs(incoming_lat - ulBound[0]) / dy) * gridHeight));
-                x = Convert.ToInt32(Math.Round((((incoming_long - ulBound[1]) / dx) * gridWidth)));
+            //first, scale the bounds to the image plane using the transform matrix
+            /*have to convert the doubles into a PointF to use the transform function
+            Input point = conversionPointSrc, output (in image plane) is conversionPointDest
+            Output point is returned to 2 doubles to use in the program             
+             */
+
+            double imagePlaneLat, imagePlaneLong;
+            PointF[] conversionPointSrc = new PointF[1];   
+            PointF[] conversionPointDest = new PointF[1];
+            conversionPointSrc[0].X = (float)incoming_lat; conversionPointSrc[0].Y = (float)incoming_long;
+
+            conversionPointDest = CvInvoke.PerspectiveTransform(conversionPointSrc, transformMatrix);
+
+            //now send them back from point to doubles
+            imagePlaneLat = conversionPointDest[0].X;
+            imagePlaneLong = conversionPointDest[0].Y;
+
+            y = Convert.ToInt32(Math.Round((Math.Abs(imagePlaneLat - ulBound[0]) / dy) * gridHeight));
+            x = Convert.ToInt32(Math.Round((((imagePlaneLong - ulBound[1]) / dx) * gridWidth)));
 
 
         }

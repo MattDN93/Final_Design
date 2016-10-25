@@ -76,7 +76,7 @@ namespace TEST_GPS_Parsing
         double longDelta_CB;
         double latDelta_CB;             
                 
-        public Mat transformMatrix;                                 //matrix M to transform varying world co-ords to normalised co-ords
+        public Mat transformMatrix_CB;                                 //matrix M to transform varying world co-ords to normalised co-ords
         //------------------------------------------------------------
 
         //==========END COPY OF VIDEO PARAMETERS=============
@@ -702,7 +702,7 @@ namespace TEST_GPS_Parsing
             outerLimitCoordsTransformed_CB[1] = transformedPtsForCalc_CB[2].X;
 
             //Part 5: get the tansform matrix 
-            transformMatrix =  CvInvoke.GetPerspectiveTransform(realWorldInputsForCalc_CB, transformedPtsForCalc_CB);
+            transformMatrix_CB =  CvInvoke.GetPerspectiveTransform(realWorldInputsForCalc_CB, transformedPtsForCalc_CB);
 
         }
 

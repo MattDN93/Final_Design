@@ -163,7 +163,7 @@ namespace TEST_GPS_Parsing
 
         }
 
-                //-------------------------PARSING MEMBER METHODS----------------------------
+        //-------------------------PARSING MEMBER METHODS----------------------------
 
         public GPSPacket parseSelection(string sentenceBuffer, GPSPacket gpsData)
         {
@@ -173,36 +173,42 @@ namespace TEST_GPS_Parsing
                 return updatedGpsData;     //the sentence is invalid 
             }
 
-            if (sentenceBuffer.Contains("GNGGA")) //We assume that each "packet" of sentences begins with a GNGGA hence update the packet ID each time a GPRMC is found!
+            if (sentenceBuffer.Contains("GNRMC")) //We assume that each "packet" of sentences begins with a GPRMC hence update the packet ID each time a GPRMC is found!
             {
                 packetID++;
                 updatedGpsData.ID = packetID;
-                updatedGpsData = parseGNGGA(sentenceBuffer, gpsData);
-                updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 0);    //checksum compute with GPGGA
+                updatedGpsData = parseGNRMC(sentenceBuffer, gpsData);
+                updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 0);    //checksum compute with GPRMC
+
                 //do some last-minute formatting to the fields based on known issues
                 updatedGpsData.date = updatedGpsData.date.TrimEnd('/'); //remove trailing "/"
+                if (updatedGpsData.time.StartsWith("0") || updatedGpsData.longitude.StartsWith("0") || updatedGpsData.latitude.StartsWith("0"))
+                {
+                    //updatedGpsData.time = updatedGpsData.time.TrimStart('0'); //remove leading zeroes
+                    //                    updatedGpsData.latitude = updatedGpsData.latitude.TrimStart('0');
+                    //                    updatedGpsData.longitude = updatedGpsData.longitude.TrimStart('0');
+                }
 
                 //convert the track angle in degrees true to a cardinal heading
                 trackToCardinal(updatedGpsData);
 
-                //convert the latitude and longitude from DDMM.MMM(H) to decimal (for Maps and calculations)
-                ///updatedGpsData = latLongConvertToDbl(updatedGpsData);
-                return updatedGpsData;               
-            }
-            else if (sentenceBuffer.Contains("GNRMC"))
-            {
-
-                updatedGpsData = parseGNRMC(sentenceBuffer, gpsData);
-                updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 1);    //checksum compute with GPRMC
-
                 //convert the time from a horrible string to something nice
                 timeNiceDisplay(updatedGpsData);
 
+                //convert the latitude and longitude from DDMM.MMM(H) to decimal (for Maps and calculations)
+                ///updatedGpsData = latLongConvertToDbl(updatedGpsData);
+
                 return updatedGpsData;
             }
-            else if (sentenceBuffer.Contains("GNVTG"))
+            else if (sentenceBuffer.Contains("GPGGA"))
             {
-                updatedGpsData = parseGPVTG(sentenceBuffer, gpsData);
+                updatedGpsData = parseGNGGA(sentenceBuffer, gpsData);
+                updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 1);    //checksum compute with GPGGA
+                return updatedGpsData;
+            }
+            else if (sentenceBuffer.Contains("GPVTG"))
+            {
+                updatedGpsData = parseGNVTG(sentenceBuffer, gpsData);
                 updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 2);    //checksum compute with GPVTG
                 //trim off leading zeroes from the speed
                 if (updatedGpsData.grspd_kph.StartsWith("0"))
@@ -216,11 +222,6 @@ namespace TEST_GPS_Parsing
                 return updatedGpsData;     //we don't consider all the other NMEA strings
             }
 
-        }
-
-        private GPSPacket parseGPVTG(string sentenceBuffer, GPSPacket gpsData)
-        {
-            throw new NotImplementedException();
         }
 
         /*----------------Time and Date Parsing Method 
@@ -249,6 +250,8 @@ namespace TEST_GPS_Parsing
 
             updatedGpsData.dt = DateTime.ParseExact(newDateTime, format, provider); //this will be used for computation
         }
+
+
 
         //parses the lat and long to a decimal format from DDMM.MMM format
         //conversion method in the Mapping class
@@ -488,37 +491,37 @@ namespace TEST_GPS_Parsing
                             }
                             break;
                         //GPRMC section 3 = Latitude DDMMSS.SSS
-                        ////case 3:
-                        ////    if (item.ToString() != ",")  //make sure the comma isn't included
-                        ////    {
-                        ////        subField += item;
-                        ////        gpsData.latitude = subField; //parse double to a string for display
-                        ////    }
-                        ////    break;
+                        case 3:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.latitude = subField; //parse double to a string for display
+                            }
+                            break;
                         //GPRMC section 4 = Latitude Cardinal Heading
-                        ////case 4:
-                        ////    if (item.ToString() != ",")  //make sure the comma isn't included
-                        ////    {
-                        ////        subField += item;
-                        ////        gpsData.latitude += subField; //add the cardinal heading to the latitude
-                        ////    }
-                        ////    break;
+                        case 4:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.latitude += subField; //add the cardinal heading to the latitude
+                            }
+                            break;
                         //GPRMC section 5 = Longitude DDMMSS.SSS
-                        ////case 5:
-                        ////    if (item.ToString() != ",")  //make sure the comma isn't included
-                        ////    {
-                        ////        subField += item;
-                        ////        gpsData.longitude = subField; //parse double to a string for display
-                        ////    }
-                        ////    break;
+                        case 5:
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.longitude = subField; //parse double to a string for display
+                            }
+                            break;
                         //GPRMC section 6 = Longitude Cardinal Heading
                         case 6:
-                            ////if (item.ToString() != ",")  //make sure the comma isn't included
-                            ////{
-                            ////    subField += item;
-                            ////    gpsData.longitude += subField; //add the cardinal heading to the longitude
-                            ////}
-                            ////break;
+                            if (item.ToString() != ",")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.longitude += subField; //add the cardinal heading to the longitude
+                            }
+                            break;
                         //GPRMC section 7 = Ground speed in Knots
                         case 7:
                             if (item.ToString() != ",")  //make sure the comma isn't included
