@@ -80,6 +80,7 @@ namespace TEST_GPS_Parsing
         protected bool isStreaming;               //whether stream is in progress
         protected bool randomSim;                 //using random simulation mode or ordered
         protected bool valHasChanged;             //for updating the marker
+        protected bool stillSwitchingCams = false;        //to ensure no crashing when switching camera
         public bool logCamSwitchToDb = false;
         bool vidLogWriteOK;                       //for signalling the video writer
 
@@ -139,7 +140,6 @@ namespace TEST_GPS_Parsing
         public VideoOutputWindow()                              //this is called before the window is even launched
         {
             InitializeComponent();
-            
             //initialise the bounds and capture arrays - prevent NullReference Exceptions later    
             //# cameras can be altered in code if needed     
             camBoundArray = new camBound[totalCameraNumber];
@@ -375,6 +375,7 @@ namespace TEST_GPS_Parsing
         {
             //update the selected device
             CameraDevice = Camera_Identifier;
+            stillSwitchingCams = true;   
 
             //Dispose of Capture if it was created before
             if (camStreamCapture != null) camStreamCapture.Stop(); camStreamCapture.Dispose();
@@ -398,6 +399,8 @@ namespace TEST_GPS_Parsing
                 Thread.Sleep(500);
                 SetupCapture(CameraDevice);
             }
+            Thread.Sleep(1500);
+            stillSwitchingCams = false;
         }
 
         private int screenStateSwitch(int switchCase, int activeCamLocal)
@@ -434,7 +437,8 @@ namespace TEST_GPS_Parsing
                         //------------modify actual capture objects---------
                         //make the camera one screen to the left the new active camera
                         //----------------Capture object switch--------------
-                        SetupCapture(activeCamLocal - 1);
+                        while (stillSwitchingCams) ;        //wait until the switch period has expired
+                         SetupCapture(activeCamLocal - 1);
                         //----------------------END TEST CODE-----------
                         //----------------------ORIGINAL CODE COMMENTED OUT------
                         //camStreamCaptureArray[currentlyActiveCamera] = camStreamCapture;
@@ -538,6 +542,7 @@ namespace TEST_GPS_Parsing
                         //}
                         //-----------------END ORIGINAL CODE--------------
                         activeCamLocal++;                        //indicate we've switched one camera right
+                        while (stillSwitchingCams) ;        //wait until the switch period has expired                        
                         camBoundUIDisplaySetup(activeCamLocal);  //call UI update to show new bounds onscreen
                         return activeCamLocal;
                     }
@@ -588,6 +593,9 @@ namespace TEST_GPS_Parsing
             return activeCamLocal;
         }
 
+        #endregion
+
+        #region Timer ticks
         //checks to see if the camera (or any others) have been disconnected
         private void disconnectionTimeout_Tick(object sender, EventArgs e)
         {
@@ -696,6 +704,7 @@ namespace TEST_GPS_Parsing
 
             }
         }
+
         #endregion
 
         #region UI and Button Routines - Setup Button
@@ -1074,6 +1083,7 @@ namespace TEST_GPS_Parsing
             throw new OverflowException();
         }
         #endregion
+
 
     }
 

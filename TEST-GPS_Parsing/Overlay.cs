@@ -467,8 +467,6 @@ namespace TEST_GPS_Parsing
                                             y = current_gps_point.Y;
                                         }
                                     }
-
-
                                     drawMarker(x, y, overlayGrid, true);   //draw this point update it 
                                 }
                                 else
@@ -540,14 +538,15 @@ namespace TEST_GPS_Parsing
             {
                 //find the angle between the current point and the nearest left limits
                 //upper angle = 180 - atan(y2-y1/x2-x1) where x2,y2 is the grid limit and x1,y1 the current point
-                upperAngle = 180 - Math.Atan2(onscreenLimitsForPrediction[0].Y - _currpt.Y,
-                                              onscreenLimitsForPrediction[0].X - _currpt.X);
-                lowerAngle = 180 - Math.Atan2(onscreenLimitsForPrediction[2].Y - _currpt.Y,
-                                              onscreenLimitsForPrediction[2].X - _currpt.X);
+
+                lowerAngle = Math.Abs(Math.Atan2(onscreenLimitsForPrediction[0].Y - _currpt.Y,
+                                              onscreenLimitsForPrediction[0].X - _currpt.X));
+                upperAngle = Math.Abs(Math.Atan2(onscreenLimitsForPrediction[2].Y - _currpt.Y,
+                                              onscreenLimitsForPrediction[2].X - _currpt.X));
 
                 //now check if the angle between the current and prev point is between these angles!
-                angleBetweenPoints = 180 - Math.Atan2(_currpt.Y - _prevpt.Y,
-                                                      _currpt.X - _prevpt.X);
+                angleBetweenPoints = Math.Abs(Math.Atan2(_currpt.Y - _prevpt.Y,
+                                                      _currpt.X - _prevpt.X));
 
                 if (angleBetweenPoints > upperAngle && angleBetweenPoints < lowerAngle)
                 {
@@ -561,7 +560,7 @@ namespace TEST_GPS_Parsing
                         //now decide on moving the point or not - if more than 3 points = 1, move it!
                         if (aggregatedPointDirection.Sum() > 3)
                         {
-                            _currpt.X = _currpt.X - 60;
+                            _currpt.X = _currpt.X - 100;
                             return _currpt;     //return predicted point
                         }
                         else
@@ -584,7 +583,7 @@ namespace TEST_GPS_Parsing
                         //now decide on moving the point or not - if more than 3 points = 1, move it!
                         if (aggregatedPointDirection.Sum() > 3)
                         {
-                            _currpt.X = _currpt.X - 60;
+                            _currpt.X = _currpt.X - 100;
                             return _currpt;     //return predicted point
                         }
                         else
@@ -621,7 +620,7 @@ namespace TEST_GPS_Parsing
                         //now decide on moving the point or not - if more than 3 points = 1, move it!
                         if (aggregatedPointDirection.Sum() > 3)
                         {
-                            _currpt.X = _currpt.X + 60;
+                            _currpt.X = _currpt.X + 100;
                             return _currpt;     //return predicted point
                         }
                         else
@@ -643,7 +642,7 @@ namespace TEST_GPS_Parsing
                         //now decide on moving the point or not - if more than 3 points = 1, move it!
                         if (aggregatedPointDirection.Sum() > 3)
                         {
-                            _currpt.X = _currpt.X + 60;
+                            _currpt.X = _currpt.X + 100;
                             return _currpt;     //return predicted point
                         }
                         else

@@ -16,7 +16,7 @@ namespace TEST_GPS_Parsing
     {
         #region Initialization and Vars
         //*********THIS VAR IS FOR TESTING FEATURES, set to false for debug features off
-        bool debug = true;
+        bool debug = false;
         //*************************************
         public string inputLogFilename;
         bool dbLoggingActive = true;
@@ -577,7 +577,7 @@ namespace TEST_GPS_Parsing
         private bool writeToDabataseSQL(GPSPacket gpsDataForDB)
         {
             //log a camera switch event
-            if (vo.logCamSwitchToDb == true)
+            if (vo != null && vo.logCamSwitchToDb == true && sqlDb != null)
             {
                 vo.logCamSwitchToDb = false;
                 sqlDb.populateDbFieldsVideo(gpsDataForDB, vo);
