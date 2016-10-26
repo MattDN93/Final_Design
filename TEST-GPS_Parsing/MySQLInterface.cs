@@ -70,18 +70,16 @@ namespace TEST_GPS_Parsing
 
                 //created table for the video output Log
                 sql = @"Create table videoLog(
-                eventID int,
-                Latitude real,
-                Longitude real,
-                currentCamNum tinyint,
-                latUpLeft real,
-                longUpLeft real,
-                longUpRight real,
-                latBotLeft real,
-                eventDesc char(50),
-                smsNum int,
-                Primary key(eventID)
-                );";
+                        eventID int,
+                        Date char(20),
+                        timestamp char(20),
+                        Latitude char(20),
+                        Longitude char(20),
+                        currentCamNum tinyint,
+                        vidLogFile char(50),
+                        eventDesc char(50),
+                        smsNum bigint);
+                        ";
 
                 cmd = new MySqlCommand(sql, conn);
                 result = cmd.ExecuteScalar();

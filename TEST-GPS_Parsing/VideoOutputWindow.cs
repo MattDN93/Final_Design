@@ -934,6 +934,7 @@ namespace TEST_GPS_Parsing
                 ol_mark.setupOverlay();                             //setup the overlay
                 ol_mark.gridWidth = vidPixelWidth;                  //pass these variables to the other class
                 ol_mark.gridHeight = vidPixelHeight;
+                ol_mark.setupPredictionLimits();                    //setup the prediction point limits
                 ol_mark.dx = camBoundArray[camScreenNumber].delta_x;
                 ol_mark.dy = camBoundArray[camScreenNumber].delta_y;
 

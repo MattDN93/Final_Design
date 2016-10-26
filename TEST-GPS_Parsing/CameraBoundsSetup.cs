@@ -109,7 +109,7 @@ namespace TEST_GPS_Parsing
            //--------------ORIGINAL CODE----------
             // camStreamCaptureArray_CB = new Capture[totalCameraNumber_CB];   //set up an array of capture objects
         }
-        #endregion
+        #endregion  
 
         #region Camera, Coords and Video Log Readiness
         

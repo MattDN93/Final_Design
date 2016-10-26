@@ -392,7 +392,7 @@ namespace TEST_GPS_Parsing
         }
         #endregion
 
-        //-------------------------THREAD 1: FOR UPDATING UI and DATA--------------------------------
+        //-------------------------THREAD 1: FOR UPDATING UI and DATA----------------
         #region Background Worker Thread
 
 
