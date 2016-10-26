@@ -539,10 +539,9 @@ namespace TEST_GPS_Parsing
                 //find the angle between the current point and the nearest left limits
                 //upper angle = 180 - atan(y2-y1/x2-x1) where x2,y2 is the grid limit and x1,y1 the current point
 
-                lowerAngle = Math.Abs(Math.Atan2(onscreenLimitsForPrediction[0].Y - _currpt.Y,
+                upperAngle = Math.Abs(Math.Atan2(onscreenLimitsForPrediction[0].Y + _currpt.Y,
                                               onscreenLimitsForPrediction[0].X - _currpt.X));
-                upperAngle = Math.Abs(Math.Atan2(onscreenLimitsForPrediction[2].Y - _currpt.Y,
-                                              onscreenLimitsForPrediction[2].X - _currpt.X));
+                lowerAngle = Math.PI + Math.Atan2(onscreenLimitsForPrediction[2].Y - _currpt.Y,_currpt.X);
 
                 //now check if the angle between the current and prev point is between these angles!
                 angleBetweenPoints = Math.Abs(Math.Atan2(_currpt.Y - _prevpt.Y,
