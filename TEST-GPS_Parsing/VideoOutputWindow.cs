@@ -478,7 +478,7 @@ namespace TEST_GPS_Parsing
                         //make the camera one screen to the left the new active camera
                         //----------------Capture object switch--------------
                         //halt fast switching threads
-                        _waitCameraRightSwitch.WaitOne();
+                        _waitCameraRightSwitch.WaitOne(15000);
                         SetupCapture(activeCamLocal - 1);
                         _waitCameraLeftSwitch.Set();
                         //----------------------END TEST CODE-----------
@@ -567,7 +567,7 @@ namespace TEST_GPS_Parsing
                         //make the camera one screen to the right the new active camera
 
                         //--------------TEST CODE-------
-                        _waitCameraLeftSwitch.WaitOne();
+                        _waitCameraLeftSwitch.WaitOne(15000);
                         SetupCapture(activeCamLocal + 1);
                         _waitCameraRightSwitch.Set();
                         //--------------END TEST CODE-----
