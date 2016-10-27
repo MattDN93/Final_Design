@@ -7,6 +7,7 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Emgu.Util;
 using DirectShowLib;
+using System.Net;
 
 namespace TEST_GPS_Parsing
 {
@@ -119,10 +120,10 @@ namespace TEST_GPS_Parsing
             if (vidSourceChoiceComboBox.SelectedIndex == 1)
             {
                 //disable IP cam setting section
+                videoSource_CB = 0;
                 checkIpAddrButton.Enabled = false;
-                camLeftIpTextBox.Enabled = false;
-                camRightIpTextBox.Enabled = false;
-                camCentreIpTextBox.Enabled = false;
+                currentIpEntryBox.Enabled = false;
+                listOfIps.Enabled = false;
                 localOrIpCamInfoLabel.Text = "Local cameras selected. These will be initialised automatically. \n Check the status below.";
                 //allow the start
 
@@ -154,15 +155,20 @@ namespace TEST_GPS_Parsing
             }
             else if (vidSourceChoiceComboBox.SelectedIndex == 2)
             {
-
+                videoSource_CB = 1;
                 localOrIpCamInfoLabel.Text =
-                    "IP cameras selected. Enter 3 IP addresses below and click 'Check Addresses'.\n Enter IP address only, the http:// is not needed.\n The status of the cameras will appear in the status pane.";
+                    "IP cameras selected. \n Enter an IP address and press Enter to add it to the list. When done, click 'Check Addresses'.\n Enter IP address only, the http:// is not needed.\n .";
                 //IP camera initialisation takes place when the user presses the "check IP addresses" button.
                 //the methods below enable the use of those buttons
-                checkIpAddrButton.Enabled = true;
-                camLeftIpTextBox.Enabled = true;
-                camRightIpTextBox.Enabled = true;
-                camCentreIpTextBox.Enabled = true;
+           
+                currentIpEntryBox.Enabled = true;
+                listOfIps.Enabled = true;
+            }
+            else
+            {
+                checkIpAddrButton.Enabled = false;
+                currentIpEntryBox.Enabled = false;
+                listOfIps.Enabled = false;
             }
 
             //check default camera status and display on UI - code supports >3 cameras but GUI doesn't so work with GUI limit
@@ -320,31 +326,51 @@ namespace TEST_GPS_Parsing
 
         }
         #endregion
-
+        
         #region Initialise camera streams (local and IP)
 
-        private void SetupCapture(int Camera_Identifier)
+        private void SetupCapture_CB(int Camera_Identifier, string url="")
         {
-            //update the selected device
-            CameraDevice_CB = Camera_Identifier;
+            if (videoSource_CB == 0)        //webcams
+            {
+                //update the selected device
+                CameraDevice_CB = Camera_Identifier;
 
-            //Dispose of Capture if it was created before
-            if (_capture_CB != null) _capture_CB.Dispose();
-            try
-            {
-                //Set up capture device
-                _capture_CB = new Capture(CameraDevice_CB);
+                //Dispose of Capture if it was created before
+                if (_capture_CB != null) _capture_CB.Dispose();
+                try
+                {
+                    //Set up capture device
+                    _capture_CB = new Capture(CameraDevice_CB);
+                }
+                catch (NullReferenceException excpt)
+                {
+                    MessageBox.Show(excpt.Message);
+                }
             }
-            catch (NullReferenceException excpt)
+            else if (videoSource_CB == 1)   //ip cams
             {
-                MessageBox.Show(excpt.Message);
+                //update the selected device
+                CameraDevice_CB = Camera_Identifier;
+
+                //Dispose of Capture if it was created before
+                if (_capture_CB != null) _capture_CB.Dispose();
+                try
+                {
+                    //Set up capture device
+                    _capture_CB = new Capture(url);
+                }
+                catch (NullReferenceException excpt)
+                {
+                    MessageBox.Show(excpt.Message);
+                }
             }
+
         }
 
         public void initCamStreams()
         {
             //tries to initialise the default camera and the first adjacent left and right
-            //--------------------TEST----------------
 
             try
             {
@@ -355,7 +381,7 @@ namespace TEST_GPS_Parsing
 
                 //setup the middlemost cam first
                 //anything LOWER index is left, HIGHER is right
-                SetupCapture((int)_SystemCameras_CB.Length / 2);
+                SetupCapture_CB((int)_SystemCameras_CB.Length / 2);
 
             }
             catch (NullReferenceException nr)
@@ -364,51 +390,27 @@ namespace TEST_GPS_Parsing
                 throw nr;
             }
 
-             
+      }
 
-            //--------------------ENDTEST---------------
-
-
-
-            //--------------------ORIGINAL CODE-----------
-            //try
-            //{
-            //    //initialise the centre, left and right camera objects - set as needed
-            //    //cscCentre_CB = new Capture(0);                                     //CENTRE CAMERA FRAME
-            //    //cscLeft_CB = new Capture(2);                                       //LEFT CAMERA FRAME
-            //    //cscRight_CB = new Capture(1);                                      //RIGHT CAMERA FRAME               
-
-            //    //The ith index starts counting from the leftmost camera and proceeds to the end L->R
-            //    for (int i = 0; i < totalCameraNumber_CB ; i++)
-            //    {
-            //        camStreamCaptureArray_CB[i] = new Capture(i);   //initialise as many capture objects as needed
-            //    }
-
-            //    //go through each cam and if any haven't loaded, set the other to centre
-            //    int haveLoaded = 0;
-            //    for (int i = 0; i < totalCameraNumber_CB; i++)
-            //    {
-            //        //set the current camera to whichever one is within bounds that is working
-            //        if (camStreamCaptureArray_CB[i].GetCaptureProperty(CapProp.FrameHeight) != 0 && (i+1<totalCameraNumber_CB))
-            //        {
-            //            haveLoaded++;
-            //        }
-            //    }
-
-            //    //assume all local cams with frame height !=0 are working, so find the middle one of them and set the current one to that
-            //    currentCamStreamCapture_CB = camStreamCaptureArray_CB[(int)haveLoaded/totalCameraNumber_CB];
-
-            //}
-            //catch (NullReferenceException nr)
-            //{
-
-            //    throw nr;
-            //}
-            //--------------------END ORIGINAL CODE------------------
-        }
-
-        public void initIpCamStreams()
+        public bool initIpCamStreams(string url)
         {
+            try
+            {
+                //Creating the HttpWebRequest
+                HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
+                //Setting the Request method HEAD- we want to check it exists
+                request.Method = "HEAD";
+                //Getting the Web Response.
+                HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+                //Returns TRUE if the Status code == 200
+                response.Close();
+                return (response.StatusCode == HttpStatusCode.OK);
+            }
+            catch
+            {
+                //Any exception will returns false.
+                return false;
+            }
             throw new NotImplementedException();
         }
         #endregion
@@ -416,39 +418,61 @@ namespace TEST_GPS_Parsing
         #region UI and button methods
         private void checkIpAddrButton_Click(object sender, EventArgs e)
         {
+            //go through each cam and if any haven't loaded, set the other to centre
+            int haveLoaded = 0;
             checkIpAddrButton.Text = "Checking...";
             //parse the IP addresses entered and attempt to connect to those cameras
             //For testing Vivotek cams 146.230.195.13-15/video.mjpg for 14 use video4.mjpg
-
-            //TODO: fix hardcoded capture array properties
-            //-------------ORIGINAL CODE COMMENTED OUT----------
-            string ipAddrLeft, ipAddrCentre, ipAddrRight;
-            ipAddrLeft = "http://" + camLeftIpTextBox.Text.ToString() + "/video.mjpg";
-            //camStreamCaptureArray_CB[0] = new Emgu.CV.Capture(ipAddrLeft);
-
-            ipAddrCentre = "http://" + camCentreIpTextBox.Text.ToString() + "/video4.mjpg";
-            //camStreamCaptureArray_CB[1] = new Emgu.CV.Capture(ipAddrCentre);
-
-            ipAddrRight = "http://" + camRightIpTextBox.Text.ToString() + "/video.mjpg";
-            //camStreamCaptureArray_CB[2] = new Emgu.CV.Capture(ipAddrRight);
-
-            //go through each cam and if any haven't loaded, set the other to centre
-            int haveLoaded = 0;
-            for (int i = 0; i < camStreamCaptureArray_CB.Length; i++)
+            camStreamCaptureArray_CB = new VideoOutputWindow.Video_Device[listOfIps.Items.Count];
+            //test each camera's availability
+            for (int i = 0; i < listOfIps.Items.Count; i++)
             {
-                //set the current camera to whichever one is within bounds that is working
-                //if (camStreamCaptureArray_CB[i].GetCaptureProperty(CapProp.FrameHeight) != 0 && (i + 1 < totalCameraNumber_CB))
-                //{
+                string currentUrl = "http://" + listOfIps.Items[i].Text + ":8080/video";
+                bool urlIsValid = initIpCamStreams(currentUrl);
+                if (urlIsValid)
+                {
                     haveLoaded++;
-                //}
+                    listOfIps.Items[i].BackColor = Color.LightGreen;
+                    camStreamCaptureArray_CB[i] = new VideoOutputWindow.Video_Device(i, currentUrl); //fill web cam array with IP cams
+                }
+                else
+                {
+                    listOfIps.Items[i].BackColor = Color.OrangeRed;
+                }
             }
 
-            //assume all local cams with frame height !=0 are working, so find the middle one of them and set the current one to that
-            //currentCamStreamCapture_CB = camStreamCaptureArray_CB[(int)haveLoaded / totalCameraNumber_CB];
-
-            ipCamReady = true;
-            checkIpAddrButton.Text = "Check IP addresses";
+            if (haveLoaded >= 2)
+            {
+                ipCamReady = true;
+                SetupCapture_CB(1, camStreamCaptureArray_CB[1].Device_Name);       //setup one of the ip cams (middle)
+                checkIpAddrButton.Text = "Check IP addresses";
+                
+            }
+            else
+            {
+                checkIpAddrButton.Text = "Check IP addresses";
+                ipCamReady = false;
+            }
+            
             //---------------END ORIGINAL CODE COMMENTED OUT
+        }
+
+        //adds to a list of IPs that the user wants to connect to
+        private void currentIpEntryBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)13 ) //enter is pressed
+            {
+                if (currentIpEntryBox.Text != "")
+                {
+                    listOfIps.Items.Add(currentIpEntryBox.Text);    //add the current IP to the textbox   
+                    currentIpEntryBox.Clear();
+                    if (listOfIps.Items.Count > 0)
+                    {
+                        checkIpAddrButton.Enabled = true;
+                    }
+                }
+            }
+
         }
 
         private void setExtentsButton_Click(object sender, EventArgs e)
@@ -525,11 +549,16 @@ namespace TEST_GPS_Parsing
         private void clearFieldsButton_Click(object sender, EventArgs e)
         {
             latBottomLeftTextbox.Clear();
+            latBottomRightTextbox.Clear();
             latUpperLeftTextbox.Clear();
             latUpperRightTextbox.Clear();
             longBottomLeftTextbox.Clear();
+            longBottomRightTextbox.Clear();
             longUpperLeftTextbox.Clear();
             longUpperRightTextbox.Clear();
+
+            listOfIps.Items.Clear();
+            checkIpAddrButton.Enabled = false;
 
         }
 
@@ -769,6 +798,7 @@ namespace TEST_GPS_Parsing
         {
 
         }
+
 
 
         #endregion

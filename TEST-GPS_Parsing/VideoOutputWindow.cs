@@ -86,6 +86,9 @@ namespace TEST_GPS_Parsing
         public bool logCamSwitchToDb = false;       //for signalling a write required to the DB
         bool vidLogWriteOK;                       //for signalling the video writer
 
+        static EventWaitHandle _waitCameraRightSwitch = new AutoResetEvent(true);       //wait handle to prevent threads switching cameras rapidly
+        static EventWaitHandle _waitCameraLeftSwitch = new AutoResetEvent(true);
+
         private System.Threading.Semaphore uiUpdateSemaphone = new Semaphore(1,3); //mutex lock to prevent UI update race conditions
         private Object uiWriteLock = new object();
         bool writingToUi = false;
@@ -144,12 +147,9 @@ namespace TEST_GPS_Parsing
             InitializeComponent();
             //initialise the bounds and capture arrays - prevent NullReference Exceptions later    
             //# cameras can be altered in code if needed     
-            camBoundArray = new camBound[totalCameraNumber];
-            camStreamCaptureArray = new Capture[totalCameraNumber];
-            for (int i = 0; i < totalCameraNumber; i++)
-            {
-                camBoundArray[i] = new camBound(0.0, 0.0);
-            }
+           // camBoundArray = new camBound[totalCameraNumber];
+           // camStreamCaptureArray = new Capture[totalCameraNumber];
+
             
         }
 
@@ -195,6 +195,12 @@ namespace TEST_GPS_Parsing
                 _SystemCameras = setup._SystemCameras_CB;
                 CameraDevice = setup.CameraDevice_CB;
                 _capture = setup._capture_CB;
+
+                camBoundArray = new camBound[WebCams.Length];
+                for (int i = 0; i < camBoundArray.Length; i++)
+                {
+                    camBoundArray[i] = new camBound(0.0, 0.0);
+                }
 
                 //Test code configuration steps with current code
                 camStreamCapture = _capture;
@@ -379,30 +385,60 @@ namespace TEST_GPS_Parsing
         {
             //update the selected device
             CameraDevice = Camera_Identifier;
+            if (captureChoice == 0)     //this capture method is for the webcams
+            {
+                                                // Dispose of Capture if it was created before
+                if (camStreamCapture != null) camStreamCapture.Stop(); camStreamCapture.Dispose();
+                try
+                {
+                    //Set up capture device
+                    camStreamCapture = new Capture(CameraDevice);
+                    camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
+                    camStreamCapture.Start();
+                }
+                catch (NullReferenceException excpt)
+                {
+                    MessageBox.Show(excpt.Message);
+                }
+                catch (Exception e)
+                {
+                    //try avoid the fast-switch issue
+                    camStreamCapture.Stop(); camStreamCapture.Dispose();
+                    camStreamCapture = null;
+                    status1TextBox.Text = "Error initialising camera...Trying again...";
+                    Thread.Sleep(500);
+                    SetupCapture(CameraDevice);
+                }
+            }
+            else if (captureChoice == 1)    //this methd is for the IP cameras
+            {
+                // Dispose of Capture if it was created before
+                if (camStreamCapture != null) camStreamCapture.Stop(); camStreamCapture.Dispose();
+                try
+                {                   
+                    //Set up capture device
+                    camStreamCapture = new Capture(WebCams[CameraDevice].Device_Name);  //we want to open a capture by URL which is stored with the cam URL
+                    camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
+                    camStreamCapture.Start();
+                }
+                catch (NullReferenceException excpt)
+                {
+                    MessageBox.Show(excpt.Message);
+                }
+                catch (Exception e)
+                {
+                    //try avoid the fast-switch issue
+                    camStreamCapture.Stop(); camStreamCapture.Dispose();
+                    camStreamCapture = null;
+                    status1TextBox.Text = "Error initialising camera...Trying again...";
+                    Thread.Sleep(500);
+                    SetupCapture(CameraDevice);
+                }
+            }
+            
           //  stillSwitchingCams = true;   
 
-            //Dispose of Capture if it was created before
-            if (camStreamCapture != null) camStreamCapture.Stop(); camStreamCapture.Dispose();
-            try
-            {
-                //Set up capture device
-                camStreamCapture = new Capture(CameraDevice);
-                camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
-                camStreamCapture.Start();
-            }
-            catch (NullReferenceException excpt)
-            {
-                MessageBox.Show(excpt.Message);
-            }
-            catch (Exception e)
-            {
-                //try avoid the fast-switch issue
-                camStreamCapture.Stop(); camStreamCapture.Dispose();
-                camStreamCapture = null;
-                status1TextBox.Text = "Error initialising camera...Trying again...";
-                Thread.Sleep(500);
-                SetupCapture(CameraDevice);
-            }
+            
            // Thread.Sleep(1500);
            // stillSwitchingCams = false;
         }
@@ -441,8 +477,10 @@ namespace TEST_GPS_Parsing
                         //------------modify actual capture objects---------
                         //make the camera one screen to the left the new active camera
                         //----------------Capture object switch--------------
-                        while (stillSwitchingCams) ;        //wait until the switch period has expired
-                         SetupCapture(activeCamLocal - 1);
+                        //halt fast switching threads
+                        _waitCameraRightSwitch.WaitOne();
+                        SetupCapture(activeCamLocal - 1);
+                        _waitCameraLeftSwitch.Set();
                         //----------------------END TEST CODE-----------
                         //----------------------ORIGINAL CODE COMMENTED OUT------
                         //camStreamCaptureArray[currentlyActiveCamera] = camStreamCapture;
@@ -529,7 +567,9 @@ namespace TEST_GPS_Parsing
                         //make the camera one screen to the right the new active camera
 
                         //--------------TEST CODE-------
+                        _waitCameraLeftSwitch.WaitOne();
                         SetupCapture(activeCamLocal + 1);
+                        _waitCameraRightSwitch.Set();
                         //--------------END TEST CODE-----
                         //-------------ORIGINAL CODE COMMENTED OUT------------
                         //camStreamCaptureArray[currentlyActiveCamera] = camStreamCapture;
@@ -545,8 +585,7 @@ namespace TEST_GPS_Parsing
                         //    }
                         //}
                         //-----------------END ORIGINAL CODE--------------
-                        activeCamLocal++;                        //indicate we've switched one camera right
-                        while (stillSwitchingCams) ;        //wait until the switch period has expired                        
+                        activeCamLocal++;                        //indicate we've switched one camera right                   
                         camBoundUIDisplaySetup(activeCamLocal);  //call UI update to show new bounds onscreen
                         return activeCamLocal;
                     }
@@ -631,24 +670,24 @@ namespace TEST_GPS_Parsing
                     disconnectCounter = 0;
                     return;                 //nothing to do, capture is OK
                 }
-                else if (disconnectCounter < 1)
-                {
-                    camDisconnectedWarningLabel.Visible = true;
-                    SetupCapture(currentlyActiveCamera);
-                    switch (ol_mark.camSwitchStatus)
-                    {
-                        case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
-                        case 0: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(0, currentlyActiveCamera); webcamVid = new Mat(); break;  //switch the current camera to the left
-                        case 1: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(1, currentlyActiveCamera); webcamVid = new Mat(); break; //switch the current camera to the right
-                        case 2: break;      //the feed need not be changed from the current one (since the value is in this screen)
-                        default:
-                            break;
-                    }
-                    ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
+                //else if (disconnectCounter < 1)
+                //{
+                   // camDisconnectedWarningLabel.Visible = true;
+                    //SetupCapture(currentlyActiveCamera);
+                    //switch (ol_mark.camSwitchStatus)
+                    //{
+                    //    case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
+                    //    case 0: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(0, currentlyActiveCamera); webcamVid = new Mat(); break;  //switch the current camera to the left
+                    //    case 1: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(1, currentlyActiveCamera); webcamVid = new Mat(); break; //switch the current camera to the right
+                    //    case 2: break;      //the feed need not be changed from the current one (since the value is in this screen)
+                    //    default:
+                    //        break;
+                    //}
+                    //ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
 
 
-                    disconnectCounter = 0;
-                }
+                    //disconnectCounter = 0;
+                //}
 
             }
             else
