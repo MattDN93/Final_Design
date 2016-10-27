@@ -356,6 +356,7 @@ namespace TEST_GPS_Parsing
                 //setup the middlemost cam first
                 //anything LOWER index is left, HIGHER is right
                 SetupCapture((int)_SystemCameras_CB.Length / 2);
+
             }
             catch (NullReferenceException nr)
             {

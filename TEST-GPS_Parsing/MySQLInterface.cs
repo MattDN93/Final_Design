@@ -145,7 +145,7 @@ namespace TEST_GPS_Parsing
 
         }
 
-        public void populateDbFieldsVideo(GPSPacket gpsDataDb, VideoOutputWindow voForDb)
+        public void populateDbFieldsVideo(GPSPacket gpsDataDb, VideoOutputWindow voForDb, string logReason)
         {
             try
             {
@@ -175,7 +175,7 @@ namespace TEST_GPS_Parsing
                 + gpsDataDb.longitude + "','"
                 + voForDb.currentlyActiveCamera + "','"
                 + voForDb.videoLogFilename + "','"                
-                + "CameraSwitch" + "','"                       //event descriptions
+                + logReason + "','"                       //event descriptions
                 + "27760934353" +    //sms number
                 "');";
 

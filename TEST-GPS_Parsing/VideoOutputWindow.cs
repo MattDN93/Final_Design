@@ -81,7 +81,9 @@ namespace TEST_GPS_Parsing
         protected bool randomSim;                 //using random simulation mode or ordered
         protected bool valHasChanged;             //for updating the marker
         protected bool stillSwitchingCams = false;        //to ensure no crashing when switching camera
-        public bool logCamSwitchToDb = false;
+        public bool grabResult;                  //result of grabbing a frame, for disconnection detection
+        int disconnectCounter = 0;                  //check if disconnected and if so do a full reset
+        public bool logCamSwitchToDb = false;       //for signalling a write required to the DB
         bool vidLogWriteOK;                       //for signalling the video writer
 
         private System.Threading.Semaphore uiUpdateSemaphone = new Semaphore(1,3); //mutex lock to prevent UI update race conditions
@@ -300,8 +302,10 @@ namespace TEST_GPS_Parsing
                         ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
                     }
                     
-                    camStreamCapture.Retrieve(webcamVid, 0);    //grab a frame and store to webcamVid matrix
+                    grabResult = camStreamCapture.Retrieve(webcamVid, 0);    //grab a frame and store to webcamVid matrix
+                    disconnectCounter++;
                     rawVideoFramesBox.Image = webcamVid;        //display on-screen
+                    
 
                     //Now draw the markers on the overlay and display 
                     //this method sends a FALSE since the image updates 24+ times per second but the data only arrives ~once per second from GPS
@@ -375,7 +379,7 @@ namespace TEST_GPS_Parsing
         {
             //update the selected device
             CameraDevice = Camera_Identifier;
-            stillSwitchingCams = true;   
+          //  stillSwitchingCams = true;   
 
             //Dispose of Capture if it was created before
             if (camStreamCapture != null) camStreamCapture.Stop(); camStreamCapture.Dispose();
@@ -399,8 +403,8 @@ namespace TEST_GPS_Parsing
                 Thread.Sleep(500);
                 SetupCapture(CameraDevice);
             }
-            Thread.Sleep(1500);
-            stillSwitchingCams = false;
+           // Thread.Sleep(1500);
+           // stillSwitchingCams = false;
         }
 
         private int screenStateSwitch(int switchCase, int activeCamLocal)
@@ -596,8 +600,66 @@ namespace TEST_GPS_Parsing
         #endregion
 
         #region Timer ticks
+        //checks to see if the frames are different to each other 10 seconds ago, if so, it's still moving LOL
+        private void cameraDisconnectCheck_Tick(object sender, EventArgs e)
+        {
+            if (isStreaming)
+            {
+                if (grabResult == false)        //something has failed with the capture
+                {
+                    camDisconnectedWarningLabel.Visible = true;
+                    grabResult = true;
+                    SetupCapture(currentlyActiveCamera);
+                    switch (ol_mark.camSwitchStatus)
+                    {
+                        case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
+                        case 0: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(0, currentlyActiveCamera); webcamVid = new Mat(); break;  //switch the current camera to the left
+                        case 1: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(1, currentlyActiveCamera); webcamVid = new Mat(); break; //switch the current camera to the right
+                        case 2: break;      //the feed need not be changed from the current one (since the value is in this screen)
+                        default:
+                            break;
+                    }
+                    ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
+
+                }
+                else
+                {
+                    camDisconnectedWarningLabel.Visible = false;
+                }
+                if (disconnectCounter > 1) //this covers the case where the parse method does not run, in which case grabResult isn't avaialble
+                {
+                    disconnectCounter = 0;
+                    return;                 //nothing to do, capture is OK
+                }
+                else if (disconnectCounter < 1)
+                {
+                    camDisconnectedWarningLabel.Visible = true;
+                    SetupCapture(currentlyActiveCamera);
+                    switch (ol_mark.camSwitchStatus)
+                    {
+                        case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
+                        case 0: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(0, currentlyActiveCamera); webcamVid = new Mat(); break;  //switch the current camera to the left
+                        case 1: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(1, currentlyActiveCamera); webcamVid = new Mat(); break; //switch the current camera to the right
+                        case 2: break;      //the feed need not be changed from the current one (since the value is in this screen)
+                        default:
+                            break;
+                    }
+                    ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
+
+
+                    disconnectCounter = 0;
+                }
+
+            }
+            else
+            {
+                camDisconnectedWarningLabel.Visible = false;
+            }
+
+            
+        }
         //checks to see if the camera (or any others) have been disconnected
-        private void disconnectionTimeout_Tick(object sender, EventArgs e)
+        private void videoSaveTimer_Tick(object sender, EventArgs e)
         {
             vidLogWriteOK = true;
             if (isStreaming)
@@ -748,6 +810,8 @@ namespace TEST_GPS_Parsing
                 }
 
         }
+
+
         #endregion
 
         #region Setting text on Video UI & capture start
@@ -977,7 +1041,7 @@ namespace TEST_GPS_Parsing
                 pausedCaptureLabel.Visible = true;
                 camStreamCapture.Pause();
                 ol_mark.clearScreen();      //remove the marker and lines off the screen.
-                disconnectionTimeout.Stop();        //pause the disconnection check timer                
+                videoSaveTimer.Stop();        //pause the disconnection check timer                
                 videoLogFilename = null;            //resets filename
                 videoWriterOutput.Dispose();        //closes the file
             }
@@ -988,7 +1052,7 @@ namespace TEST_GPS_Parsing
                 setupInstructLabel.Visible = false;     //hide the setup instruction label
                 pausedCaptureLabel.Visible = false;     //hide the paused label (for if capture was already on)
                 setupCaptureButton.Enabled = false;     //don't allow settings to be changed during capture
-                disconnectionTimeout.Start();           //start the disconnection check timer
+                videoSaveTimer.Start();           //start the disconnection check timer
                 startCaptureButton.Text = "Stop Capture";
                 setupVideoWriter(fromButtonRepress);                     //create new video Log file
                 try
@@ -1031,7 +1095,7 @@ namespace TEST_GPS_Parsing
             //if (cscRight != null) { cscRight.Stop();  cscRight.Dispose(); }
             //if (cscCentre != null) { cscCentre.Stop();  cscCentre.Dispose(); }
             //rawVideoFramesBox.Dispose();
-            disconnectionTimeout.Stop();
+            videoSaveTimer.Stop();
         }
 
         private void getVideoInfo()            //get the video properties
@@ -1082,6 +1146,7 @@ namespace TEST_GPS_Parsing
         {
             throw new OverflowException();
         }
+
         #endregion
 
 

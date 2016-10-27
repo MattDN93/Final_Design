@@ -16,7 +16,7 @@ namespace TEST_GPS_Parsing
     {
         #region Initialization and Vars
         //*********THIS VAR IS FOR TESTING FEATURES, set to false for debug features off
-        bool debug = false;
+        bool debug = true;
         //*************************************
         public string inputLogFilename;
         bool dbLoggingActive = true;
@@ -580,7 +580,12 @@ namespace TEST_GPS_Parsing
             if (vo != null && vo.logCamSwitchToDb == true && sqlDb != null)
             {
                 vo.logCamSwitchToDb = false;
-                sqlDb.populateDbFieldsVideo(gpsDataForDB, vo);
+                sqlDb.populateDbFieldsVideo(gpsDataForDB, vo, "camera_Switch");
+            }
+            //log a camera disconnection event
+            if (vo != null && vo.grabResult == false && sqlDb != null)
+            {
+                sqlDb.populateDbFieldsVideo(gpsDataForDB, vo, "connection_Fail");
             }
             //don't write semi-filled packets to the DB
             if (duplicatePacketCounter != gpsDataForDB.packetID)
