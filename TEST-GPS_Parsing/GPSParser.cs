@@ -8,7 +8,8 @@ using GMap.NET;
 using GMap.NET.WindowsForms;
 using GMap.NET.WindowsForms.Markers;
 using GMap.NET.WindowsForms.ToolTips;
-
+using System.Net;
+using System.IO;
 
 namespace TEST_GPS_Parsing
 {
@@ -47,7 +48,6 @@ namespace TEST_GPS_Parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
         int duplicatePacketCounter = 1;                     //used to ensure duplicate packets aren't saved into the DB
-
 
         public bool newLogEveryStart { get; private set; }
 
@@ -130,6 +130,9 @@ namespace TEST_GPS_Parsing
             dbLoggedOnLabel.Visible = false;
             statusTextBox.BackColor = System.Drawing.Color.LemonChiffon;
             statusTextBox.AppendText("Ready. Click the button to open a file.");
+
+            //TEST - init the networking session for the GPS
+         
         }
         #endregion
 
@@ -256,8 +259,60 @@ namespace TEST_GPS_Parsing
                 updateUITimer.Start();
             openVideoButton.Enabled = false;
             //}
+        }
 
+        //dev test to start checking the incoming GPS data
+        private void testGpsGetButton_Click(object sender, EventArgs e)
+        {
 
+            //Web service options for the GPS webservice
+            WebRequest request;
+            WebResponse response;
+            request = WebRequest.Create(
+"http://ec2-54-244-63-232.us-west-2.compute.amazonaws.com/send_gpsData.php");
+            // If required by the server, set the credentials.
+            //request.Credentials = CredentialCache.DefaultCredentials;
+            // Get the response.
+            response = request.GetResponse();
+            // Display the status.
+            string servResponse = ((HttpWebResponse)response).StatusDescription;
+            if (servResponse != "OK")
+            {
+                rawLogFileTextBox.AppendText("Server request failed...");
+                response.Close();
+                return;
+            }
+            else
+            {
+                rawLogFileTextBox.AppendText(servResponse);
+                Stream datastream = response.GetResponseStream();
+                if (datastream.CanRead == false)
+                {
+                    rawLogFileTextBox.AppendText("Datastream read failed - check server up!");
+                    response.Close();
+                    return;
+                }
+                else
+                {
+                    // Open the stream using a StreamReader for easy access.
+                    StreamReader reader = new StreamReader(datastream);
+                    // Read the content.
+                    string responseFromServer = reader.ReadToEnd();
+                    //pulls out the packet ID and checks if it's larger than the last one - else suspect internet!
+                    int packetID = Convert.ToInt32(responseFromServer.Substring(0, responseFromServer.IndexOf(';')));
+                    packetIDTextBox.Text = packetID.ToString();
+                    if (packetID == 7711 )
+                    {
+                        rawLogFileTextBox.AppendText("Same packet received - check GPS unit by SMSing 'status'");
+                    }
+                    // Display the content.
+                    rawLogFileTextBox.AppendText(responseFromServer);
+                    // Clean up the streams and the response.
+                    reader.Close();
+                    response.Close();
+                }
+
+            }
 
 
         }
@@ -924,6 +979,7 @@ namespace TEST_GPS_Parsing
 
 
         }
+
         #endregion
 
 

@@ -555,11 +555,14 @@ namespace TEST_GPS_Parsing
             longBottomLeftTextbox.Clear();
             longBottomRightTextbox.Clear();
             longUpperLeftTextbox.Clear();
-            longUpperRightTextbox.Clear();
+            longUpperRightTextbox.Clear();           
 
+        }
+
+        private void clearIpsButton_Click(object sender, EventArgs e)
+        {
             listOfIps.Items.Clear();
             checkIpAddrButton.Enabled = false;
-
         }
 
         private void goBackButton_Click(object sender, EventArgs e)
@@ -798,6 +801,7 @@ namespace TEST_GPS_Parsing
         {
 
         }
+
 
 
 

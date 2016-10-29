@@ -128,6 +128,7 @@
             this.dbPwdTextbox = new System.Windows.Forms.TextBox();
             this.dbUsernameTextbox = new System.Windows.Forms.TextBox();
             this.label30 = new System.Windows.Forms.Label();
+            this.testGpsGetButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -1105,11 +1106,23 @@
             this.label30.TabIndex = 31;
             this.label30.Text = "4";
             // 
+            // testGpsGetButton
+            // 
+            this.testGpsGetButton.Location = new System.Drawing.Point(148, 6);
+            this.testGpsGetButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.testGpsGetButton.Name = "testGpsGetButton";
+            this.testGpsGetButton.Size = new System.Drawing.Size(155, 32);
+            this.testGpsGetButton.TabIndex = 9;
+            this.testGpsGetButton.Text = "[TEST] Get GPS data";
+            this.testGpsGetButton.UseVisualStyleBackColor = true;
+            this.testGpsGetButton.Click += new System.EventHandler(this.testGpsGetButton_Click);
+            // 
             // GPSParser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1318, 598);
+            this.Controls.Add(this.testGpsGetButton);
             this.Controls.Add(this.label30);
             this.Controls.Add(this.panel5);
             this.Controls.Add(this.panel4);
@@ -1267,6 +1280,7 @@
         private System.Windows.Forms.Label label30;
         private System.Windows.Forms.TextBox dbStatusTextbox;
         private System.Windows.Forms.Label dbLoggedOnLabel;
+        private System.Windows.Forms.Button testGpsGetButton;
     }
 }
 

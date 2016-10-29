@@ -46,6 +46,9 @@
             this.label22 = new System.Windows.Forms.Label();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
+            this.listOfIps = new System.Windows.Forms.ListView();
+            this.label20 = new System.Windows.Forms.Label();
+            this.currentIpEntryBox = new System.Windows.Forms.TextBox();
             this.label19 = new System.Windows.Forms.Label();
             this.localOrIpCamInfoLabel = new System.Windows.Forms.Label();
             this.checkIpAddrButton = new System.Windows.Forms.Button();
@@ -88,9 +91,7 @@
             this.longUpperLeftTextbox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.coordsHelpLink = new System.Windows.Forms.LinkLabel();
-            this.currentIpEntryBox = new System.Windows.Forms.TextBox();
-            this.label20 = new System.Windows.Forms.Label();
-            this.listOfIps = new System.Windows.Forms.ListView();
+            this.clearIpsButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox8.SuspendLayout();
@@ -284,6 +285,7 @@
             // groupBox10
             // 
             this.groupBox10.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox10.Controls.Add(this.clearIpsButton);
             this.groupBox10.Controls.Add(this.listOfIps);
             this.groupBox10.Controls.Add(this.label20);
             this.groupBox10.Controls.Add(this.currentIpEntryBox);
@@ -299,11 +301,38 @@
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "Enter IP addresses here";
             // 
+            // listOfIps
+            // 
+            this.listOfIps.Location = new System.Drawing.Point(109, 108);
+            this.listOfIps.Name = "listOfIps";
+            this.listOfIps.Size = new System.Drawing.Size(214, 68);
+            this.listOfIps.TabIndex = 33;
+            this.listOfIps.UseCompatibleStateImageBehavior = false;
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label20.Location = new System.Drawing.Point(11, 108);
+            this.label20.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(86, 19);
+            this.label20.TabIndex = 32;
+            this.label20.Text = "Current IPs:";
+            // 
+            // currentIpEntryBox
+            // 
+            this.currentIpEntryBox.Location = new System.Drawing.Point(109, 80);
+            this.currentIpEntryBox.Name = "currentIpEntryBox";
+            this.currentIpEntryBox.Size = new System.Drawing.Size(214, 25);
+            this.currentIpEntryBox.TabIndex = 31;
+            this.currentIpEntryBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.currentIpEntryBox_KeyPress);
+            // 
             // label19
             // 
             this.label19.AutoSize = true;
             this.label19.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.Location = new System.Drawing.Point(51, 80);
+            this.label19.Location = new System.Drawing.Point(6, 83);
             this.label19.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(98, 19);
@@ -315,7 +344,7 @@
             this.localOrIpCamInfoLabel.AutoSize = true;
             this.localOrIpCamInfoLabel.BackColor = System.Drawing.Color.WhiteSmoke;
             this.localOrIpCamInfoLabel.Font = new System.Drawing.Font("Segoe UI", 7.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.localOrIpCamInfoLabel.Location = new System.Drawing.Point(54, 28);
+            this.localOrIpCamInfoLabel.Location = new System.Drawing.Point(22, 27);
             this.localOrIpCamInfoLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.localOrIpCamInfoLabel.Name = "localOrIpCamInfoLabel";
             this.localOrIpCamInfoLabel.Size = new System.Drawing.Size(314, 15);
@@ -326,7 +355,7 @@
             // checkIpAddrButton
             // 
             this.checkIpAddrButton.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.checkIpAddrButton.Location = new System.Drawing.Point(372, 127);
+            this.checkIpAddrButton.Location = new System.Drawing.Point(352, 95);
             this.checkIpAddrButton.Margin = new System.Windows.Forms.Padding(4);
             this.checkIpAddrButton.Name = "checkIpAddrButton";
             this.checkIpAddrButton.Size = new System.Drawing.Size(96, 51);
@@ -818,32 +847,17 @@
             this.coordsHelpLink.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.coordsHelpLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.coordsHelpLink_LinkClicked);
             // 
-            // currentIpEntryBox
+            // clearIpsButton
             // 
-            this.currentIpEntryBox.Location = new System.Drawing.Point(154, 77);
-            this.currentIpEntryBox.Name = "currentIpEntryBox";
-            this.currentIpEntryBox.Size = new System.Drawing.Size(214, 25);
-            this.currentIpEntryBox.TabIndex = 31;
-            this.currentIpEntryBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.currentIpEntryBox_KeyPress);
-            // 
-            // label20
-            // 
-            this.label20.AutoSize = true;
-            this.label20.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label20.Location = new System.Drawing.Point(63, 111);
-            this.label20.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(86, 19);
-            this.label20.TabIndex = 32;
-            this.label20.Text = "Current IPs:";
-            // 
-            // listOfIps
-            // 
-            this.listOfIps.Location = new System.Drawing.Point(154, 108);
-            this.listOfIps.Name = "listOfIps";
-            this.listOfIps.Size = new System.Drawing.Size(214, 68);
-            this.listOfIps.TabIndex = 33;
-            this.listOfIps.UseCompatibleStateImageBehavior = false;
+            this.clearIpsButton.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.clearIpsButton.Location = new System.Drawing.Point(352, 147);
+            this.clearIpsButton.Margin = new System.Windows.Forms.Padding(2);
+            this.clearIpsButton.Name = "clearIpsButton";
+            this.clearIpsButton.Size = new System.Drawing.Size(96, 30);
+            this.clearIpsButton.TabIndex = 4;
+            this.clearIpsButton.Text = "Clear IPs";
+            this.clearIpsButton.UseVisualStyleBackColor = true;
+            this.clearIpsButton.Click += new System.EventHandler(this.clearIpsButton_Click);
             // 
             // CameraBoundsSetup
             // 
@@ -952,5 +966,6 @@
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.TextBox currentIpEntryBox;
         private System.Windows.Forms.ListView listOfIps;
+        private System.Windows.Forms.Button clearIpsButton;
     }
 }
