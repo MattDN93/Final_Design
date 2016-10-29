@@ -15,7 +15,6 @@ $selDb = mysqli_select_db($dbconnection,$dbname) or die('Database connection fai
 //receive the incoming GPS variables and data
 //Will ignore any packets that aren't sent
 //into packetID, place the varibale called 'pid' in GET
-$packetID = (isset($_GET['pid']))? $_GET['pid']: false;
 $sessionID = (isset($_GET['sid']))? $_GET['sid']: false;
 $date = (isset($_GET['date']))? $_GET['date']: false;
 $time = (isset($_GET['time']))? $_GET['time']: false;
@@ -26,14 +25,15 @@ $altitude = (isset($_GET['alt']))? $_GET['alt']: false;
 $angleCard = (isset($_GET['ac']))? $_GET['ac']: false;
 $angleDeg = (isset($_GET['ad']))? $_GET['ad']: false;
 $accuracy = (isset($_GET['acc']))? $_GET['acc']: false;
-$fixType = (isset($_GET['ft']))? $_GET['ft']: false;
-$fixQual = (isset($_GET['fq']))? $_GET['fq']: false;
-$numSats = (isset($_GET['ns']))? $_GET['ns']: false;
 $checksum = (isset($_GET['ns']))? $_GET['ns']: false;
+
+$sqlrow = "SELECT COUNT(*) FROM `gpsData`";
+$sqlrnumcheck = mysqli_query($dbconnection,$sqlrow) or die('SQL query failed'.mysql_error());
+$packetID = mysqli_fetch_row($sqlrnumcheck);	//get the number of items in the DB for ID
 
 //insert the incoming data into the MySQL database
 //first braket is MySQL headers - VALUES is the value name above
-$sql = "INSERT INTO `gpsData`(`packetID`, `sessionID`, `date`, `time`, `latitude`, `longitude`, `grSpdKph`, `altitude`, `angleCard`, `angleDeg`, `accuracy`, `fixType`, `fixQual`, `numSats`, `checksum`) VALUES ('$packetID','$sessionID',NOW(),NOW(),'$latitude','$longitude','$grSpdKph','$altitude','$angleCard','$angleDeg' ,'$accuracy' ,'$fixType','$fixQual','$numSats','$checksum')";
+$sql = "INSERT INTO `gpsData`(`packetID`, `sessionID`, `date`, `time`, `latitude`, `longitude`, `grSpdKph`, `altitude`, `angleCard`, `angleDeg`, `accuracy`, `fixType`, `fixQual`, `numSats`, `checksum`) VALUES ('$packetID[0]','$sessionID',NOW(),NOW(),'$latitude','$longitude','$grSpdKph','$altitude','$angleCard','$angleDeg' ,'$accuracy' ,'$fixType','$fixQual','$numSats','$checksum')";
 
 $insert = mysqli_query($dbconnection, $sql) or die('SQL write error: '. mysql_error()); // insert MySQL request;
 
