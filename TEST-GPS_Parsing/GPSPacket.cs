@@ -12,9 +12,10 @@ namespace TEST_GPS_Parsing
         //--these are all strings for UI display---
         public int timeElapsed;
         //vars for GPS data
-        public int ID;
-        public int packetID = 0;               //session-based packet ID, one packet is equivalent to a set of NMEA strings starting with GPRMC
-        public int deltaCount = 0;                    //checks the delta of packet ID so we can update only when ID has changed
+        public int ID;                          //global ID from the web database
+        public int gpsSessionID;                //session ID from the GPS (packets since the last shutdown
+        public int packetID = 0;               //session-based packet ID from this software, one packet is equivalent to a set of NMEA strings starting with GPRMC
+        public int deltaCount = 0;             //checks the delta of packet ID so we can update only when ID has changed
         //incoming GPS data
         //from GPRMC
         public string latitude;
@@ -47,6 +48,9 @@ namespace TEST_GPS_Parsing
         public string checksumGNGGA;
         public string checksumResultStatusForDisplay;
 
+        //web request status messages
+        public string webserverRequestResult;
+
         //Default constructor
         public GPSPacket()
         {
@@ -76,6 +80,7 @@ namespace TEST_GPS_Parsing
             checksumGNGGA = "";
             checksumGNVTG = "";
             checksumResultStatusForDisplay = "";
+            webserverRequestResult = "";
         }
 
         //function to return friendly string from flags
@@ -114,6 +119,106 @@ namespace TEST_GPS_Parsing
         {
             return fixqual_f;
         }
+
+        //-------------------NEW PARSING METHOD------------------------------
+        public GPSPacket newParsingMethod(string incomingBuffer,GPSPacket gpsData)
+        {
+            //incoming format
+            //PID ; SID ;       Date ;      Time;       Lat;       Long     Spd;    Alt
+            //7711; 1483; 2016 - 10 - 29; 17:20:21; -29.868922; 30.979895; 0.02; 152.2069
+            int sectionCount = 0;
+            string subField = "";
+
+            //strip out incoming buffer spaces
+            incomingBuffer = incomingBuffer.Replace(" ", "");
+
+            foreach (var item in incomingBuffer)
+            {
+                if (item.ToString() != "*")      //the asterisk specifies the end of line
+                {
+                    if (item.ToString() == ";")  //increment counter for next segment
+                    {
+                        sectionCount++;
+                        subField = "";
+                    }
+
+                    switch (sectionCount)       //store the fields based on the expected section
+                    {
+                        //Section 1 is the global packet ID
+                        case 0:
+                            if (item.ToString() != ";")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.ID = Convert.ToInt32(subField); //parse string to a string for display
+                            }break;
+                        //Section 2 is the GPS session packet ID
+                        case 1:
+                            if (item.ToString() != ";")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.gpsSessionID = Convert.ToInt32(subField); //parse string to a string for display
+                            }
+                            break;
+                        //Section 3 is the global packet ID
+                        case 2:
+                            if (item.ToString() != ";")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.date = subField; //parse string to a string for display
+                            }
+                            break;
+                        //Section 1 is the global packet ID
+                        case 3:
+                            if (item.ToString() != ";")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.time = subField; //parse string to a string for display
+                            }
+                            break;
+                        //Section 1 is the global packet ID
+                        case 4:
+                            if (item.ToString() != ";")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.latitude = subField; //parse string to a string for display
+                            }
+                            break;
+                        case 5:
+                            if (item.ToString() != ";")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.longitude = subField; //parse string to a string for display
+                            }
+                            break;
+                        case 6:
+                            if (item.ToString() != ";")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.grspd_kph = subField; //parse string to a string for display
+                            }
+                            break;
+                        case 7:
+                            if (item.ToString() != ";")  //make sure the comma isn't included
+                            {
+                                subField += item;
+                                gpsData.altitude = subField; //parse string to a string for display
+                            }
+                            break;
+
+                        default: break;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return gpsData;
+            
+        }
+
+        //-------------------END NEW PARSING METHODS-------------------------
         
         //Make sure the checksum is correct by generating a checksum from the string and comparing
         public GPSPacket getChecksum(string sentence, GPSPacket updatedGpsData, int sentenceType)
@@ -165,62 +270,89 @@ namespace TEST_GPS_Parsing
 
         //-------------------------PARSING MEMBER METHODS----------------------------
 
-        public GPSPacket parseSelection(string sentenceBuffer, GPSPacket gpsData)
+        public GPSPacket parseSelection(string sentenceBuffer, GPSPacket gpsData, bool usingWebLogging)
         {
-            GPSPacket updatedGpsData = gpsData; //sets up a new object which methods return with updated values
-            if (!(sentenceBuffer.StartsWith("$")))
+            GPSPacket updatedGpsData = new GPSPacket(); //sets up a new object which methods return with updated values
+            if (usingWebLogging == true)  //we've got the webserver response OR a failed packet
             {
-                return updatedGpsData;     //the sentence is invalid 
-            }
-
-            if (sentenceBuffer.Contains("GNRMC")) //We assume that each "packet" of sentences begins with a GPRMC hence update the packet ID each time a GPRMC is found!
-            {
-                packetID++;
-                updatedGpsData.ID = packetID;
-                updatedGpsData = parseGNRMC(sentenceBuffer, gpsData);
-                updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 0);    //checksum compute with GPRMC
-
-                //do some last-minute formatting to the fields based on known issues
-                updatedGpsData.date = updatedGpsData.date.TrimEnd('/'); //remove trailing "/"
-                if (updatedGpsData.time.StartsWith("0") || updatedGpsData.longitude.StartsWith("0") || updatedGpsData.latitude.StartsWith("0"))
+                if (!sentenceBuffer.Contains(";"))
                 {
-                    //updatedGpsData.time = updatedGpsData.time.TrimStart('0'); //remove leading zeroes
-                    //                    updatedGpsData.latitude = updatedGpsData.latitude.TrimStart('0');
-                    //                    updatedGpsData.longitude = updatedGpsData.longitude.TrimStart('0');
+                    return updatedGpsData;     //the sentence is invalid 
                 }
-
-                //convert the track angle in degrees true to a cardinal heading
-                trackToCardinal(updatedGpsData);
-
-                //convert the time from a horrible string to something nice
-                timeNiceDisplay(updatedGpsData);
-
-                //convert the latitude and longitude from DDMM.MMM(H) to decimal (for Maps and calculations)
-                ///updatedGpsData = latLongConvertToDbl(updatedGpsData);
-
-                return updatedGpsData;
-            }
-            else if (sentenceBuffer.Contains("GPGGA"))
-            {
-                updatedGpsData = parseGNGGA(sentenceBuffer, gpsData);
-                updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 1);    //checksum compute with GPGGA
-                return updatedGpsData;
-            }
-            else if (sentenceBuffer.Contains("GPVTG"))
-            {
-                updatedGpsData = parseGNVTG(sentenceBuffer, gpsData);
-                updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 2);    //checksum compute with GPVTG
-                //trim off leading zeroes from the speed
-                if (updatedGpsData.grspd_kph.StartsWith("0"))
+                else
                 {
-                    updatedGpsData.grspd_kph = updatedGpsData.grspd_kph.TrimStart('0');
+                    updatedGpsData = newParsingMethod(sentenceBuffer, gpsData);     //parse the incoming string
+                    if (updatedGpsData.ID > gpsData.ID)
+                    {
+                        packetID++;
+                        return updatedGpsData;
+                    }
+                    else
+                    {
+                        return updatedGpsData;
+                    }
+                    
                 }
-                return updatedGpsData;
+                
             }
-            else
+
+            //-----------------original NMEA parsing-------------------
+            else   //this is a NMEA string and so it starts with a '$"
             {
-                return updatedGpsData;     //we don't consider all the other NMEA strings
+                if (!(sentenceBuffer.StartsWith("$")))  //we've got the webserver response OR a failed packet
+                {
+                    return updatedGpsData;
+                }
+                    if (sentenceBuffer.Contains("GNRMC")) //We assume that each "packet" of sentences begins with a GPRMC hence update the packet ID each time a GPRMC is found!
+                {
+                    packetID++;
+                    updatedGpsData.ID = packetID;
+                    updatedGpsData = parseGNRMC(sentenceBuffer, gpsData);
+                    updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 0);    //checksum compute with GPRMC
+
+                    //do some last-minute formatting to the fields based on known issues
+                    updatedGpsData.date = updatedGpsData.date.TrimEnd('/'); //remove trailing "/"
+                    if (updatedGpsData.time.StartsWith("0") || updatedGpsData.longitude.StartsWith("0") || updatedGpsData.latitude.StartsWith("0"))
+                    {
+                        //updatedGpsData.time = updatedGpsData.time.TrimStart('0'); //remove leading zeroes
+                        //                    updatedGpsData.latitude = updatedGpsData.latitude.TrimStart('0');
+                        //                    updatedGpsData.longitude = updatedGpsData.longitude.TrimStart('0');
+                    }
+
+                    //convert the track angle in degrees true to a cardinal heading
+                    trackToCardinal(updatedGpsData);
+
+                    //convert the time from a horrible string to something nice
+                    timeNiceDisplay(updatedGpsData);
+
+                    //convert the latitude and longitude from DDMM.MMM(H) to decimal (for Maps and calculations)
+                    ///updatedGpsData = latLongConvertToDbl(updatedGpsData);
+
+                    return updatedGpsData;
+                }
+                else if (sentenceBuffer.Contains("GPGGA"))
+                {
+                    updatedGpsData = parseGNGGA(sentenceBuffer, gpsData);
+                    updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 1);    //checksum compute with GPGGA
+                    return updatedGpsData;
+                }
+                else if (sentenceBuffer.Contains("GPVTG"))
+                {
+                    updatedGpsData = parseGNVTG(sentenceBuffer, gpsData);
+                    updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 2);    //checksum compute with GPVTG
+                                                                                        //trim off leading zeroes from the speed
+                    if (updatedGpsData.grspd_kph.StartsWith("0"))
+                    {
+                        updatedGpsData.grspd_kph = updatedGpsData.grspd_kph.TrimStart('0');
+                    }
+                    return updatedGpsData;
+                }
+                else
+                {
+                    return updatedGpsData;     //we don't consider all the other NMEA strings
+                }
             }
+            
 
         }
 

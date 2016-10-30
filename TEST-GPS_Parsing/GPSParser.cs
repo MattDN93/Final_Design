@@ -24,6 +24,12 @@ namespace TEST_GPS_Parsing
         bool parseIsRunning = false;                  //bool to denote whether the parser is in progress or not.
         bool videoOutputRunning = false;                //bool to check if the vo object has been created or not
         private static int resourceInUse= 0;          //Flag to manage threads and resource locks  
+        bool usingWebLogging;                       //flag to mention whether file or webserver parsing is used
+
+        //web request status flag returns
+        private static int requestCompleteOK = 0;
+        private static int serverReturnedFail = 1;
+        private static int dataReadFail = 2;
 
         private Object coordsSendLock = new Object();
 
@@ -43,6 +49,7 @@ namespace TEST_GPS_Parsing
         GMapOverlay locationMarkersOverlay;           //overlay for the location markers on map
         VideoOutputWindow vo;                         //object for the video output window
         MySQLInterface sqlDb;                           //MySQL database instance
+        string serverUri;                               //displayed to user to show which server they're connected to
 
         string sentenceBuffer;                        //global buffer to read incoming data used for parsing
         string rawBuffer;                             //not used for parsing , but for display only
@@ -129,9 +136,10 @@ namespace TEST_GPS_Parsing
             dbPwdTextbox.Enabled = false;
             dbLoggedOnLabel.Visible = false;
             statusTextBox.BackColor = System.Drawing.Color.LemonChiffon;
-            statusTextBox.AppendText("Ready. Click the button to open a file.");
+            statusTextBox.AppendText("Ready. Click 1. to open server.");
 
             //TEST - init the networking session for the GPS
+            servStatusTextbox.Text = "Connect to server...";
          
         }
         #endregion
@@ -153,6 +161,8 @@ namespace TEST_GPS_Parsing
                 dbPwdTextbox.Visible = false;
                 dbUsernameTextbox.Visible = false;
                 dbSetupButton.Visible = false;
+                unLabel.Visible = false;
+                pwLabel.Visible = false;
                 dbLoggedOnLabel.Visible = true;
             }
             catch (Exception open_ex)
@@ -175,13 +185,15 @@ namespace TEST_GPS_Parsing
 
         private void openLogDialog_FileOk(object sender, CancelEventArgs e)
         {
-
+            //disable the webserver logging now
+            testGpsGetButton.Enabled = false;
+            usingWebLogging = false;
             //MessageBox.Show("GPS NMEA log file ready. Click Start Tracking.");
             inputLogFilename = openLogDialog.FileName;       //save the filename of the logfile
             gpsData.gpsLogfilename = inputLogFilename;       //save filename to associated GPS class
             startButton.Enabled = true;
             statusTextBox.Clear();
-            statusTextBox.AppendText("File opened OK. Click start to start parsing.");
+            statusTextBox.AppendText("Server opened OK. Click start above.");
         }
 
  
@@ -230,9 +242,13 @@ namespace TEST_GPS_Parsing
             DialogResult quitQuestion = MessageBox.Show("This will stop the GPS log. Stop logging now?", "Stop GPS logging?", MessageBoxButtons.YesNo,MessageBoxIcon.Question);
             if (quitQuestion == DialogResult.Yes)
             {
-                stopButton.Enabled = false;
-                startButton.Enabled = true;
+                //enable the choices again
+                testGpsGetButton.Text = "Connect to server";
+                testGpsGetButton.Enabled = true;
                 openFileButton.Enabled = true;
+
+                stopButton.Enabled = false;
+                startButton.Enabled = true;                
                 recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
                 _waitHandleDatabase.Set();      //pings the parser thread to release the lock
                 dbLoggingThread.CancelAsync(); //requests cancellation of the database thread
@@ -261,57 +277,43 @@ namespace TEST_GPS_Parsing
             //}
         }
 
-        //dev test to start checking the incoming GPS data
+        //tests connection to the server
         private void testGpsGetButton_Click(object sender, EventArgs e)
         {
-
+            //sends a basic HTTP command to the server to make sure it's online
             //Web service options for the GPS webservice
             WebRequest request;
             WebResponse response;
             request = WebRequest.Create(
-"http://ec2-54-244-63-232.us-west-2.compute.amazonaws.com/send_gpsData.php");
-            // If required by the server, set the credentials.
-            //request.Credentials = CredentialCache.DefaultCredentials;
+"http://ec2-54-244-63-232.us-west-2.compute.amazonaws.com");
             // Get the response.
             response = request.GetResponse();
             // Display the status.
             string servResponse = ((HttpWebResponse)response).StatusDescription;
             if (servResponse != "OK")
             {
-                rawLogFileTextBox.AppendText("Server request failed...");
+                servStatusTextbox.Text = "Server request failed.";
                 response.Close();
                 return;
             }
             else
             {
-                rawLogFileTextBox.AppendText(servResponse);
-                Stream datastream = response.GetResponseStream();
-                if (datastream.CanRead == false)
-                {
-                    rawLogFileTextBox.AppendText("Datastream read failed - check server up!");
-                    response.Close();
-                    return;
-                }
-                else
-                {
-                    // Open the stream using a StreamReader for easy access.
-                    StreamReader reader = new StreamReader(datastream);
-                    // Read the content.
-                    string responseFromServer = reader.ReadToEnd();
-                    //pulls out the packet ID and checks if it's larger than the last one - else suspect internet!
-                    int packetID = Convert.ToInt32(responseFromServer.Substring(0, responseFromServer.IndexOf(';')));
-                    packetIDTextBox.Text = packetID.ToString();
-                    if (packetID == 7711 )
-                    {
-                        rawLogFileTextBox.AppendText("Same packet received - check GPS unit by SMSing 'status'");
-                    }
-                    // Display the content.
-                    rawLogFileTextBox.AppendText(responseFromServer);
-                    // Clean up the streams and the response.
-                    reader.Close();
-                    response.Close();
-                }
+                //results success so server is online, go ahead with setting up
+                testGpsGetButton.Text = "Server online";
+                serverUri = ((HttpWebResponse)response).ResponseUri.ToString();
+                serverUri = serverUri.Substring(0, serverUri.LastIndexOf('/')) + "/phpmyadmin";
+                testGpsGetButton.Enabled = false;
+                usingWebLogging = true;
+                openFileButton.Enabled = false;
+                servStatusTextbox.Text = servResponse;
 
+                dbSetupButton.Enabled = true;
+                dbUsernameTextbox.Enabled = true;
+                dbPwdTextbox.Enabled = true;            
+                startButton.Enabled = true;
+                statusTextBox.Clear();
+                statusTextBox.AppendText("Server opened OK. Click start above.");
+                response.Close();
             }
 
 
@@ -443,8 +445,81 @@ namespace TEST_GPS_Parsing
             checksumTextbox.Clear();
             checksumTextbox.Text = gpsData.checksumResultStatusForDisplay;
 
+            //show the status of other components
+            servStatusTextbox.Clear();
+            servStatusTextbox.Text = gpsData.webserverRequestResult;
+
 
         }
+        #endregion
+
+        #region Web requests for GPS data
+
+        public int makeWebRequest()
+        {
+            //Web service options for the GPS webservice
+            WebRequest request;
+            WebResponse response;
+            request = WebRequest.Create(
+"http://ec2-54-244-63-232.us-west-2.compute.amazonaws.com/send_gpsData.php");
+            // If required by the server, set the credentials.
+            //request.Credentials = CredentialCache.DefaultCredentials;
+            // Get the response.
+            response = request.GetResponse();
+            // Display the status - get URI to send to link.
+            serverUri = ((HttpWebResponse)response).ResponseUri.ToString();
+            serverUri = serverUri.Substring(0, serverUri.LastIndexOf('/')) + "/phpmyadmin";            
+
+            string servResponse = ((HttpWebResponse)response).StatusDescription;
+            servStatusTextbox.Text = servResponse;
+
+            if (servResponse != "OK")
+            {
+                string fullResponse = response.ToString();  //full response string
+                gpsData.webserverRequestResult = fullResponse;
+                response.Close();
+                return serverReturnedFail;
+            }
+            else
+            {
+                gpsData.webserverRequestResult = ((HttpWebResponse)response).StatusDescription;
+                Stream datastream = response.GetResponseStream();
+                if (datastream.CanRead == false)
+                {
+                    gpsData.webserverRequestResult = "Datastream read failed - check server up!";
+                    response.Close();
+                    return dataReadFail;
+                }
+                else
+                {
+                    // Open the stream using a StreamReader for easy access.
+                    StreamReader reader = new StreamReader(datastream);
+                    // Read the content.
+                    string responseFromServer = reader.ReadToEnd();
+                    //pulls out the packet ID and checks if it's larger than the last one - else suspect internet!
+                    int packetID = Convert.ToInt32(responseFromServer.Substring(0, responseFromServer.IndexOf(';')));              
+                    // Display the content in the raw buffers 
+                    rawBuffer = responseFromServer;
+                    // Clean up the streams and the response and write the main response to the buffer for parsing
+                    sentenceBuffer = responseFromServer;
+                    reader.Close();
+                    response.Close();
+                    return requestCompleteOK;
+                }
+
+            }
+
+        }
+
+        private void servAccessLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (serverUri != null)      //user should have opened the server first
+            {
+                System.Diagnostics.Process.Start(serverUri);
+            }
+            
+        }
+
         #endregion
 
         //-------------------------THREAD 1: FOR UPDATING UI and DATA----------------
@@ -458,33 +533,29 @@ namespace TEST_GPS_Parsing
             Thread.CurrentThread.Name = "GPS Logging Thread";
             Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
 
-            //create a new streamreader instance for the incoming file
-            System.IO.StreamReader inputFile = new System.IO.StreamReader(gpsData.gpsLogfilename);
-
-            //start reading the line
-            //For simulating NMEA behaviour
-            int count = 0;
-            
-                while (inputFile.EndOfStream == false)
+            //This thread now uses 2 different methods: one parses raw NMEA, the other parses from a webserver
+            //------------------METHOD 1: PARSING USING THE WEBSERVER--------------
+            #region Parsing with real GPS webserver source
+            if (usingWebLogging == true)
+            {
+                int count = 0;
+                while (!recvRawDataWorker.CancellationPending) //check for thread cancel request from stop button (since it's only active here)
                 {
-                    if (!recvRawDataWorker.CancellationPending) //check for thread cancel request from stop button (since it's only active here)
-                    {                    
-                        sentenceBuffer = inputFile.ReadLine();
-                        //This function updates the UI elements with the parsed NMEA data
-                        rawBuffer += sentenceBuffer;                         //aggregates the raw buffer to display it
-
-
+                    int localRequestResult = makeWebRequest();
+                    while (localRequestResult == serverReturnedFail)    //inform the user of the fail
+                    {
+                        gpsData.webserverRequestResult = "Connectivity fail...";
+                    }
+                    rawBuffer += sentenceBuffer;                         //aggregates the raw buffer to display it
+                    
                     //Checks if the resource is available 
                     Console.WriteLine("Parser has data-lock");
-                    gpsData = gpsData.parseSelection(sentenceBuffer, gpsData);  //perform the parsing operation
-                    doChecksumCheck();                                          //check on the checksums of the current method
-                    mapData.parseLatLong(gpsData.latitude, gpsData.longitude);  //pass the data to the mapping method
-                    
-                    count++;
+                    gpsData = gpsData.parseSelection(sentenceBuffer, gpsData, true);  //perform the parsing operation
+                    //mapData.parseLatLong(gpsData.latitude, gpsData.longitude);  //pass the data to the mapping method
 
+                    count++;
                     //this allows for a thread-safe variable access
-                    if (gpsData.packetID > gpsData.deltaCount)
-                    {
+
                         gpsData.deltaCount++;
                         //locationMarkersOverlay = mapData.plotOnMap(locationMarkersOverlay);          //passes the initialised overlay to be populated
 
@@ -504,7 +575,7 @@ namespace TEST_GPS_Parsing
                                     {
                                         vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
                                     }
-                                   
+
                                 }
 
                             }
@@ -513,18 +584,18 @@ namespace TEST_GPS_Parsing
                                 videoOutputRunning = false;
                             }
 
-                            
+
                         }
 
 
-                        
+
 
                         Console.WriteLine("Waiting for DB write to finish");
                         if (dbLoggingActive == true)
                         {
                             _waitHandleDatabase.WaitOne();                  //only wait for write if there's actually a write happening
                         }
-                        
+
                         Console.WriteLine("Parser obtained UI write lock");
                         recvRawDataWorker.ReportProgress(count, gpsData); //only update the UI if a whole new packet has been read- saves calling every char                                                
 
@@ -532,28 +603,120 @@ namespace TEST_GPS_Parsing
                         {
                             _waitHandleParser.Set(); //inform the db thread that the lock has been released
                         }
-                        
+
                         Console.WriteLine("Parser released UI lock");
                         //rawBuffer = "";
                     }
 
 
-                    //FOR SIMULATION ONLY
-                    if (debug)
+           }
+            #endregion
+
+            #region Parsing with simulated NMEA files
+            if (usingWebLogging == false)
+            {
+                //create a new streamreader instance for the incoming file
+                System.IO.StreamReader inputFile = new System.IO.StreamReader(gpsData.gpsLogfilename);
+
+                //start reading the line
+                //For simulating NMEA behaviour
+                int count = 0;
+
+                while (inputFile.EndOfStream == false)
+                {
+                    if (!recvRawDataWorker.CancellationPending) //check for thread cancel request from stop button (since it's only active here)
                     {
-                        Thread.Sleep(1000);
-                    }
-                    
+                        sentenceBuffer = inputFile.ReadLine();
+                        //This function updates the UI elements with the parsed NMEA data
+                        rawBuffer += sentenceBuffer;                         //aggregates the raw buffer to display it
+
+
+                        //Checks if the resource is available 
+                        Console.WriteLine("Parser has data-lock");
+                        gpsData = gpsData.parseSelection(sentenceBuffer, gpsData,false);  //perform the parsing operation
+                                                                                    //doChecksumCheck();                                          //check on the checksums of the current method
+                        mapData.parseLatLong(gpsData.latitude, gpsData.longitude);  //pass the data to the mapping method
+
+                        count++;
+
+                        //this allows for a thread-safe variable access
+                        if (gpsData.packetID > gpsData.deltaCount)
+                        {
+                            gpsData.deltaCount++;
+                            //locationMarkersOverlay = mapData.plotOnMap(locationMarkersOverlay);          //passes the initialised overlay to be populated
+
+                            //unlock the data to write to the DB 
+                            _waitHandleParser.Set();
+                            Console.WriteLine("Parser released lock");
+
+                            //send the co-ordinates to the video output UI - keeps calling till its set
+                            //pass the new instance of the overlay if it's been disposed before
+                            if (parseIsRunning)
+                            {
+                                try
+                                {
+                                    if (!vo.IsDisposed)
+                                    {
+                                        lock (coordsSendLock)
+                                        {
+                                            vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
+                                        }
+
+                                    }
+
+                                }
+                                catch (NullReferenceException)
+                                {
+                                    videoOutputRunning = false;
+                                }
+
+
+                            }
+
+
+
+
+                            Console.WriteLine("Waiting for DB write to finish");
+                            if (dbLoggingActive == true)
+                            {
+                                _waitHandleDatabase.WaitOne();                  //only wait for write if there's actually a write happening
+                            }
+
+                            Console.WriteLine("Parser obtained UI write lock");
+                            recvRawDataWorker.ReportProgress(count, gpsData); //only update the UI if a whole new packet has been read- saves calling every char                                                
+
+                            if (dbLoggingActive == true)
+                            {
+                                _waitHandleParser.Set(); //inform the db thread that the lock has been released
+                            }
+
+                            Console.WriteLine("Parser released UI lock");
+                            //rawBuffer = "";
+                        }
+
+
+                        //FOR SIMULATION ONLY
+                        if (debug)
+                        {
+                            Thread.Sleep(1000);
+                        }
+
                         //---------------
                     }
                     else
                     {
-                    inputFile.Close();
-                    //everything else is handled in the completion thread
-                    break;
+                        inputFile.Close();
+                        //everything else is handled in the completion thread
+                        break;
                     }
                 }
-            inputFile.Close();
+                inputFile.Close();
+            }
+            #endregion
+
+
+
+
 
         
         }
@@ -725,6 +888,8 @@ namespace TEST_GPS_Parsing
                 stopButton.Enabled = false;
                 startButton.Enabled = true;
                 openFileButton.Enabled = true;
+                testGpsGetButton.Enabled = true;
+                testGpsGetButton.Text = "Connect to server";
                 parseIsRunning = false;
                 trayIconParsing.Text = "Logging stopped.";
                 trayIconParsing.ShowBalloonTip(5, "GPS Logging stopped", "Logging stopped or interrupted. Open a new file to restart logging.", ToolTipIcon.Error);
@@ -980,7 +1145,13 @@ namespace TEST_GPS_Parsing
 
         }
 
+
         #endregion
+
+        private void dbUsernameTextbox_TextChanged(object sender, EventArgs e)
+        {
+
+        }
 
 
     }
