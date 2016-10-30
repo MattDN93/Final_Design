@@ -551,7 +551,7 @@ namespace TEST_GPS_Parsing
                     //Checks if the resource is available 
                     Console.WriteLine("Parser has data-lock");
                     gpsData = gpsData.parseSelection(sentenceBuffer, gpsData, true);  //perform the parsing operation
-                    //mapData.parseLatLong(gpsData.latitude, gpsData.longitude);  //pass the data to the mapping method
+                    mapData.parseLatLong(gpsData.latitude, gpsData.longitude,true);  //pass the data to the mapping method
 
                     count++;
                     //this allows for a thread-safe variable access
@@ -635,7 +635,7 @@ namespace TEST_GPS_Parsing
                         Console.WriteLine("Parser has data-lock");
                         gpsData = gpsData.parseSelection(sentenceBuffer, gpsData,false);  //perform the parsing operation
                                                                                     //doChecksumCheck();                                          //check on the checksums of the current method
-                        mapData.parseLatLong(gpsData.latitude, gpsData.longitude);  //pass the data to the mapping method
+                        mapData.parseLatLong(gpsData.latitude, gpsData.longitude,false);  //pass the data to the mapping method
 
                         count++;
 

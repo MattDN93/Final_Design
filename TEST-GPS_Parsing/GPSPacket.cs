@@ -390,7 +390,7 @@ namespace TEST_GPS_Parsing
         private GPSPacket latLongConvertToDbl(GPSPacket updatedGpsDataForLatLong)
         {
             Mapping mapObjectTemp = new Mapping();      //used just for the lat/long parsing method
-            mapObjectTemp.parseLatLong(updatedGpsDataForLatLong.latitude, updatedGpsDataForLatLong.longitude);
+            mapObjectTemp.parseLatLong(updatedGpsDataForLatLong.latitude, updatedGpsDataForLatLong.longitude,false);
             updatedGpsDataForLatLong.latitude = mapObjectTemp.latitudeD.ToString();
             updatedGpsDataForLatLong.longitude = mapObjectTemp.longitudeD.ToString();
             return updatedGpsDataForLatLong;
