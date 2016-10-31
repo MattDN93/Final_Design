@@ -400,6 +400,7 @@ namespace TEST_GPS_Parsing
                 HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
                 //Setting the Request method HEAD- we want to check it exists
                 request.Method = "HEAD";
+                request.Proxy = null;
                 //Getting the Web Response.
                 HttpWebResponse response = request.GetResponse() as HttpWebResponse;
                 //Returns TRUE if the Status code == 200
@@ -630,6 +631,36 @@ namespace TEST_GPS_Parsing
             drawModeChoiceComboBox.SelectedIndex = 2;
             vidSourceChoiceComboBox.SelectedIndex = 1;
         }
+
+        private void devLanButton_Click(object sender, EventArgs e)
+        {           
+            //Test Suite for co-ord checks - Howard College Traversal With Google Earth
+            //bounds UpperLeft: Lat -29.866178; Long 30.981370
+            //bounds UpperRight Long 30.983583
+            //bounds BottomLeft Lat -29.866673
+            //goes up, right off, across main, left off, across right and right off, and back up out top
+
+            longUpperLeftTextbox.Text = "30.980211";            
+            longBottomLeftTextbox.Text = "30.980166";
+
+            longUpperRightTextbox.Text = "30.980293";
+            longBottomRightTextbox.Text = "30.980258";
+
+            latUpperLeftTextbox.Text = "-29.868590";
+            latUpperRightTextbox.Text = "-29.868621";
+
+            latBottomLeftTextbox.Text = "-29.868635";
+            latBottomRightTextbox.Text = "-29.868674";
+
+
+            drawModeChoiceComboBox.SelectedIndex = 2;
+            vidSourceChoiceComboBox.SelectedIndex = 2;
+            listOfIps.Items.Add("192.168.135.103");
+            listOfIps.Items.Add("192.168.135.102");
+            ///listOfIps.Items.Add("192.168.135.104");
+            checkIpAddrButton.Enabled = true;
+
+        }
         #endregion
 
         #region Camera modification methods
@@ -801,6 +832,7 @@ namespace TEST_GPS_Parsing
         {
 
         }
+
 
 
 

@@ -264,7 +264,7 @@ namespace TEST_GPS_Parsing
                     videoLogFilename = "videoLogFile" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
                     videoWriterOutput = new VideoWriter(videoLogFilename + ".mkv", //File name
                                             VideoWriter.Fourcc('M', 'P', '4', '2'), //Video format
-                                            15, //FPS
+                                            20, //FPS
                                             new Size(640, 480), //frame size
                                             true); //Color
                 }
@@ -275,7 +275,7 @@ namespace TEST_GPS_Parsing
                 videoLogFilename = "videoLogFile" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
                 videoWriterOutput = new VideoWriter(videoLogFilename + ".mkv", //File name
                                         VideoWriter.Fourcc('M', 'P', '4', '2'), //Video format
-                                        15, //FPS
+                                        20, //FPS
                                         new Size(640, 480), //frame size
                                         true); //Color
             }
@@ -307,11 +307,9 @@ namespace TEST_GPS_Parsing
                         }
                         ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
                     }
-                    
-                    grabResult = camStreamCapture.Retrieve(webcamVid, 0);    //grab a frame and store to webcamVid matrix
-                    disconnectCounter++;
-                    rawVideoFramesBox.Image = webcamVid;        //display on-screen
-                    
+
+                    grabResult = camStreamCapture.Retrieve(webcamVid, 0);
+                    //rawVideoFramesBox.Image = webcamVid;                                       
 
                     //Now draw the markers on the overlay and display 
                     //this method sends a FALSE since the image updates 24+ times per second but the data only arrives ~once per second from GPS
@@ -319,7 +317,7 @@ namespace TEST_GPS_Parsing
                     bool returnVal = false;
                     if (drawMode_Overlay != DRAW_MODE_REVOBJTRACK)
                     {
-                        returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, false);     //draw marker from external input of coords
+                        returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, false, currentlyActiveCamera);     //draw marker from external input of coords
                     }
                     else
                     {
@@ -478,7 +476,7 @@ namespace TEST_GPS_Parsing
                         //make the camera one screen to the left the new active camera
                         //----------------Capture object switch--------------
                         //halt fast switching threads
-                        _waitCameraRightSwitch.WaitOne(15000);
+                        _waitCameraRightSwitch.WaitOne(5000);
                         SetupCapture(activeCamLocal - 1);
                         _waitCameraLeftSwitch.Set();
                         //----------------------END TEST CODE-----------
@@ -567,7 +565,7 @@ namespace TEST_GPS_Parsing
                         //make the camera one screen to the right the new active camera
 
                         //--------------TEST CODE-------
-                        _waitCameraLeftSwitch.WaitOne(15000);
+                        _waitCameraLeftSwitch.WaitOne(5000);
                         SetupCapture(activeCamLocal + 1);
                         _waitCameraRightSwitch.Set();
                         //--------------END TEST CODE-----
@@ -756,7 +754,7 @@ namespace TEST_GPS_Parsing
                     bool returnVal = false;
                     if (drawMode_Overlay != DRAW_MODE_REVOBJTRACK)
                     {
-                        returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, true);     //draw marker from external input of coords
+                        returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, true, currentlyActiveCamera);     //draw marker from external input of coords
                     }
                     if (returnVal == true && isStreaming)              //if the marker routine returned OK, draw the result in the video window
                     {
@@ -772,7 +770,7 @@ namespace TEST_GPS_Parsing
                     if (drawMode_Overlay != DRAW_MODE_REVOBJTRACK)
                     {
                         valHasChanged = false;
-                        returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, false);     //draw marker from external input of coords
+                        returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, false, currentlyActiveCamera);     //draw marker from external input of coords
                     }
                     else
                     {
@@ -1077,12 +1075,14 @@ namespace TEST_GPS_Parsing
                 isStreaming = false;
                 setupCaptureButton.Enabled = true;
                 startCaptureButton.Text = "Start Capture";
+                startCaptureButton.Enabled = false;     
                 pausedCaptureLabel.Visible = true;
                 camStreamCapture.Pause();
                 ol_mark.clearScreen();      //remove the marker and lines off the screen.
                 videoSaveTimer.Stop();        //pause the disconnection check timer                
                 videoLogFilename = null;            //resets filename
                 videoWriterOutput.Dispose();        //closes the file
+                startCaptureButton.Enabled = true;
             }
             else
             {
@@ -1096,6 +1096,7 @@ namespace TEST_GPS_Parsing
                 setupVideoWriter(fromButtonRepress);                     //create new video Log file
                 try
                 {
+                  
                    camStreamCapture.Start();
                    isStreaming = true;
                     

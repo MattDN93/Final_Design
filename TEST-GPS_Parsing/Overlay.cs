@@ -232,7 +232,7 @@ namespace TEST_GPS_Parsing
         #endregion
 
         #region Drawing Onscreen Marker (Points)
-        public bool drawMarker(int current_xval, int current_yval, Mat webcamVidforOverlay, bool valHasChanged)
+        public bool drawMarker(int current_xval, int current_yval, Mat webcamVidforOverlay, bool valHasChanged, int currentCamNum)
         {
             try
             {
@@ -252,7 +252,8 @@ namespace TEST_GPS_Parsing
                 //void putText(Mat& img, const string& text, Point org, int fontFace, double fontScale, new MCvScalar color, int thickness=1, int lineType=8, bool bottomLeftOrigin=false )
                 CvInvoke.PutText(overlayGrid, dateTimeDisplay , new Point(10, 10), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(0, 0, 255), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
                 //write camera number onscreen
-                
+                string camNumber = "Camera " + currentCamNum;
+                CvInvoke.PutText(overlayGrid, camNumber, new Point(gridWidth - 70, 10), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(0, 0, 255), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
 
                 usingCoords = true;         //setting this to ensure the x & y values aren't touched by other thread. Bool setting is atomic
 
@@ -467,11 +468,11 @@ namespace TEST_GPS_Parsing
                                             y = current_gps_point.Y;
                                         }
                                     }
-                                    drawMarker(x, y, overlayGrid, true);   //draw this point update it 
+                                    drawMarker(x, y, overlayGrid, true, currentlyActiveCamera);   //draw this point update it 
                                 }
                                 else
                                 {
-                                    drawMarker(x, y, overlayGrid, false);   //draw this point but don't update it yet
+                                    drawMarker(x, y, overlayGrid, false, currentlyActiveCamera);   //draw this point but don't update it yet
                                 }
 
                                 //END TEST

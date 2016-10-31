@@ -287,6 +287,7 @@ namespace TEST_GPS_Parsing
             request = WebRequest.Create(
 "http://ec2-54-244-63-232.us-west-2.compute.amazonaws.com");
             // Get the response.
+            request.Proxy = null;
             response = request.GetResponse();
             // Display the status.
             string servResponse = ((HttpWebResponse)response).StatusDescription;
@@ -324,9 +325,13 @@ namespace TEST_GPS_Parsing
 
         private void updateUITimer_Tick(object sender, EventArgs e)
         {
-            if (recvRawDataWorker.IsBusy)
+            if (parseIsRunning)
             {
                 gpsData.timeElapsed++; //update the running timer only if parsing is active
+            }
+            if (recvRawDataWorker.IsBusy)
+            {
+                
                 if (!videoOutputRunning)
                 {
                     statusTextBox.BackColor = System.Drawing.Color.Orange;
@@ -464,6 +469,7 @@ namespace TEST_GPS_Parsing
 "http://ec2-54-244-63-232.us-west-2.compute.amazonaws.com/send_gpsData.php");
             // If required by the server, set the credentials.
             //request.Credentials = CredentialCache.DefaultCredentials;
+            request.Proxy = null;
             // Get the response.
             response = request.GetResponse();
             // Display the status - get URI to send to link.
@@ -1153,7 +1159,10 @@ namespace TEST_GPS_Parsing
 
         }
 
+        private void timeElapsedTextBox_TextChanged(object sender, EventArgs e)
+        {
 
+        }
     }
 
 

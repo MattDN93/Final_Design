@@ -49,19 +49,19 @@
             this.headDegTextBox = new System.Windows.Forms.TextBox();
             this.speedKphTextBox = new System.Windows.Forms.TextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.label14 = new System.Windows.Forms.Label();
             this.timeTextBox = new System.Windows.Forms.TextBox();
-            this.label13 = new System.Windows.Forms.Label();
-            this.dateTextBox = new System.Windows.Forms.TextBox();
+            this.label14 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
+            this.dateTextBox = new System.Windows.Forms.TextBox();
+            this.label13 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
-            this.fixqualTextBox = new System.Windows.Forms.TextBox();
             this.accuracyTextBox = new System.Windows.Forms.TextBox();
-            this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
-            this.fixvalTextBox = new System.Windows.Forms.TextBox();
             this.satsViewTextBox = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.fixqualTextBox = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.fixvalTextBox = new System.Windows.Forms.TextBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.label22 = new System.Windows.Forms.Label();
             this.label21 = new System.Windows.Forms.Label();
@@ -114,26 +114,26 @@
             this.dbUsernameTextbox = new System.Windows.Forms.TextBox();
             this.testGpsGetButton = new System.Windows.Forms.Button();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
+            this.servStatusTextbox = new System.Windows.Forms.TextBox();
             this.servAccessLabel = new System.Windows.Forms.LinkLabel();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label23 = new System.Windows.Forms.Label();
+            this.startButton = new System.Windows.Forms.Button();
             this.label32 = new System.Windows.Forms.Label();
             this.panel6 = new System.Windows.Forms.Panel();
             this.label33 = new System.Windows.Forms.Label();
+            this.label37 = new System.Windows.Forms.Label();
             this.panel7 = new System.Windows.Forms.Panel();
+            this.pwLabel = new System.Windows.Forms.Label();
+            this.unLabel = new System.Windows.Forms.Label();
             this.label35 = new System.Windows.Forms.Label();
             this.label36 = new System.Windows.Forms.Label();
-            this.label37 = new System.Windows.Forms.Label();
             this.panel8 = new System.Windows.Forms.Panel();
+            this.label39 = new System.Windows.Forms.Label();
             this.label38 = new System.Windows.Forms.Label();
             this.groupBox11 = new System.Windows.Forms.GroupBox();
-            this.label39 = new System.Windows.Forms.Label();
-            this.unLabel = new System.Windows.Forms.Label();
-            this.pwLabel = new System.Windows.Forms.Label();
-            this.startButton = new System.Windows.Forms.Button();
-            this.servStatusTextbox = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -354,15 +354,6 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "GPS Fix Information";
             // 
-            // label14
-            // 
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(222, 31);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(43, 17);
-            this.label14.TabIndex = 14;
-            this.label14.Text = "Time:";
-            // 
             // timeTextBox
             // 
             this.timeTextBox.Location = new System.Drawing.Point(270, 28);
@@ -372,23 +363,14 @@
             this.timeTextBox.Size = new System.Drawing.Size(82, 22);
             this.timeTextBox.TabIndex = 13;
             // 
-            // label13
+            // label14
             // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(6, 31);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(42, 17);
-            this.label13.TabIndex = 12;
-            this.label13.Text = "Date:";
-            // 
-            // dateTextBox
-            // 
-            this.dateTextBox.Location = new System.Drawing.Point(65, 28);
-            this.dateTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.dateTextBox.Name = "dateTextBox";
-            this.dateTextBox.ReadOnly = true;
-            this.dateTextBox.Size = new System.Drawing.Size(126, 22);
-            this.dateTextBox.TabIndex = 11;
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(222, 31);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(43, 17);
+            this.label14.TabIndex = 14;
+            this.label14.Text = "Time:";
             // 
             // label12
             // 
@@ -399,14 +381,23 @@
             this.label12.TabIndex = 9;
             this.label12.Text = "m";
             // 
-            // label10
+            // dateTextBox
             // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(328, 0);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(85, 17);
-            this.label10.TabIndex = 7;
-            this.label10.Text = "Quality of fix";
+            this.dateTextBox.Location = new System.Drawing.Point(65, 28);
+            this.dateTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.dateTextBox.Name = "dateTextBox";
+            this.dateTextBox.ReadOnly = true;
+            this.dateTextBox.Size = new System.Drawing.Size(126, 22);
+            this.dateTextBox.TabIndex = 11;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(6, 31);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(42, 17);
+            this.label13.TabIndex = 12;
+            this.label13.Text = "Date:";
             // 
             // label11
             // 
@@ -417,15 +408,6 @@
             this.label11.TabIndex = 6;
             this.label11.Text = "Accuracy of fix";
             // 
-            // fixqualTextBox
-            // 
-            this.fixqualTextBox.Location = new System.Drawing.Point(431, -4);
-            this.fixqualTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.fixqualTextBox.Name = "fixqualTextBox";
-            this.fixqualTextBox.ReadOnly = true;
-            this.fixqualTextBox.Size = new System.Drawing.Size(121, 22);
-            this.fixqualTextBox.TabIndex = 5;
-            // 
             // accuracyTextBox
             // 
             this.accuracyTextBox.Location = new System.Drawing.Point(303, 59);
@@ -434,15 +416,6 @@
             this.accuracyTextBox.ReadOnly = true;
             this.accuracyTextBox.Size = new System.Drawing.Size(49, 22);
             this.accuracyTextBox.TabIndex = 4;
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(130, 0);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(86, 17);
-            this.label8.TabIndex = 3;
-            this.label8.Text = "Validity of fix";
             // 
             // label9
             // 
@@ -453,15 +426,6 @@
             this.label9.TabIndex = 2;
             this.label9.Text = "Satellites in view:";
             // 
-            // fixvalTextBox
-            // 
-            this.fixvalTextBox.Location = new System.Drawing.Point(250, 0);
-            this.fixvalTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.fixvalTextBox.Name = "fixvalTextBox";
-            this.fixvalTextBox.ReadOnly = true;
-            this.fixvalTextBox.Size = new System.Drawing.Size(52, 22);
-            this.fixvalTextBox.TabIndex = 1;
-            // 
             // satsViewTextBox
             // 
             this.satsViewTextBox.Location = new System.Drawing.Point(139, 59);
@@ -470,6 +434,42 @@
             this.satsViewTextBox.ReadOnly = true;
             this.satsViewTextBox.Size = new System.Drawing.Size(52, 22);
             this.satsViewTextBox.TabIndex = 0;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(328, 0);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(85, 17);
+            this.label10.TabIndex = 7;
+            this.label10.Text = "Quality of fix";
+            // 
+            // fixqualTextBox
+            // 
+            this.fixqualTextBox.Location = new System.Drawing.Point(431, -4);
+            this.fixqualTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.fixqualTextBox.Name = "fixqualTextBox";
+            this.fixqualTextBox.ReadOnly = true;
+            this.fixqualTextBox.Size = new System.Drawing.Size(121, 22);
+            this.fixqualTextBox.TabIndex = 5;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(130, 0);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(86, 17);
+            this.label8.TabIndex = 3;
+            this.label8.Text = "Validity of fix";
+            // 
+            // fixvalTextBox
+            // 
+            this.fixvalTextBox.Location = new System.Drawing.Point(250, 0);
+            this.fixvalTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.fixvalTextBox.Name = "fixvalTextBox";
+            this.fixvalTextBox.ReadOnly = true;
+            this.fixvalTextBox.Size = new System.Drawing.Size(52, 22);
+            this.fixvalTextBox.TabIndex = 1;
             // 
             // groupBox4
             // 
@@ -513,6 +513,7 @@
             this.timeElapsedTextBox.ReadOnly = true;
             this.timeElapsedTextBox.Size = new System.Drawing.Size(57, 22);
             this.timeElapsedTextBox.TabIndex = 11;
+            this.timeElapsedTextBox.TextChanged += new System.EventHandler(this.timeElapsedTextBox_TextChanged);
             // 
             // label17
             // 
@@ -975,6 +976,14 @@
             this.groupBox9.TabStop = false;
             this.groupBox9.Text = "Server Status";
             // 
+            // servStatusTextbox
+            // 
+            this.servStatusTextbox.Location = new System.Drawing.Point(6, 25);
+            this.servStatusTextbox.Name = "servStatusTextbox";
+            this.servStatusTextbox.ReadOnly = true;
+            this.servStatusTextbox.Size = new System.Drawing.Size(148, 22);
+            this.servStatusTextbox.TabIndex = 4;
+            // 
             // servAccessLabel
             // 
             this.servAccessLabel.AutoSize = true;
@@ -1031,6 +1040,17 @@
             this.label23.TabIndex = 24;
             this.label23.Text = "Logging:";
             // 
+            // startButton
+            // 
+            this.startButton.Location = new System.Drawing.Point(25, 32);
+            this.startButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.startButton.Name = "startButton";
+            this.startButton.Size = new System.Drawing.Size(67, 28);
+            this.startButton.TabIndex = 6;
+            this.startButton.Text = "Start";
+            this.startButton.UseVisualStyleBackColor = true;
+            this.startButton.Click += new System.EventHandler(this.startButton_Click);
+            // 
             // label32
             // 
             this.label32.AutoSize = true;
@@ -1063,6 +1083,16 @@
             this.label33.Text = "Activate \r\nCams";
             this.label33.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label37.Location = new System.Drawing.Point(2, 2);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(26, 29);
+            this.label37.TabIndex = 31;
+            this.label37.Text = "4";
+            // 
             // panel7
             // 
             this.panel7.BackColor = System.Drawing.Color.LawnGreen;
@@ -1079,6 +1109,24 @@
             this.panel7.Name = "panel7";
             this.panel7.Size = new System.Drawing.Size(249, 96);
             this.panel7.TabIndex = 30;
+            // 
+            // pwLabel
+            // 
+            this.pwLabel.AutoSize = true;
+            this.pwLabel.Location = new System.Drawing.Point(10, 66);
+            this.pwLabel.Name = "pwLabel";
+            this.pwLabel.Size = new System.Drawing.Size(73, 17);
+            this.pwLabel.TabIndex = 30;
+            this.pwLabel.Text = "Password:";
+            // 
+            // unLabel
+            // 
+            this.unLabel.AutoSize = true;
+            this.unLabel.Location = new System.Drawing.Point(9, 36);
+            this.unLabel.Name = "unLabel";
+            this.unLabel.Size = new System.Drawing.Size(77, 17);
+            this.unLabel.TabIndex = 29;
+            this.unLabel.Text = "Username:";
             // 
             // label35
             // 
@@ -1099,16 +1147,6 @@
             this.label36.TabIndex = 23;
             this.label36.Text = "2";
             // 
-            // label37
-            // 
-            this.label37.AutoSize = true;
-            this.label37.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label37.Location = new System.Drawing.Point(2, 2);
-            this.label37.Name = "label37";
-            this.label37.Size = new System.Drawing.Size(26, 29);
-            this.label37.TabIndex = 31;
-            this.label37.Text = "4";
-            // 
             // panel8
             // 
             this.panel8.BackColor = System.Drawing.Color.SkyBlue;
@@ -1121,6 +1159,15 @@
             this.panel8.Name = "panel8";
             this.panel8.Size = new System.Drawing.Size(160, 97);
             this.panel8.TabIndex = 29;
+            // 
+            // label39
+            // 
+            this.label39.AutoSize = true;
+            this.label39.Location = new System.Drawing.Point(42, 7);
+            this.label39.Name = "label39";
+            this.label39.Size = new System.Drawing.Size(91, 17);
+            this.label39.TabIndex = 29;
+            this.label39.Text = "Server Setup";
             // 
             // label38
             // 
@@ -1147,52 +1194,6 @@
             this.groupBox11.TabIndex = 21;
             this.groupBox11.TabStop = false;
             this.groupBox11.Text = "Actions";
-            // 
-            // label39
-            // 
-            this.label39.AutoSize = true;
-            this.label39.Location = new System.Drawing.Point(42, 7);
-            this.label39.Name = "label39";
-            this.label39.Size = new System.Drawing.Size(91, 17);
-            this.label39.TabIndex = 29;
-            this.label39.Text = "Server Setup";
-            // 
-            // unLabel
-            // 
-            this.unLabel.AutoSize = true;
-            this.unLabel.Location = new System.Drawing.Point(9, 36);
-            this.unLabel.Name = "unLabel";
-            this.unLabel.Size = new System.Drawing.Size(77, 17);
-            this.unLabel.TabIndex = 29;
-            this.unLabel.Text = "Username:";
-            // 
-            // pwLabel
-            // 
-            this.pwLabel.AutoSize = true;
-            this.pwLabel.Location = new System.Drawing.Point(10, 66);
-            this.pwLabel.Name = "pwLabel";
-            this.pwLabel.Size = new System.Drawing.Size(73, 17);
-            this.pwLabel.TabIndex = 30;
-            this.pwLabel.Text = "Password:";
-            // 
-            // startButton
-            // 
-            this.startButton.Location = new System.Drawing.Point(25, 32);
-            this.startButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.startButton.Name = "startButton";
-            this.startButton.Size = new System.Drawing.Size(67, 28);
-            this.startButton.TabIndex = 6;
-            this.startButton.Text = "Start";
-            this.startButton.UseVisualStyleBackColor = true;
-            this.startButton.Click += new System.EventHandler(this.startButton_Click);
-            // 
-            // servStatusTextbox
-            // 
-            this.servStatusTextbox.Location = new System.Drawing.Point(6, 25);
-            this.servStatusTextbox.Name = "servStatusTextbox";
-            this.servStatusTextbox.ReadOnly = true;
-            this.servStatusTextbox.Size = new System.Drawing.Size(148, 22);
-            this.servStatusTextbox.TabIndex = 4;
             // 
             // GPSParser
             // 

@@ -46,6 +46,7 @@
             this.label22 = new System.Windows.Forms.Label();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
+            this.clearIpsButton = new System.Windows.Forms.Button();
             this.listOfIps = new System.Windows.Forms.ListView();
             this.label20 = new System.Windows.Forms.Label();
             this.currentIpEntryBox = new System.Windows.Forms.TextBox();
@@ -91,7 +92,7 @@
             this.longUpperLeftTextbox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.coordsHelpLink = new System.Windows.Forms.LinkLabel();
-            this.clearIpsButton = new System.Windows.Forms.Button();
+            this.devLanButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox8.SuspendLayout();
@@ -301,6 +302,18 @@
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "Enter IP addresses here";
             // 
+            // clearIpsButton
+            // 
+            this.clearIpsButton.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.clearIpsButton.Location = new System.Drawing.Point(352, 147);
+            this.clearIpsButton.Margin = new System.Windows.Forms.Padding(2);
+            this.clearIpsButton.Name = "clearIpsButton";
+            this.clearIpsButton.Size = new System.Drawing.Size(96, 30);
+            this.clearIpsButton.TabIndex = 4;
+            this.clearIpsButton.Text = "Clear IPs";
+            this.clearIpsButton.UseVisualStyleBackColor = true;
+            this.clearIpsButton.Click += new System.EventHandler(this.clearIpsButton_Click);
+            // 
             // listOfIps
             // 
             this.listOfIps.Location = new System.Drawing.Point(109, 108);
@@ -473,6 +486,7 @@
             this.groupBox7.BackColor = System.Drawing.Color.LemonChiffon;
             this.groupBox7.BackgroundImage = global::TEST_GPS_Parsing.Properties.Resources.tracking;
             this.groupBox7.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.groupBox7.Controls.Add(this.devLanButton);
             this.groupBox7.Controls.Add(this.insertTestValues);
             this.groupBox7.Controls.Add(this.videoFormatCombobox);
             this.groupBox7.Controls.Add(this.label11);
@@ -492,7 +506,7 @@
             // 
             // insertTestValues
             // 
-            this.insertTestValues.Location = new System.Drawing.Point(410, 46);
+            this.insertTestValues.Location = new System.Drawing.Point(413, 16);
             this.insertTestValues.Margin = new System.Windows.Forms.Padding(4);
             this.insertTestValues.Name = "insertTestValues";
             this.insertTestValues.Size = new System.Drawing.Size(131, 29);
@@ -847,17 +861,15 @@
             this.coordsHelpLink.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.coordsHelpLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.coordsHelpLink_LinkClicked);
             // 
-            // clearIpsButton
+            // devLanButton
             // 
-            this.clearIpsButton.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.clearIpsButton.Location = new System.Drawing.Point(352, 147);
-            this.clearIpsButton.Margin = new System.Windows.Forms.Padding(2);
-            this.clearIpsButton.Name = "clearIpsButton";
-            this.clearIpsButton.Size = new System.Drawing.Size(96, 30);
-            this.clearIpsButton.TabIndex = 4;
-            this.clearIpsButton.Text = "Clear IPs";
-            this.clearIpsButton.UseVisualStyleBackColor = true;
-            this.clearIpsButton.Click += new System.EventHandler(this.clearIpsButton_Click);
+            this.devLanButton.Location = new System.Drawing.Point(413, 53);
+            this.devLanButton.Name = "devLanButton";
+            this.devLanButton.Size = new System.Drawing.Size(131, 34);
+            this.devLanButton.TabIndex = 28;
+            this.devLanButton.Text = "[DEV2] EC3 LAN";
+            this.devLanButton.UseVisualStyleBackColor = true;
+            this.devLanButton.Click += new System.EventHandler(this.devLanButton_Click);
             // 
             // CameraBoundsSetup
             // 
@@ -967,5 +979,6 @@
         private System.Windows.Forms.TextBox currentIpEntryBox;
         private System.Windows.Forms.ListView listOfIps;
         private System.Windows.Forms.Button clearIpsButton;
+        private System.Windows.Forms.Button devLanButton;
     }
 }
