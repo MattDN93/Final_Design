@@ -13,6 +13,7 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Emgu.Util;
 using DirectShowLib;
+using System.Timers;
 
 namespace TEST_GPS_Parsing
 {
@@ -23,8 +24,8 @@ namespace TEST_GPS_Parsing
         public Mat webcamVid;                  //create a Mat object to manipulate
         public Mat overlayVid;
 
-        public Capture[] camStreamCaptureArray;                          //array to hold all camera capture objects
-        
+        public Capture[] camStreamCaptureArray;                //DEPRECATED ARRAY FOR CAPTURE OBJECTS!!
+
         //------------------DirectShow Capture Objects--------------
         public DsDevice[] _SystemCameras;
         public Video_Device[] WebCams;
@@ -48,9 +49,9 @@ namespace TEST_GPS_Parsing
             {
                 return String.Format("[{0}] {1}: {2}", Device_ID, Device_Name, Identifier);
             }
-        } 
+        }
 
-        
+
         private Capture camStreamCapture = null;        //the current OpenCV capture stream
         //private Capture cscLeft = null;                  //left camera capture
         //private Capture cscRight = null;                 //right camera capture
@@ -86,10 +87,14 @@ namespace TEST_GPS_Parsing
         public bool logCamSwitchToDb = false;       //for signalling a write required to the DB
         bool vidLogWriteOK;                       //for signalling the video writer
 
+        System.Timers.Timer camSwitchTimer;         //timer to check when cameras should switch
+
         static EventWaitHandle _waitCameraRightSwitch = new AutoResetEvent(true);       //wait handle to prevent threads switching cameras rapidly
         static EventWaitHandle _waitCameraLeftSwitch = new AutoResetEvent(true);
+        static EventWaitHandle _waitForParsing = new AutoResetEvent(true);
+        static EventWaitHandle _waitforSwitchCheck = new AutoResetEvent(true);
 
-        private System.Threading.Semaphore uiUpdateSemaphone = new Semaphore(1,3); //mutex lock to prevent UI update race conditions
+        private System.Threading.Semaphore uiUpdateSemaphone = new Semaphore(1, 3); //mutex lock to prevent UI update race conditions
         private Object uiWriteLock = new object();
         bool writingToUi = false;
 
@@ -147,10 +152,8 @@ namespace TEST_GPS_Parsing
             InitializeComponent();
             //initialise the bounds and capture arrays - prevent NullReference Exceptions later    
             //# cameras can be altered in code if needed     
-           // camBoundArray = new camBound[totalCameraNumber];
-           // camStreamCaptureArray = new Capture[totalCameraNumber];
-
-            
+            // camBoundArray = new camBound[totalCameraNumber];
+            // camStreamCaptureArray = new Capture[totalCameraNumber];
         }
 
         private void VideoOutputWindow_Load(object sender, EventArgs e)
@@ -161,7 +164,15 @@ namespace TEST_GPS_Parsing
             overlayVideoFramesBox.Visible = false;
             setupInstructLabel.Visible = true;
             pausedCaptureLabel.Visible = false;
+            camInitLabel.Visible = false;
 
+            //initialise the camera switch timer
+            // Create a timer with a two second interval.
+            camSwitchTimer = new System.Timers.Timer(100);
+            // Hook up the Elapsed event for the timer. 
+            camSwitchTimer.Elapsed += new ElapsedEventHandler(checkCamSwitchNeeded);
+            camSwitchTimer.AutoReset = true;
+            camSwitchTimer.Enabled = true;
         }
         #endregion
 
@@ -169,6 +180,7 @@ namespace TEST_GPS_Parsing
 
         private bool receiveSetupInfo()
         {
+            camInitLabel.Visible = true;
             /*the setup parameters have been set by the CameraBOunds Setup window 
                 *The parameters are copied across before the window is disposed.
                 *Any further use of the variables are the ones local to this class
@@ -191,8 +203,8 @@ namespace TEST_GPS_Parsing
                 //get as many capture objects as cameras active
 
                 //----------------TEST CODE--------------------
-                WebCams = setup.camStreamCaptureArray_CB;
-                _SystemCameras = setup._SystemCameras_CB;
+                WebCams = setup.webCams_CB;
+                _SystemCameras = setup._SystemCameras_CB; //DirectShow object - for local cams
                 CameraDevice = setup.CameraDevice_CB;
                 _capture = setup._capture_CB;
 
@@ -202,25 +214,48 @@ namespace TEST_GPS_Parsing
                     camBoundArray[i] = new camBound(0.0, 0.0);
                 }
 
-                //Test code configuration steps with current code
-                camStreamCapture = _capture;
-                //----------------END TEST CODE----------------
 
-                //----------------ORIGINAL CODE----------------
-                //for (int i = 0; i < totalCameraNumber; i++)
-                //{
-                //    camStreamCaptureArray[i] = setup.camStreamCaptureArray_CB[i];
-                //}
-
-                //camStreamCapture = setup.currentCamStreamCapture_CB;
-                //---------------END ORIGINAL CODE-------------
 
                 //---------get capture extents---------
                 // get by default from centre cam (camArray[1])
+                int len;
+                if (WebCams.Length > 1)
+                { len = 1; }
+                else { len = 0; }
+
                 for (int i = 0; i <= 1; i++)
                 {
-                    camBoundArray[1].upperLeftBound[i] = setup.upperLeftCoordsTransformed_CB[i];
-                    camBoundArray[1].outerLimitBound[i] = setup.outerLimitCoordsTransformed_CB[i];
+                    camBoundArray[len].upperLeftBound[i] = setup.upperLeftCoordsTransformed_CB[i];
+                    camBoundArray[len].outerLimitBound[i] = setup.outerLimitCoordsTransformed_CB[i];
+                }
+
+                //Setup all the capture devices and then pause all but the ones we need
+                camStreamCaptureArray = new Capture[WebCams.Length];
+
+
+                if (_SystemCameras.Length < 2) //means we're dealing with IP cams so set them all up now
+                {
+                    for (int i = 0; i < WebCams.Length; i++)
+                    {
+                        camStreamCaptureArray[i] = new Capture(WebCams[i].Device_Name);
+                    }
+                    //set the centre (or left, if 1 cam) cam as active
+                    camStreamCapture = camStreamCaptureArray[len];
+                }
+                else //set up for local cameras
+                {
+
+                    //Test code configuration steps with current code
+                    camStreamCapture = _capture;
+                }
+                camInitLabel.Visible = false;
+
+                for (int i = 0; i < WebCams.Length; i++)
+                {
+                    if (i != len) //pause all the others
+                    {
+                        camStreamCaptureArray[i].Pause();
+                    }
                 }
 
                 //bring across the transformation matrix to do the point plane conversion (gps real world to image plane)
@@ -228,8 +263,8 @@ namespace TEST_GPS_Parsing
 
                 //---------update the UI initially with info--
                 //by default first camera is the centre (camBound[1])
-                camBoundUIDisplaySetup(1);
-                currentlyActiveCamera = 1;
+                camBoundUIDisplaySetup(len);
+                currentlyActiveCamera = len;
 
                 //use the class-local methods now
                 camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
@@ -242,20 +277,20 @@ namespace TEST_GPS_Parsing
                 MessageBox.Show("A capture open error occurred: " + excpt.Message);
                 return false;
             }
-            
+
         }
 
         private void setupVideoWriter(int mode)
         {
             //this method is being called at form initialisation, so get data from bounds window
-            if(mode == initialSetup)
+            if (mode == initialSetup)
             {
                 videoLogFilename = setup.videoLogFilename_CB;
                 videoWriterOutput = setup.videoWriterOutput_CB;
             }
             else if (mode == fromButtonRepress) //this method was called by repeated pressed of Stop/Start after capture was setup so re-init writer
             {
-                if (videoLogFilename!= null) //account for initial "start" press when object already setup
+                if (videoLogFilename != null) //account for initial "start" press when object already setup
                 {
                     return;
                 }
@@ -284,32 +319,47 @@ namespace TEST_GPS_Parsing
         #endregion
 
         #region Frame and Overlay Methods
+        //Called every 100ms to check if a camera switch is needed
+        private void checkCamSwitchNeeded(object source, ElapsedEventArgs e)
+        {
+            _waitforSwitchCheck.WaitOne(2000);
+            if (!rawVideoFramesBox.IsDisposed && isStreaming)      //make sure not to grab a frame if the window is closig
+            {
+                //set camStreamCapture (the central selected camera) to the correct cam (switch if needed) based on co-ord bound checks
+                //only switch capture objects if a GPS value has been updated!
+                if (valHasChanged)
+                {
+                    _waitforSwitchCheck.Reset();
+                    _waitForParsing.WaitOne();
+                    switch (ol_mark.camSwitchStatus)
+                    {
+                        case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
+                        case 0: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(0, currentlyActiveCamera); webcamVid = new Mat(); break;  //switch the current camera to the left
+                        case 1: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(1, currentlyActiveCamera); webcamVid = new Mat(); break; //switch the current camera to the right
+                        case 2: break;      //the feed need not be changed from the current one (since the value is in this screen)
+                        default:
+                            break;
+                    }
+                    _waitforSwitchCheck.Set();
+                    ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
+                }
+
+            }
+            return;
+        }
+
         //this method is called every time the IsGrabbed event is raised i.e. every time a new frame is captured
         private void parseFrames(object sender, EventArgs arg)
         {
-            //Mat webcamVid = new Mat();
+            _waitForParsing.Reset();
             try
             {
                 if (!rawVideoFramesBox.IsDisposed && isStreaming)      //make sure not to grab a frame if the window is closig
                 {
-                    //set camStreamCapture (the central selected camera) to the correct cam (switch if needed) based on co-ord bound checks
-                    //only switch capture objects if a GPS value has been updated!
-                    if (valHasChanged)
-                    {
-                        switch (ol_mark.camSwitchStatus)
-                        {
-                            case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
-                            case 0: logCamSwitchToDb = true;  currentlyActiveCamera = screenStateSwitch(0, currentlyActiveCamera); webcamVid = new Mat(); break;  //switch the current camera to the left
-                            case 1: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(1, currentlyActiveCamera); webcamVid = new Mat(); break; //switch the current camera to the right
-                            case 2: break;      //the feed need not be changed from the current one (since the value is in this screen)
-                            default:
-                                break;
-                        }
-                        ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
-                    }
 
                     grabResult = camStreamCapture.Retrieve(webcamVid, 0);
-                    //rawVideoFramesBox.Image = webcamVid;                                       
+
+                    //rawVideoFramesBox.Image = webcamVid;        THIS CAUSES CAPTURE FAILURE CRASHES                               
 
                     //Now draw the markers on the overlay and display 
                     //this method sends a FALSE since the image updates 24+ times per second but the data only arrives ~once per second from GPS
@@ -329,7 +379,7 @@ namespace TEST_GPS_Parsing
                         {
                             returnVal = ol_mark.drawPolygons(webcamVid, false);                                //draw marker from onscreen tracking
                         }
-                    } 
+                    }
 
 
                     if (returnVal == true)
@@ -337,7 +387,7 @@ namespace TEST_GPS_Parsing
                         try
                         {
                             overlayVideoFramesBox.Image = ol_mark.overlayGrid;
-                           // FOR DEBUGGING MEMORY EXCEPTIONS ThrowMemoryException("Memory");
+                            // FOR DEBUGGING MEMORY EXCEPTIONS ThrowMemoryException("Memory");
                         }
                         catch (OutOfMemoryException)
                         {
@@ -345,11 +395,11 @@ namespace TEST_GPS_Parsing
                             MessageBox.Show("Error! Your system has run out of memory.\n" +
                                 "Close some programs and try capturing again.\n" +
                                 "Don't worry, video was logged right up to this point and has been saved.\n" +
-                                "To restart capture, close any memry-intensive programs, and click 'Stop Capture' once.","Capture halted",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                                "To restart capture, close any memry-intensive programs, and click 'Stop Capture' once.", "Capture halted", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             isStreaming = false;
                         }
-                       
-                        
+
+
                         if (isStreaming /*&& vidLogWriteOK*/) //the commented part allows for dropped frames for condensed filesizes
                         {
                             vidLogWriteOK = false;
@@ -366,11 +416,12 @@ namespace TEST_GPS_Parsing
                         }
                     }
                 }
+                _waitForParsing.Set();      //unlock the wait on the other thread
 
             }
             catch (Exception e)
             {
-                MessageBox.Show("Capturing failed. Reason: " + e.Message, "Something happened!", MessageBoxButtons.OK, MessageBoxIcon.Error,MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
+                MessageBox.Show("Capturing failed. Reason: " + e.Message, "Something happened!", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
                 isStreaming = false;
                 startCaptureButton.Text = "(Re)Start Capture";
                 ReleaseData();      //something failed so release the data
@@ -378,18 +429,22 @@ namespace TEST_GPS_Parsing
             }
 
         }
+        #endregion
 
+        #region capture Setup
         private void SetupCapture(int Camera_Identifier)
         {
+
             //update the selected device
             CameraDevice = Camera_Identifier;
             if (captureChoice == 0)     //this capture method is for the webcams
             {
-                                                // Dispose of Capture if it was created before
+                // Dispose of Capture if it was created before
                 if (camStreamCapture != null) camStreamCapture.Stop(); camStreamCapture.Dispose();
                 try
                 {
                     //Set up capture device
+                    isStreaming = true;
                     camStreamCapture = new Capture(CameraDevice);
                     camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
                     camStreamCapture.Start();
@@ -411,11 +466,14 @@ namespace TEST_GPS_Parsing
             else if (captureChoice == 1)    //this methd is for the IP cameras
             {
                 // Dispose of Capture if it was created before
-                if (camStreamCapture != null) camStreamCapture.Stop(); camStreamCapture.Dispose();
+                if (camStreamCapture != null) camStreamCapture.Stop();
                 try
-                {                   
+                {
+                    camStreamCapture = null;
+                    camStreamCapture = camStreamCaptureArray[CameraDevice];
                     //Set up capture device
-                    camStreamCapture = new Capture(WebCams[CameraDevice].Device_Name);  //we want to open a capture by URL which is stored with the cam URL
+                    //camStreamCapture = new Capture(WebCams[CameraDevice].Device_Name);  //we want to open a capture by URL which is stored with the cam URL
+                    camStreamCaptureArray[currentlyActiveCamera].Pause();   //pause the "old" stream
                     camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
                     camStreamCapture.Start();
                 }
@@ -426,19 +484,17 @@ namespace TEST_GPS_Parsing
                 catch (Exception e)
                 {
                     //try avoid the fast-switch issue
-                    camStreamCapture.Stop(); camStreamCapture.Dispose();
-                    camStreamCapture = null;
                     status1TextBox.Text = "Error initialising camera...Trying again...";
                     Thread.Sleep(500);
                     SetupCapture(CameraDevice);
                 }
             }
-            
-          //  stillSwitchingCams = true;   
 
-            
-           // Thread.Sleep(1500);
-           // stillSwitchingCams = false;
+            //  stillSwitchingCams = true;   
+
+
+            // Thread.Sleep(1500);
+            // stillSwitchingCams = false;
         }
 
         private int screenStateSwitch(int switchCase, int activeCamLocal)
@@ -450,9 +506,9 @@ namespace TEST_GPS_Parsing
                 if (switchCase == 0)        //means a switch left is requested
                 {
                     //switch coordinates
-                    if (activeCamLocal - 1 >= 0)       //don't go left if you can't
+                    if (activeCamLocal - 1 > 0)       //don't go left if you can't
                     {
-                        
+
                         double dx_test = camBoundArray[activeCamLocal].delta_x;
                         //------------modify camera GPS bounds-----------
                         //setup left cam's upper right longitude bound
@@ -469,14 +525,14 @@ namespace TEST_GPS_Parsing
 
                         //setup upper left longitude
                         camBoundArray[activeCamLocal - 1].upperLeftBound[1] =
-                            camBoundArray[activeCamLocal].upperLeftBound[1] 
+                            camBoundArray[activeCamLocal].upperLeftBound[1]
                             - dx_test/*camBoundArray[currentlyActiveCamera].delta_x*/;
 
                         //------------modify actual capture objects---------
                         //make the camera one screen to the left the new active camera
                         //----------------Capture object switch--------------
                         //halt fast switching threads
-                        _waitCameraRightSwitch.WaitOne(5000);
+                        _waitCameraRightSwitch.WaitOne();
                         SetupCapture(activeCamLocal - 1);
                         _waitCameraLeftSwitch.Set();
                         //----------------------END TEST CODE-----------
@@ -500,11 +556,11 @@ namespace TEST_GPS_Parsing
                         //----------------------END ORIGINAL CODE OUT
                         return activeCamLocal;
                     }
-                    else if (activeCamLocal - 1 == 0)   //we're already on the leftmost camera
+                    else if (activeCamLocal - 1 < 0)   //we're already on the leftmost camera
                     {
                         return activeCamLocal;
                     }
-                    
+
                     ////capture object comparison and switch
 
                     //if (camStreamCapture.Equals(cscLeft))    //if the current frame is already set to the left
@@ -542,7 +598,7 @@ namespace TEST_GPS_Parsing
                 else if (switchCase == 1)       //means a switch right is requested
                 {
                     //switch coordinates
-                    if (activeCamLocal + 1 <= camBoundArray.Length)       //don't go right if you can't
+                    if (activeCamLocal + 1 < camBoundArray.Length)       //don't go right if you can't
                     {
                         //setup left cam's upper right longitude bound
                         camBoundArray[activeCamLocal + 1].outerLimitBound[0] =
@@ -565,7 +621,7 @@ namespace TEST_GPS_Parsing
                         //make the camera one screen to the right the new active camera
 
                         //--------------TEST CODE-------
-                        _waitCameraLeftSwitch.WaitOne(5000);
+                        _waitCameraLeftSwitch.WaitOne();
                         SetupCapture(activeCamLocal + 1);
                         _waitCameraRightSwitch.Set();
                         //--------------END TEST CODE-----
@@ -644,47 +700,41 @@ namespace TEST_GPS_Parsing
             {
                 if (grabResult == false)        //something has failed with the capture
                 {
-                    camDisconnectedWarningLabel.Visible = true;
-                    grabResult = true;
-                    SetupCapture(currentlyActiveCamera);
-                    switch (ol_mark.camSwitchStatus)
+                    disconnectCounter++;
+                    if (disconnectCounter > 5)
                     {
-                        case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
-                        case 0: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(0, currentlyActiveCamera); webcamVid = new Mat(); break;  //switch the current camera to the left
-                        case 1: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(1, currentlyActiveCamera); webcamVid = new Mat(); break; //switch the current camera to the right
-                        case 2: break;      //the feed need not be changed from the current one (since the value is in this screen)
-                        default:
-                            break;
+                        disconnectCounter = 0;
+                        camDisconnectedWarningLabel.Visible = true;
+                        SetupCapture(currentlyActiveCamera);
                     }
-                    ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
+                    else
+                    {
+                        camDisconnectedWarningLabel.Visible = false;
+                    }
 
                 }
                 else
                 {
+                    grabResult = false;
                     camDisconnectedWarningLabel.Visible = false;
-                }
-                if (disconnectCounter > 1) //this covers the case where the parse method does not run, in which case grabResult isn't avaialble
-                {
-                    disconnectCounter = 0;
-                    return;                 //nothing to do, capture is OK
                 }
                 //else if (disconnectCounter < 1)
                 //{
-                   // camDisconnectedWarningLabel.Visible = true;
-                    //SetupCapture(currentlyActiveCamera);
-                    //switch (ol_mark.camSwitchStatus)
-                    //{
-                    //    case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
-                    //    case 0: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(0, currentlyActiveCamera); webcamVid = new Mat(); break;  //switch the current camera to the left
-                    //    case 1: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(1, currentlyActiveCamera); webcamVid = new Mat(); break; //switch the current camera to the right
-                    //    case 2: break;      //the feed need not be changed from the current one (since the value is in this screen)
-                    //    default:
-                    //        break;
-                    //}
-                    //ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
+                // camDisconnectedWarningLabel.Visible = true;
+                //SetupCapture(currentlyActiveCamera);
+                //switch (ol_mark.camSwitchStatus)
+                //{
+                //    case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
+                //    case 0: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(0, currentlyActiveCamera); webcamVid = new Mat(); break;  //switch the current camera to the left
+                //    case 1: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(1, currentlyActiveCamera); webcamVid = new Mat(); break; //switch the current camera to the right
+                //    case 2: break;      //the feed need not be changed from the current one (since the value is in this screen)
+                //    default:
+                //        break;
+                //}
+                //ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
 
 
-                    //disconnectCounter = 0;
+                //disconnectCounter = 0;
                 //}
 
             }
@@ -693,7 +743,7 @@ namespace TEST_GPS_Parsing
                 camDisconnectedWarningLabel.Visible = false;
             }
 
-            
+
         }
         //checks to see if the camera (or any others) have been disconnected
         private void videoSaveTimer_Tick(object sender, EventArgs e)
@@ -705,27 +755,27 @@ namespace TEST_GPS_Parsing
             }
 
 
-        //    if (isStreaming)
-        //    {
-        //        Mat testFrame1 = new Mat();
-        //        testFrame1 = camStreamCapture.QueryFrame();
-        //        Mat testFrame2 = new Mat(vidPixelHeight, vidPixelWidth, DepthType.Cv8U, 3);
-        //        testFrame2 = camStreamCapture.QueryFrame();
-        //        if (CvInvoke.Norm(testFrame1, testFrame2) == 0.0)
-        //        {
-        //            Console.Write("Connection Error on current camera!");
-        //        }
-        //    }
+            //    if (isStreaming)
+            //    {
+            //        Mat testFrame1 = new Mat();
+            //        testFrame1 = camStreamCapture.QueryFrame();
+            //        Mat testFrame2 = new Mat(vidPixelHeight, vidPixelWidth, DepthType.Cv8U, 3);
+            //        testFrame2 = camStreamCapture.QueryFrame();
+            //        if (CvInvoke.Norm(testFrame1, testFrame2) == 0.0)
+            //        {
+            //            Console.Write("Connection Error on current camera!");
+            //        }
+            //    }
 
         }
 
         //This recalculates the incoming datapoints once every 500ms since GPS data only arrives that often
         private void refreshOverlay_Tick(object sender, EventArgs e)
         {
-                overlayTick();      //call the overlay update without passing GPS coords    
+            overlayTick();      //call the overlay update without passing GPS coords    
         }
 
-        public void overlayTick(double incoming_lat= 0.0, double incoming_long = 0.0)
+        public void overlayTick(double incoming_lat = 0.0, double incoming_long = 0.0)
         {
             if (ol_mark != null)
             {
@@ -736,19 +786,19 @@ namespace TEST_GPS_Parsing
                     bool varsInUse = false;
                     //while (!varsInUse)
                     //{
-                        try
-                        {
-                            varsInUse = ol_mark.setNewCoords(incoming_lat, incoming_long, transformMatrix);      //set coords if not being read from/written to
-                        }
-                        catch (OverflowException)
-                        {
+                    try
+                    {
+                        varsInUse = ol_mark.setNewCoords(incoming_lat, incoming_long, transformMatrix);      //set coords if not being read from/written to
+                    }
+                    catch (OverflowException)
+                    {
                         type = 4;
-                            setTextonVideoUI("Arithmetic error in calculating bounds - did you set them correctly?");       //use thread safe var access
+                        setTextonVideoUI("Arithmetic error in calculating bounds - did you set them correctly?");       //use thread safe var access
                         type = -1;
-                        
+
                         //return;
                     }
-                        
+
                     //}
                     //now we draw the marker with the updated point coords
                     bool returnVal = false;
@@ -758,7 +808,7 @@ namespace TEST_GPS_Parsing
                     }
                     if (returnVal == true && isStreaming)              //if the marker routine returned OK, draw the result in the video window
                     {
-                            overlayVideoFramesBox.Image = ol_mark.overlayGrid;                       
+                        overlayVideoFramesBox.Image = ol_mark.overlayGrid;
                     }
                 }
                 else
@@ -813,38 +863,38 @@ namespace TEST_GPS_Parsing
             //We assume that clicking the setup capture button resets all video preferences
 
             ReleaseData();              //dispose of any previous capture objects
-            isStreaming = false;        
+            isStreaming = false;
 
-                this.setup = new CameraBoundsSetup(this);      //pass itself as an object to manipulate
-                DialogResult setupResult = setup.ShowDialog();             //pass the videoOutput object to allow settings to be set and passed back
+            this.setup = new CameraBoundsSetup(this);      //pass itself as an object to manipulate
+            DialogResult setupResult = setup.ShowDialog();             //pass the videoOutput object to allow settings to be set and passed back
 
-                //respond based on the result of the dialog
-                if (setupResult == DialogResult.OK || setupResult == DialogResult.Yes)
+            //respond based on the result of the dialog
+            if (setupResult == DialogResult.OK || setupResult == DialogResult.Yes)
+            {
+                //get the new data from the setup UI
+                bool receivedOK = receiveSetupInfo();
+                if (receivedOK)
                 {
-                    //get the new data from the setup UI
-                    bool receivedOK = receiveSetupInfo();
-                    if (receivedOK)
-                    {
-                        startCaptureButton.Enabled = true;
-                        setup.Close();
-                        setup.Dispose();        //dispose of setup
-                    }
-                    else
-                    {
-                        startCaptureButton.Enabled = false;
-                        MessageBox.Show("One or more camera setup parameters weren't saved correctly. Please launch setup again.", "Camera setup error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    
-                    
-                }
-                else if (setupResult == DialogResult.Cancel || setupResult == DialogResult.No)        //if setup process was prematurely cancelled
-                {
-                    status1TextBox.Clear();
-                    status1TextBox.Text = "Setup was cancelled.";
-                    startCaptureButton.Enabled = false;         //first time setup, require settings before capture
+                    startCaptureButton.Enabled = true;
                     setup.Close();
-                    setup.Dispose();                               //clear object because it wasn't setup properly
+                    setup.Dispose();        //dispose of setup
                 }
+                else
+                {
+                    startCaptureButton.Enabled = false;
+                    MessageBox.Show("One or more camera setup parameters weren't saved correctly. Please launch setup again.", "Camera setup error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+
+            }
+            else if (setupResult == DialogResult.Cancel || setupResult == DialogResult.No)        //if setup process was prematurely cancelled
+            {
+                status1TextBox.Clear();
+                status1TextBox.Text = "Setup was cancelled.";
+                startCaptureButton.Enabled = false;         //first time setup, require settings before capture
+                setup.Close();
+                setup.Dispose();                               //clear object because it wasn't setup properly
+            }
 
         }
 
@@ -873,7 +923,7 @@ namespace TEST_GPS_Parsing
                         }
                         else
                         {
-                                this.latitudeLabel.Text = text;
+                            this.latitudeLabel.Text = text;
 
                         }; break;
                     case 1:
@@ -882,8 +932,9 @@ namespace TEST_GPS_Parsing
                             SetTextCallback l = new SetTextCallback(setTextonVideoUI);
                             Invoke(l, new object[] { text });
                         }
-                        else {
-                                this.LongitudeLabel.Text = text;
+                        else
+                        {
+                            this.LongitudeLabel.Text = text;
 
                         }; break;
                     case 2:
@@ -894,7 +945,7 @@ namespace TEST_GPS_Parsing
                         }
                         else
                         {
-                                this.latOORStatusBox.Text = text;
+                            this.latOORStatusBox.Text = text;
                         }; break;
                     case 3:
                         if (this.longOORTextBox.InvokeRequired)
@@ -904,7 +955,7 @@ namespace TEST_GPS_Parsing
                         }
                         else
                         {
-                                this.longOORTextBox.Text = text;
+                            this.longOORTextBox.Text = text;
                         }; break;
                     case 4:
                         if (this.status1TextBox.InvokeRequired)
@@ -914,7 +965,7 @@ namespace TEST_GPS_Parsing
                         }
                         else
                         {
-                                this.status1TextBox.Text = text;
+                            this.status1TextBox.Text = text;
                         }; break;
 
                     default:
@@ -969,12 +1020,12 @@ namespace TEST_GPS_Parsing
                         Invoke(l, new object[] { text });
                     }
                     else { this.latBotLeftLabel.Text = text; }; break;
-                default: 
+                default:
                     break;
             }
 
         }
-                
+
         private void camBoundUIDisplaySetup(int camScreenNumber)
         {
             /* INFORMATION
@@ -1051,7 +1102,7 @@ namespace TEST_GPS_Parsing
                 if (drawMode_Overlay == DRAW_MODE_REVOBJTRACK)      //the (x,y) coords aren't drawn onscreen if using the object based tracking
                 {
                     ol_mark.displayCoordTextOnscreen = false;
-                } 
+                }
                 else
                 {
                     ol_mark.displayCoordTextOnscreen = true;
@@ -1075,11 +1126,12 @@ namespace TEST_GPS_Parsing
                 isStreaming = false;
                 setupCaptureButton.Enabled = true;
                 startCaptureButton.Text = "Start Capture";
-                startCaptureButton.Enabled = false;     
+                startCaptureButton.Enabled = false;
                 pausedCaptureLabel.Visible = true;
                 camStreamCapture.Pause();
                 ol_mark.clearScreen();      //remove the marker and lines off the screen.
-                videoSaveTimer.Stop();        //pause the disconnection check timer                
+                videoSaveTimer.Stop();        //pause the disconnection check timer   
+                camSwitchTimer.Stop();
                 videoLogFilename = null;            //resets filename
                 videoWriterOutput.Dispose();        //closes the file
                 startCaptureButton.Enabled = true;
@@ -1092,25 +1144,26 @@ namespace TEST_GPS_Parsing
                 pausedCaptureLabel.Visible = false;     //hide the paused label (for if capture was already on)
                 setupCaptureButton.Enabled = false;     //don't allow settings to be changed during capture
                 videoSaveTimer.Start();           //start the disconnection check timer
+                camSwitchTimer.Start();
                 startCaptureButton.Text = "Stop Capture";
                 setupVideoWriter(fromButtonRepress);                     //create new video Log file
                 try
                 {
-                  
-                   camStreamCapture.Start();
-                   isStreaming = true;
-                    
+
+                    camStreamCapture.Start();
+                    isStreaming = true;
+
                 }
                 catch (Exception re)
                 {
-                   MessageBox.Show("Capturing still failed. Try again later. Reason: " + re.Message, "Something happened!", 
-                                MessageBoxButtons.OK, MessageBoxIcon.Error,MessageBoxDefaultButton.Button1 ,(MessageBoxOptions)0x40000);
-                   isStreaming = false;
-                   startCaptureButton.Text = "(Re)Start Capture";
-                   ReleaseData();      //something failed so release the data
-                   return;
-                 }
-              }
+                    MessageBox.Show("Capturing still failed. Try again later. Reason: " + re.Message, "Something happened!",
+                                 MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, (MessageBoxOptions)0x40000);
+                    isStreaming = false;
+                    startCaptureButton.Text = "(Re)Start Capture";
+                    ReleaseData();      //something failed so release the data
+                    return;
+                }
+            }
 
         }
 
@@ -1119,23 +1172,39 @@ namespace TEST_GPS_Parsing
         #region Close & release methods 
         public void ReleaseData()
         {
-            if (camStreamCapture != null) { camStreamCapture.Stop(); camStreamCapture.Dispose();}
+
+            if (camStreamCapture != null) { camStreamCapture.Stop(); camStreamCapture.Dispose(); }
 
             //stop each camera capture instance
-            for (int i = 0; i < totalCameraNumber ; i++)
+            if (WebCams == null)
             {
-                //this method might be called at the start of execution so check for null references in case
-                if (camStreamCaptureArray != null && camStreamCaptureArray[i] != null)
+                for (int i = 0; i < totalCameraNumber; i++)
                 {
-                    camStreamCaptureArray[i].Stop();
-                    camStreamCaptureArray[i].Dispose();
+                    //this method might be called at the start of execution so check for null references in case
+                    if (camStreamCaptureArray != null && camStreamCaptureArray[i] != null)
+                    {
+                        camStreamCaptureArray[i].Stop();
+                        camStreamCaptureArray[i].Dispose();
+                    }
                 }
             }
-            //if (cscLeft != null) { cscLeft.Stop();  cscLeft.Dispose(); }
-            //if (cscRight != null) { cscRight.Stop();  cscRight.Dispose(); }
-            //if (cscCentre != null) { cscCentre.Stop();  cscCentre.Dispose(); }
+            else
+            {
+                for (int i = 0; i < WebCams.Length; i++)
+                {
+                    //this method might be called at the start of execution so check for null references in case
+                    if (camStreamCaptureArray != null && camStreamCaptureArray[i] != null)
+                    {
+                        camStreamCaptureArray[i].Stop();
+                        camStreamCaptureArray[i].Dispose();
+                    }
+                }
+            }
+
+
             //rawVideoFramesBox.Dispose();
             videoSaveTimer.Stop();
+            camSwitchTimer.Stop();
         }
 
         private void getVideoInfo()            //get the video properties
@@ -1160,8 +1229,8 @@ namespace TEST_GPS_Parsing
                 this.Dispose();
                 ReleaseData();      //try to release the capture
             }
-            
-            
+
+
         }
 
         #endregion
@@ -1186,6 +1255,7 @@ namespace TEST_GPS_Parsing
         {
             throw new OverflowException();
         }
+
 
         #endregion
 
