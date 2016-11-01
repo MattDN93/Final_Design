@@ -633,7 +633,13 @@ namespace TEST_GPS_Parsing
 
 
             drawModeChoiceComboBox.SelectedIndex = 2;
-            vidSourceChoiceComboBox.SelectedIndex = 1;
+            vidSourceChoiceComboBox.SelectedIndex = 2;
+
+            videoFormatCombobox.SelectedIndex = 0;
+            listOfIps.Items.Add("192.168.0.7");
+            listOfIps.Items.Add("192.168.0.9");
+            listOfIps.Items.Add("192.168.0.10");
+            checkIpAddrButton.Enabled = true;
         }
 
         private void devLanButton_Click(object sender, EventArgs e)
@@ -656,11 +662,12 @@ namespace TEST_GPS_Parsing
             latBottomLeftTextbox.Text = "-29.868635";
             latBottomRightTextbox.Text = "-29.868674";
 
+            videoFormatCombobox.SelectedIndex = 0;
 
             drawModeChoiceComboBox.SelectedIndex = 2;
             vidSourceChoiceComboBox.SelectedIndex = 2;
-            listOfIps.Items.Add("192.168.135.103");
-            listOfIps.Items.Add("192.168.135.102");
+            listOfIps.Items.Add("192.168.0.9");
+            listOfIps.Items.Add("192.168.0.10");
             ///listOfIps.Items.Add("192.168.135.104");
             checkIpAddrButton.Enabled = true;
 
