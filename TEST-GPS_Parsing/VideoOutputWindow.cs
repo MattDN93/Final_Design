@@ -73,6 +73,8 @@ namespace TEST_GPS_Parsing
 
         //-----------------User options and parameters---------
         public int captureChoice;              //user's selection of which capture to use
+        private static int captureChoiceIP = 1;
+        private static int captureChoiceLocal = 0;
         public int drawMode_Overlay;
         private string fileName;
 
@@ -231,7 +233,7 @@ namespace TEST_GPS_Parsing
                 camStreamCaptureArray = new Capture[WebCams.Length];
 
 
-                if (_SystemCameras.Length < 2) //means we're dealing with IP cams so set them all up now
+                if (captureChoice == captureChoiceIP) //means we're dealing with IP cams so set them all up now
                 {
                     for (int i = 0; i < WebCams.Length; i++)
                     {
@@ -240,7 +242,7 @@ namespace TEST_GPS_Parsing
                     //set the centre (or left, if 1 cam) cam as active
                     //--camStreamCapture = camStreamCaptureArray[len];
                 }
-                else //set up for local cameras
+                else if (captureChoice == captureChoiceLocal) //set up for local cameras
                 {
                     //Test code configuration steps with current code
                     camStreamCapture = _capture;
@@ -248,7 +250,7 @@ namespace TEST_GPS_Parsing
                 }
                 camInitLabel.Visible = false;
 
-                if (_SystemCameras.Length < 2)      //ip cams only
+                if (captureChoice == captureChoiceIP)      //ip cams only
                 {
                     for (int i = 0; i < WebCams.Length; i++)
                     {
@@ -269,7 +271,7 @@ namespace TEST_GPS_Parsing
                 currentlyActiveCamera = len;
 
                 //use the class-local methods now
-                if(_SystemCameras.Length < 2) //IP cams
+                if(captureChoice == captureChoiceIP) //IP cams
                 {
                     camStreamCaptureArray[len].ImageGrabbed += parseFrames;
                 }
@@ -348,12 +350,12 @@ namespace TEST_GPS_Parsing
                 {
                     Mat tempFrame = new Mat();
                     _waitforSwitchCheck.WaitOne();  //wait for the switcher thread to finish its work
-                    if (_SystemCameras.Length < 2)
+                    if (captureChoice == captureChoiceIP)
                     {
                         grabResult = camStreamCaptureArray[currentlyActiveCamera].Retrieve(tempFrame);
                         webcamVid = tempFrame;
                     }
-                    else
+                    else if (captureChoice == captureChoiceLocal)
                     {
                         grabResult = camStreamCapture.Retrieve(webcamVid);
                     }
@@ -1098,7 +1100,7 @@ namespace TEST_GPS_Parsing
             switch (captureChoice)
             {
                 case 0: videoModeLabel.Text = "Live Video"; break;
-                case 1: videoModeLabel.Text = "Recorded Video"; break;
+                case 1: videoModeLabel.Text = "IP Video"; break;
                 default:
                     videoModeLabel.Text = "None Set";
                     break;
@@ -1186,7 +1188,7 @@ namespace TEST_GPS_Parsing
                 startCaptureButton.Text = "Start Capture";
                 startCaptureButton.Enabled = false;
                 pausedCaptureLabel.Visible = true;
-                if (_SystemCameras.Length < 2)
+                if (captureChoice == captureChoiceIP)
                 {camStreamCaptureArray[currentlyActiveCamera].Pause();}
                 else{camStreamCapture.Pause();}                                
                 ol_mark.clearScreen();      //remove the marker and lines off the screen.
@@ -1210,7 +1212,7 @@ namespace TEST_GPS_Parsing
                 try
                 {
 
-                    if (_SystemCameras.Length < 2)
+                    if (captureChoice == captureChoiceIP)
                     { camStreamCaptureArray[currentlyActiveCamera].Start(); }
                     else { camStreamCapture.Start(); }
                     isStreaming = true;
@@ -1272,12 +1274,12 @@ namespace TEST_GPS_Parsing
 
         private void getVideoInfo(int whichCamNumber)            //get the video properties
         {
-            if (_SystemCameras.Length < 2) //IP cams
+            if (captureChoice == captureChoiceIP) //IP cams
             {
                 vidPixelHeight = (int)camStreamCaptureArray[whichCamNumber].GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight);
                 vidPixelWidth = (int)camStreamCaptureArray[whichCamNumber].GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameWidth);
             }
-            else
+            else if (captureChoice == captureChoiceLocal)
             {
                 vidPixelHeight = (int)camStreamCapture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight);
                 vidPixelWidth = (int)camStreamCapture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameWidth);
