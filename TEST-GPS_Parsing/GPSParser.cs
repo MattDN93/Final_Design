@@ -8,8 +8,10 @@ using GMap.NET;
 using GMap.NET.WindowsForms;
 using GMap.NET.WindowsForms.Markers;
 using GMap.NET.WindowsForms.ToolTips;
+using System.Net.Http;
 using System.Net;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace TEST_GPS_Parsing
 {
@@ -43,18 +45,22 @@ namespace TEST_GPS_Parsing
              */
         static EventWaitHandle _waitHandleParser = new AutoResetEvent(false);
         static EventWaitHandle _waitHandleDatabase = new AutoResetEvent(false);
+        static EventWaitHandle _waitHangleWebRequest = new AutoResetEvent(false);
 
         GPSPacket gpsData = new GPSPacket();          //global GPS data packet for UI display                                                     
         Mapping mapData = new Mapping();              //set up a new mapping object for mapping function access
         GMapOverlay locationMarkersOverlay;           //overlay for the location markers on map
         VideoOutputWindow vo;                         //object for the video output window
         MySQLInterface sqlDb;                           //MySQL database instance
+
         string serverUri;                               //displayed to user to show which server they're connected to
 
         string sentenceBuffer;                        //global buffer to read incoming data used for parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
         int duplicatePacketCounter = 1;                     //used to ensure duplicate packets aren't saved into the DB
+        int referencePacketID = 0;                  //used to compare to current packet ID to make sure GPS is alive
+        private int localRequestResult;
 
         public bool newLogEveryStart { get; private set; }
 
@@ -217,7 +223,10 @@ namespace TEST_GPS_Parsing
                 trayIconParsing.Text = "GPS logging active...";
                 trayIconParsing.ShowBalloonTip(5, "Logging running...", "Logger will continue running here if main window closed.",ToolTipIcon.Info);
 
+               
+
                 recvRawDataWorker.RunWorkerAsync();         //starts the thread to parse data and update UI
+
                 if (dbLoggingActive == true)
                 {
                     dbLoggingThread.RunWorkerAsync();       //starts thread to manage DB data if logging is on
@@ -226,7 +235,7 @@ namespace TEST_GPS_Parsing
             }
             else
             {
-                recvRawDataWorker.CancelAsync();
+                recvRawDataWorker.CancelAsync();                
                 statusTextBox.Clear();
                 trayIconParsing.Text = "Parsing error! See main window.";
                 trayIconParsing.ShowBalloonTip(5, "GPS Logging error" ,"The last operation isn't finished yet. Please wait and try again.", ToolTipIcon.Error);
@@ -280,6 +289,7 @@ namespace TEST_GPS_Parsing
         //tests connection to the server
         private void testGpsGetButton_Click(object sender, EventArgs e)
         {
+
             //sends a basic HTTP command to the server to make sure it's online
             //Web service options for the GPS webservice
             WebRequest request;
@@ -340,17 +350,37 @@ namespace TEST_GPS_Parsing
 
             }
 
+            if (parseIsRunning && (gpsData.timeElapsed % 5 == 0))
+            {
+
+                //compare the packet from 10 seconds ago to the one now - if they match GPS is off
+                if (gpsData.ID != referencePacketID)
+                {
+                    status2TextBox.BackColor = System.Drawing.Color.LightGreen;
+                    status2TextBox.Text = "GPS is available & connected.";
+                    referencePacketID = gpsData.ID;
+                }
+                else
+                {
+                    status2TextBox.BackColor = System.Drawing.Color.Orange;
+                    status2TextBox.Text = "GPS feed lost - SMS 'status' to check.";
+                    referencePacketID = gpsData.ID;
+                }
+            }
+
+
             //also check on status of database logging requirement
             if (dbLoggingActive == true)
             {
-                status2TextBox.Clear();
-                status2TextBox.AppendText("Database logging enabled.");
+                dbStatusTextbox.Clear();
+                dbStatusTextbox.AppendText("Database logging enabled.");
             }
             else if (dbLoggingActive == false)
             {
                 dbLoggingThread.CancelAsync();      //end the logging thread
-                status2TextBox.Clear();
-                status2TextBox.AppendText("Database logging disabled.");
+                
+                dbStatusTextbox.Clear();
+                dbStatusTextbox.AppendText("Database logging disabled.");
             }
 
             if (vo != null)
@@ -474,7 +504,7 @@ namespace TEST_GPS_Parsing
             response = request.GetResponse();
             // Display the status - get URI to send to link.
             serverUri = ((HttpWebResponse)response).ResponseUri.ToString();
-            serverUri = serverUri.Substring(0, serverUri.LastIndexOf('/')) + "/phpmyadmin";            
+            serverUri = serverUri.Substring(0, serverUri.LastIndexOf('/')) + "/phpmyadmin";
 
             string servResponse = ((HttpWebResponse)response).StatusDescription;
             servStatusTextbox.Text = servResponse;
@@ -503,7 +533,7 @@ namespace TEST_GPS_Parsing
                     // Read the content.
                     string responseFromServer = reader.ReadToEnd();
                     //pulls out the packet ID and checks if it's larger than the last one - else suspect internet!
-                    int packetID = Convert.ToInt32(responseFromServer.Substring(0, responseFromServer.IndexOf(';')));              
+                    int packetID = Convert.ToInt32(responseFromServer.Substring(0, responseFromServer.IndexOf(';')));
                     // Display the content in the raw buffers 
                     rawBuffer = responseFromServer;
                     // Clean up the streams and the response and write the main response to the buffer for parsing
@@ -542,18 +572,20 @@ namespace TEST_GPS_Parsing
             //This thread now uses 2 different methods: one parses raw NMEA, the other parses from a webserver
             //------------------METHOD 1: PARSING USING THE WEBSERVER--------------
             #region Parsing with real GPS webserver source
+            //setup the web source
+
             if (usingWebLogging == true)
             {
                 int count = 0;
-                while (!recvRawDataWorker.CancellationPending) //check for thread cancel request from stop button (since it's only active here)
                 {
-                    int localRequestResult = makeWebRequest();
-                    while (localRequestResult == serverReturnedFail)    //inform the user of the fail
+
+                    if (localRequestResult == serverReturnedFail)    //inform the user of the fail
                     {
                         gpsData.webserverRequestResult = "Connectivity fail...";
                     }
+
                     rawBuffer += sentenceBuffer;                         //aggregates the raw buffer to display it
-                    
+
                     //Checks if the resource is available 
                     Console.WriteLine("Parser has data-lock");
                     gpsData = gpsData.parseSelection(sentenceBuffer, gpsData, true);  //perform the parsing operation
@@ -841,6 +873,7 @@ namespace TEST_GPS_Parsing
             return true;
         }
         #endregion
+
 
         #region Thread Update Methods
 
@@ -1167,6 +1200,8 @@ namespace TEST_GPS_Parsing
         {
 
         }
+
+
     }
 
 

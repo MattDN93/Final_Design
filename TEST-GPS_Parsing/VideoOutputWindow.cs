@@ -545,25 +545,11 @@ namespace TEST_GPS_Parsing
                         _waitCameraRightSwitch.WaitOne(2000);
                         SetupCapture(activeCamLocal - 1);
                         _waitCameraLeftSwitch.Set();
-                        //----------------------END TEST CODE-----------
-                        //----------------------ORIGINAL CODE COMMENTED OUT------
-                        //camStreamCaptureArray[currentlyActiveCamera] = camStreamCapture;
-                        //camStreamCaptureArray[currentlyActiveCamera - 1].Start();
-                        //camStreamCapture = camStreamCaptureArray[currentlyActiveCamera - 1];
-                        //----------------Coordinate bounds switch-----------
 
                         activeCamLocal--;            //switch camera index one left
                         camBoundUIDisplaySetup(activeCamLocal);  //call UI update to show new bounds onscreen
 
-                        ////halt all other camera frames for resource purposes
-                        //for (int i = 0; i < camStreamCaptureArray.Length; i++)
-                        //{
-                        //    if (i != currentlyActiveCamera - 1)
-                        //    {
-                        //        camStreamCaptureArray[i].Pause();
-                        //    }
-                        //}
-                        //----------------------END ORIGINAL CODE OUT
+
                         return activeCamLocal;
                     }
                     else if (activeCamLocal - 1 < 0)   //we're already on the leftmost camera
@@ -573,37 +559,7 @@ namespace TEST_GPS_Parsing
 
                     ////capture object comparison and switch
 
-                    //if (camStreamCapture.Equals(cscLeft))    //if the current frame is already set to the left
-                    //{
-                    //    cscCentre.Stop();
-                    //    cscRight.Stop();
-                    //    return;     //keep leftmost camera frame
-                    //}
-                    //else if (camStreamCapture.Equals(cscCentre)) //if the current frame is set to the centre camera
-                    //{
-                    //    //----------------Capture object switch--------------
-                    //    cscCentre = camStreamCapture;       //set the current stream to centre
-                    //    camStreamCapture = cscLeft;         //switch camera left by one screen
-                    //    cscCentre.Stop();
-                    //    cscRight.Stop();
-                    //    cscLeft.Start();
-                    //    //----------------Coordinate bounds switch-----------
-                    //    currentlyActiveCamera--;            //switch camera index one left
-                    //    camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
-                    //}
-                    //else if (camStreamCapture.Equals(cscRight))
-                    //{
-                    //    //----------------Capture object switch--------------
-                    //    cscRight = camStreamCapture;        //set the current stream to right
-                    //    camStreamCapture = cscCentre;       //switch camera left by one screen to centre
-                    //    cscLeft.Stop();
-                    //    cscRight.Stop();
-                    //    cscCentre.Start();
-                    //    //----------------Coordinate bounds switch-----------
-                    //    currentlyActiveCamera--;            //switch camera index one left
-                    //    camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
-                    //}
-
+                   
                 }
                 else if (switchCase == 1)       //means a switch right is requested
                 {
@@ -630,25 +586,10 @@ namespace TEST_GPS_Parsing
                         //------------modify actual capture objects---------
                         //make the camera one screen to the right the new active camera
 
-                        //--------------TEST CODE-------
                         _waitCameraLeftSwitch.WaitOne(2000);
                         SetupCapture(activeCamLocal + 1);
                         _waitCameraRightSwitch.Set();
-                        //--------------END TEST CODE-----
-                        //-------------ORIGINAL CODE COMMENTED OUT------------
-                        //camStreamCaptureArray[currentlyActiveCamera] = camStreamCapture;
-                        //camStreamCapture = camStreamCaptureArray[currentlyActiveCamera + 1];
-                        //camStreamCaptureArray[currentlyActiveCamera + 1].Start();
 
-                        //halt all other camera frames for resource purposes
-                        //for (int i = 0; i < camStreamCaptureArray.Length; i++)
-                        //{
-                        //    if (i != currentlyActiveCamera + 1)
-                        //    {
-                        //        camStreamCaptureArray[i].Pause();
-                        //    }
-                        //}
-                        //-----------------END ORIGINAL CODE--------------
                         activeCamLocal++;                        //indicate we've switched one camera right                   
                         camBoundUIDisplaySetup(activeCamLocal);  //call UI update to show new bounds onscreen
                         return activeCamLocal;
@@ -657,42 +598,6 @@ namespace TEST_GPS_Parsing
                     {
                         return activeCamLocal;
                     }
-
-                    //if (camStreamCapture.Equals(cscRight))    //if the current frame is already set to the right
-                    //{
-                    //    cscCentre.Stop();
-                    //    cscLeft.Stop();
-                    //    return;     //keep rightmost camera frame
-                    //}
-                    //else if (camStreamCapture.Equals(cscCentre)) //if the current frame is set to the centre camera
-                    //{
-                    //    //----------------Capture object switch--------------
-                    //    cscCentre = camStreamCapture;       //set current stream to centre
-                    //    camStreamCapture = cscRight;         //switch camera right by one screen
-                    //    //cscCentre.Stop();
-                    //    //cscLeft.Stop();
-                    //    //cscRight.Start();
-                    //    //camStreamCapture.Start();
-
-                    //    //----------------Coordinate bounds switch-----------
-                    //    currentlyActiveCamera++;            //switch camera index one right
-                    //    camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
-                    //}
-                    //else if (camStreamCapture.Equals(cscLeft)) //if curent frame is set to the left
-                    //{
-                    //    //----------------Capture object switch--------------
-                    //    cscLeft = camStreamCapture;
-                    //    camStreamCapture = cscCentre;       //switch camera right by one screen to centre
-                    //    //cscLeft.Stop();
-                    //    //cscCentre.Start();
-                    //    //camStreamCapture.Start();
-                    //    //cscRight.Stop();
-
-                    //    //----------------Coordinate bounds switch-----------
-                    //    currentlyActiveCamera++;            //switch camera index one right
-                    //    camBoundUIDisplaySetup(currentlyActiveCamera);  //call UI update to show new bounds onscreen
-                    //}
-
 
                 }
             }
@@ -777,24 +682,6 @@ namespace TEST_GPS_Parsing
                     grabResult = false;
                     camDisconnectedWarningLabel.Visible = false;
                 }
-                //else if (disconnectCounter < 1)
-                //{
-                // camDisconnectedWarningLabel.Visible = true;
-                //SetupCapture(currentlyActiveCamera);
-                //switch (ol_mark.camSwitchStatus)
-                //{
-                //    case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
-                //    case 0: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(0, currentlyActiveCamera); webcamVid = new Mat(); break;  //switch the current camera to the left
-                //    case 1: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(1, currentlyActiveCamera); webcamVid = new Mat(); break; //switch the current camera to the right
-                //    case 2: break;      //the feed need not be changed from the current one (since the value is in this screen)
-                //    default:
-                //        break;
-                //}
-                //ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
-
-
-                //disconnectCounter = 0;
-                //}
                 
             }
             else
