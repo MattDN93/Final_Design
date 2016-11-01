@@ -357,9 +357,12 @@ namespace TEST_GPS_Parsing
             {
                 if (!rawVideoFramesBox.IsDisposed && isStreaming)      //make sure not to grab a frame if the window is closig
                 {
+                    Mat tempFrame = new Mat();
                     _waitforSwitchCheck.WaitOne();  //wait for the switcher thread to finish its work
-                    grabResult = camStreamCaptureArray[currentlyActiveCamera].Retrieve(webcamVid, 0);
+                    grabResult = camStreamCaptureArray[currentlyActiveCamera].Retrieve(tempFrame,0);
+                    webcamVid = tempFrame;
                     _waitForParsing.Reset();
+
                     //rawVideoFramesBox.Image = webcamVid;        THIS CAUSES CAPTURE FAILURE CRASHES                               
 
                     //Now draw the markers on the overlay and display 

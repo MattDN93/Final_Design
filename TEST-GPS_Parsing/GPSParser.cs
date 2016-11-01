@@ -711,7 +711,6 @@ namespace TEST_GPS_Parsing
                     }
                     else
                     {
-                        inputFile.Close();
                         //everything else is handled in the completion thread
                         break;
                     }
@@ -1160,6 +1159,11 @@ namespace TEST_GPS_Parsing
         }
 
         private void timeElapsedTextBox_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void mapPane_Load(object sender, EventArgs e)
         {
 
         }
