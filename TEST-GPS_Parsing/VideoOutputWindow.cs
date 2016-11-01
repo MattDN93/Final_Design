@@ -242,19 +242,23 @@ namespace TEST_GPS_Parsing
                 }
                 else //set up for local cameras
                 {
-
                     //Test code configuration steps with current code
                     camStreamCapture = _capture;
+
                 }
                 camInitLabel.Visible = false;
 
-                for (int i = 0; i < WebCams.Length; i++)
+                if (_SystemCameras.Length < 2)      //ip cams only
                 {
-                    if (i != len) //pause all the others
+                    for (int i = 0; i < WebCams.Length; i++)
                     {
-                        camStreamCaptureArray[i].Pause();
+                        if (i != len) //pause all the others
+                        {
+                            camStreamCaptureArray[i].Pause();   //this is for IP cams
+                        }
                     }
                 }
+
 
                 //bring across the transformation matrix to do the point plane conversion (gps real world to image plane)
                 transformMatrix = setup.transformMatrix_CB;
@@ -265,8 +269,16 @@ namespace TEST_GPS_Parsing
                 currentlyActiveCamera = len;
 
                 //use the class-local methods now
-                //--camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
-                camStreamCaptureArray[len].ImageGrabbed += parseFrames;
+                if(_SystemCameras.Length < 2) //IP cams
+                {
+                    camStreamCaptureArray[len].ImageGrabbed += parseFrames;
+                }
+                else
+                {
+                    camStreamCapture.ImageGrabbed += parseFrames;   //the method for new frames
+                    
+                }                
+
                 webcamVid = new Mat();                          //create the webcam mat object
 
                 //we're done editing the camera frames, launch the background switcher thread
@@ -324,29 +336,6 @@ namespace TEST_GPS_Parsing
         //Called every 100ms to check if a camera switch is needed
         private void checkCamSwitchNeeded(object source, ElapsedEventArgs e)
         {
-            //_waitforSwitchCheck.WaitOne(2000);
-            //if (!rawVideoFramesBox.IsDisposed && isStreaming)      //make sure not to grab a frame if the window is closig
-            //{
-            //    //set camStreamCapture (the central selected camera) to the correct cam (switch if needed) based on co-ord bound checks
-            //    //only switch capture objects if a GPS value has been updated!
-            //    if (valHasChanged)
-            //    {
-            //        //_waitforSwitchCheck.Reset();
-            //        switch (ol_mark.camSwitchStatus)
-            //        {
-            //            case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
-            //            case 0: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(0, currentlyActiveCamera); webcamVid = new Mat(); break;  //switch the current camera to the left
-            //            case 1: logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(1, currentlyActiveCamera); webcamVid = new Mat(); break; //switch the current camera to the right
-            //            case 2: break;      //the feed need not be changed from the current one (since the value is in this screen)
-            //            default:
-            //                break;
-            //        }
-            //        //_waitforSwitchCheck.Set();
-            //        ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
-            //    }
-
-            //}
-            //return;
         }
 
         //this method is called every time the IsGrabbed event is raised i.e. every time a new frame is captured
@@ -359,8 +348,16 @@ namespace TEST_GPS_Parsing
                 {
                     Mat tempFrame = new Mat();
                     _waitforSwitchCheck.WaitOne();  //wait for the switcher thread to finish its work
-                    grabResult = camStreamCaptureArray[currentlyActiveCamera].Retrieve(tempFrame,0);
-                    webcamVid = tempFrame;
+                    if (_SystemCameras.Length < 2)
+                    {
+                        grabResult = camStreamCaptureArray[currentlyActiveCamera].Retrieve(tempFrame);
+                        webcamVid = tempFrame;
+                    }
+                    else
+                    {
+                        grabResult = camStreamCapture.Retrieve(webcamVid);
+                    }
+                                        
                     _waitForParsing.Reset();
 
                     //rawVideoFramesBox.Image = webcamVid;        THIS CAUSES CAPTURE FAILURE CRASHES                               
@@ -1189,8 +1186,9 @@ namespace TEST_GPS_Parsing
                 startCaptureButton.Text = "Start Capture";
                 startCaptureButton.Enabled = false;
                 pausedCaptureLabel.Visible = true;
-                //-- camStreamCapture.Pause();
-                camStreamCaptureArray[currentlyActiveCamera].Pause();
+                if (_SystemCameras.Length < 2)
+                {camStreamCaptureArray[currentlyActiveCamera].Pause();}
+                else{camStreamCapture.Pause();}                                
                 ol_mark.clearScreen();      //remove the marker and lines off the screen.
                 videoSaveTimer.Stop();        //pause the disconnection check timer   
                 camSwitchTimer.Stop();
@@ -1212,8 +1210,9 @@ namespace TEST_GPS_Parsing
                 try
                 {
 
-                    //--camStreamCapture.Start();
-                    camStreamCaptureArray[currentlyActiveCamera].Start();
+                    if (_SystemCameras.Length < 2)
+                    { camStreamCaptureArray[currentlyActiveCamera].Start(); }
+                    else { camStreamCapture.Start(); }
                     isStreaming = true;
 
                 }
@@ -1273,8 +1272,18 @@ namespace TEST_GPS_Parsing
 
         private void getVideoInfo(int whichCamNumber)            //get the video properties
         {
-            vidPixelHeight = (int)camStreamCaptureArray[whichCamNumber].GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight);
-            vidPixelWidth = (int)camStreamCaptureArray[whichCamNumber].GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameWidth);
+            if (_SystemCameras.Length < 2) //IP cams
+            {
+                vidPixelHeight = (int)camStreamCaptureArray[whichCamNumber].GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight);
+                vidPixelWidth = (int)camStreamCaptureArray[whichCamNumber].GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameWidth);
+            }
+            else
+            {
+                vidPixelHeight = (int)camStreamCapture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight);
+                vidPixelWidth = (int)camStreamCapture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameWidth);
+
+            }
+            
         }
 
         private void VideoOutputWindow_FormClosing(object sender, FormClosingEventArgs e)
