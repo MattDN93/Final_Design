@@ -45,7 +45,7 @@ namespace TEST_GPS_Parsing
              */
         static EventWaitHandle _waitHandleParser = new AutoResetEvent(false);
         static EventWaitHandle _waitHandleDatabase = new AutoResetEvent(false);
-        static EventWaitHandle _waitHangleWebRequest = new AutoResetEvent(false);
+        static EventWaitHandle _waitHangleWebRequest = new AutoResetEvent(true);
 
         GPSPacket gpsData = new GPSPacket();          //global GPS data packet for UI display                                                     
         Mapping mapData = new Mapping();              //set up a new mapping object for mapping function access
@@ -223,7 +223,12 @@ namespace TEST_GPS_Parsing
                 trayIconParsing.Text = "GPS logging active...";
                 trayIconParsing.ShowBalloonTip(5, "Logging running...", "Logger will continue running here if main window closed.",ToolTipIcon.Info);
 
-               
+                if (usingWebLogging == true)
+                {
+                    localRequestResult = -1;                //init to a non-used value
+                    webRequestThread.RunWorkerAsync();      //start the web thread if needed
+                }
+
 
                 recvRawDataWorker.RunWorkerAsync();         //starts the thread to parse data and update UI
 
@@ -235,7 +240,8 @@ namespace TEST_GPS_Parsing
             }
             else
             {
-                recvRawDataWorker.CancelAsync();                
+                recvRawDataWorker.CancelAsync();
+                if (usingWebLogging == true) { webRequestThread.CancelAsync(); }             
                 statusTextBox.Clear();
                 trayIconParsing.Text = "Parsing error! See main window.";
                 trayIconParsing.ShowBalloonTip(5, "GPS Logging error" ,"The last operation isn't finished yet. Please wait and try again.", ToolTipIcon.Error);
@@ -257,7 +263,8 @@ namespace TEST_GPS_Parsing
                 openFileButton.Enabled = true;
 
                 stopButton.Enabled = false;
-                startButton.Enabled = true;                
+                startButton.Enabled = true;
+                if (usingWebLogging == true) { webRequestThread.CancelAsync(); } //cancel the web thread
                 recvRawDataWorker.CancelAsync(); //requests cancellation of the worker
                 _waitHandleDatabase.Set();      //pings the parser thread to release the lock
                 dbLoggingThread.CancelAsync(); //requests cancellation of the database thread
@@ -560,82 +567,99 @@ namespace TEST_GPS_Parsing
 
         //-------------------------THREAD 1: FOR UPDATING UI and DATA----------------
         #region Background Worker Thread
+        //-------------------------THREAD 0: FOR MAKING WEB REQUESTS-----------------
+        private void webRequestThread_DoWork(object sender, DoWorkEventArgs e)
+        {
+            //only run if parsing is happening
+            if (!webRequestThread.CancellationPending && recvRawDataWorker.IsBusy)
+            {
+                Console.Write("Making Web REquest");
+                localRequestResult = makeWebRequest();
 
+            }
+        }
 
         //-------------------------THREAD 1: FOR BACKGROUND WORK--------------------
         private void recvRawDataWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             //Set thread parameters
             Thread.CurrentThread.Name = "GPS Logging Thread";
-            Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
 
             //This thread now uses 2 different methods: one parses raw NMEA, the other parses from a webserver
             //------------------METHOD 1: PARSING USING THE WEBSERVER--------------
             #region Parsing with real GPS webserver source
             //setup the web source
-
-            if (usingWebLogging == true)
+            int countWeb = 0;
+            while (usingWebLogging == true && !recvRawDataWorker.CancellationPending)
             {
-                int count = 0;
+                if (localRequestResult == requestCompleteOK)
                 {
+                    rawBuffer += sentenceBuffer;                         //aggregates the raw buffer to display it
+                    
+                    //Checks if the resource is available 
+                    Console.WriteLine("Parser has data-lock");
+                    gpsData = gpsData.parseSelection(sentenceBuffer, gpsData, true);  //perform the parsing operation
+                    mapData.parseLatLong(gpsData.latitude, gpsData.longitude, true);  //pass the data to the mapping method
 
+                    //send the co-ordinates to the video output UI - keeps calling till its set
+                    //pass the new instance of the overlay if it's been disposed before
+                    if (parseIsRunning)
+                    {
+                        try
+                        {
+                            if (!vo.IsDisposed)
+                            {
+                                lock (coordsSendLock)
+                                {
+                                    vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
+                                }
+
+                            }
+
+                        }
+                        catch (NullReferenceException)
+                        {
+                            videoOutputRunning = false;
+                        }
+
+
+                    }
+
+                }   //end of webserver flag check
+                else
+                {
+                    countWeb++;
+                    if (countWeb > 10)
+                    {
+                        countWeb = 0;
+                    }
                     if (localRequestResult == serverReturnedFail)    //inform the user of the fail
                     {
                         gpsData.webserverRequestResult = "Connectivity fail...";
                     }
-
-                    rawBuffer += sentenceBuffer;                         //aggregates the raw buffer to display it
-
-                    //Checks if the resource is available 
-                    Console.WriteLine("Parser has data-lock");
-                    gpsData = gpsData.parseSelection(sentenceBuffer, gpsData, true);  //perform the parsing operation
-                    mapData.parseLatLong(gpsData.latitude, gpsData.longitude,true);  //pass the data to the mapping method
-
-                    count++;
-                    //this allows for a thread-safe variable access
-
+                    if (rawBuffer == null || sentenceBuffer == null) //account for the fact that the request might not be done yet
+                    {
+                        rawBuffer = "";
+                        sentenceBuffer = "";
+                        
+                    }
+                }
                         gpsData.deltaCount++;
-                        //locationMarkersOverlay = mapData.plotOnMap(locationMarkersOverlay);          //passes the initialised overlay to be populated
+                //locationMarkersOverlay = mapData.plotOnMap(locationMarkersOverlay);          //passes the initialised overlay to be populated
+                makeWebRequest();
+                //unlock the data to write to the DB 
+                _waitHandleParser.Set();
+                
+                Console.WriteLine("Parser released lock");
 
-                        //unlock the data to write to the DB 
-                        _waitHandleParser.Set();
-                        Console.WriteLine("Parser released lock");
-
-                        //send the co-ordinates to the video output UI - keeps calling till its set
-                        //pass the new instance of the overlay if it's been disposed before
-                        if (parseIsRunning)
-                        {
-                            try
-                            {
-                                if (!vo.IsDisposed)
-                                {
-                                    lock (coordsSendLock)
-                                    {
-                                        vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
-                                    }
-
-                                }
-
-                            }
-                            catch (NullReferenceException)
-                            {
-                                videoOutputRunning = false;
-                            }
-
-
-                        }
-
-
-
-
-                        Console.WriteLine("Waiting for DB write to finish");
+                Console.WriteLine("Waiting for DB write to finish");
                         if (dbLoggingActive == true)
                         {
                             _waitHandleDatabase.WaitOne();                  //only wait for write if there's actually a write happening
                         }
 
                         Console.WriteLine("Parser obtained UI write lock");
-                        recvRawDataWorker.ReportProgress(count, gpsData); //only update the UI if a whole new packet has been read- saves calling every char                                                
+                        recvRawDataWorker.ReportProgress(countWeb, gpsData); //only update the UI if a whole new packet has been read- saves calling every char                                                
 
                         if (dbLoggingActive == true)
                         {
@@ -644,10 +668,10 @@ namespace TEST_GPS_Parsing
 
                         Console.WriteLine("Parser released UI lock");
                         //rawBuffer = "";
-                    }
+            }
 
 
-           }
+           
             #endregion
 
             #region Parsing with simulated NMEA files

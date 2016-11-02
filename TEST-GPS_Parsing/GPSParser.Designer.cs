@@ -134,6 +134,7 @@
             this.label39 = new System.Windows.Forms.Label();
             this.label38 = new System.Windows.Forms.Label();
             this.groupBox11 = new System.Windows.Forms.GroupBox();
+            this.webRequestThread = new System.ComponentModel.BackgroundWorker();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -1241,6 +1242,12 @@
             this.groupBox11.TabStop = false;
             this.groupBox11.Text = "Actions";
             // 
+            // webRequestThread
+            // 
+            this.webRequestThread.WorkerReportsProgress = true;
+            this.webRequestThread.WorkerSupportsCancellation = true;
+            this.webRequestThread.DoWork += new System.ComponentModel.DoWorkEventHandler(this.webRequestThread_DoWork);
+            // 
             // GPSParser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -1404,6 +1411,7 @@
         private System.Windows.Forms.Button startButton;
         private System.Windows.Forms.TextBox servStatusTextbox;
         private System.Windows.Forms.Label label18;
+        private System.ComponentModel.BackgroundWorker webRequestThread;
     }
 }
 

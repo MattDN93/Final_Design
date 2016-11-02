@@ -848,9 +848,38 @@ namespace TEST_GPS_Parsing
 
 
 
+
         #endregion
 
+        private void eeceDemo_Click(object sender, EventArgs e)
+        {
+            //Test Suite for co-ord checks - Howard College Traversal With Google Earth
+            //bounds UpperLeft: Lat -29.866178; Long 30.981370
+            //bounds UpperRight Long 30.983583
+            //bounds BottomLeft Lat -29.866673
+            //goes up, right off, across main, left off, across right and right off, and back up out top
 
+            longUpperLeftTextbox.Text = "30.980520";
+            longBottomLeftTextbox.Text = "30.980655";
+
+            longUpperRightTextbox.Text = "30.980600";
+            longBottomRightTextbox.Text = "30.980740";
+
+            latUpperLeftTextbox.Text = "-29.868200";
+            latUpperRightTextbox.Text = "-29.868075";
+
+            latBottomLeftTextbox.Text = "-29.868248";
+            latBottomRightTextbox.Text = "-29.868130";
+
+            videoFormatCombobox.SelectedIndex = 0;
+
+            drawModeChoiceComboBox.SelectedIndex = 2;
+            vidSourceChoiceComboBox.SelectedIndex = 1;
+            //listOfIps.Items.Add("192.168.0.9");
+            //listOfIps.Items.Add("192.168.0.10");
+            ///listOfIps.Items.Add("192.168.135.104");
+            //checkIpAddrButton.Enabled = true;
+        }
     }
 }
 
