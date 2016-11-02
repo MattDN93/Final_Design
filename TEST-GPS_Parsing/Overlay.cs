@@ -50,6 +50,7 @@ namespace TEST_GPS_Parsing
          
         //---------overlay structures--------
         public Mat overlayGrid;        //"background" grid overlay matrix
+        public Mat cannyResult_out;
 
         //---------flags for switching cam---
         public int camSwitchStatus = -1;
@@ -341,12 +342,12 @@ namespace TEST_GPS_Parsing
         {
             //1. Noise removal
             //Mat processedFrame = new Mat();         //create a new frame to process
-            Mat processedFrame = webcamVidForOverlay.Clone();
+            Mat processedFrame  = webcamVidForOverlay.Clone();
 
             CvInvoke.CvtColor(processedFrame, processedFrame, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);     //convert to grayscale
             Mat downSampled = new Mat();            //create a holding mat for downsampling
-            CvInvoke.PyrDown(processedFrame, downSampled);  //use pyramid downsample
-            CvInvoke.PyrUp(downSampled, processedFrame);     //upsample onto the original again
+            //CvInvoke.PyrDown(/*processedFrame, */ overlayGrid, downSampled);  //use pyramid downsample
+            //CvInvoke.PyrUp(downSampled, /*processedFrame*/overlayGrid);     //upsample onto the original again
 
             //2. Canny Edge detection
             double thresholdLink = 80.0;           //value to force rejection/acceptance if pixel is between upper & lower thresh
@@ -354,6 +355,10 @@ namespace TEST_GPS_Parsing
             double thresholdHigh = 120;             //have a 3:1 upper:lower ratio (per Canny's paper)
             Mat cannyResult = new Mat();            //create a holding Mat for the canny edge result
             CvInvoke.Canny(processedFrame, cannyResult, thresholdLow, thresholdHigh);
+
+            //thresholding
+            CvInvoke.AdaptiveThreshold(cannyResult,cannyResult, 255.0,Emgu.CV.CvEnum.AdaptiveThresholdType.GaussianC,Emgu.CV.CvEnum.ThresholdType.Binary,7,5);
+            cannyResult_out = cannyResult;
 
             //3. Hough Probabilistic Transform
             //Uses probabilistic methods to determine all the polygons in the image
@@ -367,7 +372,6 @@ namespace TEST_GPS_Parsing
                 10);                // gap between lines
 
             //4. Find the contours          
-
             //we draw the result to OverlayGrid which is accessed by the video output methods
             overlayGrid = webcamVidForOverlay.Clone();
 
@@ -402,10 +406,10 @@ namespace TEST_GPS_Parsing
                     CvInvoke.ApproxPolyDP(
                         currentContour,         //the current polygon
                         approxContour,          //the resultant smoothe polygon
-                        CvInvoke.ArcLength(currentContour, true) * 0.05, //calculating epsilon by finding the arc length of start -> end
+                        CvInvoke.ArcLength(currentContour, true) * 0.04, //calculating epsilon by finding the arc length of start -> end
                         true);                  //is the contour closed?
 
-                        if (approxContour.Size == 4)        //there are 4 contours -> rectangle
+                        if (approxContour.Size > 9)        //there are 4 contours -> rectangle
                         {
                             //for a rectangle, find internal angles, they must be 80 < angle < 100 to be a rectangle
                             bool validRect = true;
@@ -414,20 +418,20 @@ namespace TEST_GPS_Parsing
 
                             for (int j = 0; j < polyEdges.Length; j++)  //traverse each edge and check angle
                             {
-                                double angle = Math.Abs(
-                                   polyEdges[(j + 1) % polyEdges.Length].GetExteriorAngleDegree(polyEdges[j]));
-                                if (angle < 80 || angle > 100)
-                                {
-                                    validRect = false;
-                                    break;
-                                }
+                                //double angle = Math.Abs(
+                                //   polyEdges[(j + 1) % polyEdges.Length].GetExteriorAngleDegree(polyEdges[j]));
+                                //if (angle < 80 || angle > 100)
+                                //{
+                                //    validRect = false;
+                                //    break;
+                                //}
 
                             }
 
                             //find the area of the polygon to avoid false positives with very small areas
                             double polygonArea = CvInvoke.ContourArea(approxContour);
 
-                            if (validRect && polygonArea > 250.0)
+                            if (validRect && polygonArea > 150.0)
                             {
                                 //For prediction, store the last 5 points to get an aggregate direction
 
@@ -478,11 +482,15 @@ namespace TEST_GPS_Parsing
                                 //END TEST
 
                                 usingCoords = false;
-
+                                webcamVid = overlayGrid;
                             }
 
-                            
 
+
+                        }
+                        else
+                        {
+                            drawMarker(x, y, overlayGrid, false, currentlyActiveCamera);   //keep drawing the overlay regardless
                         }//approxSize == 4
 
                     }//vector currentCOntour
@@ -620,7 +628,7 @@ namespace TEST_GPS_Parsing
                         //now decide on moving the point or not - if more than 3 points = 1, move it!
                         if (aggregatedPointDirection.Sum() > 3)
                         {
-                            _currpt.X = _currpt.X + 100;
+                            _currpt.X = _currpt.X + 180;
                             return _currpt;     //return predicted point
                         }
                         else

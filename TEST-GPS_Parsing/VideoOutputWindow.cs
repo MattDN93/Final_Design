@@ -390,6 +390,7 @@ namespace TEST_GPS_Parsing
                         try
                         {
                             overlayVideoFramesBox.Image = ol_mark.overlayGrid;
+                           // rawVideoFramesBox.Image = ol_mark.cannyResult_out;
                             // FOR DEBUGGING MEMORY EXCEPTIONS ThrowMemoryException("Memory");
                         }
                         catch (OutOfMemoryException)
