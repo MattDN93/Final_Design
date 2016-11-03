@@ -381,7 +381,7 @@ namespace TEST_GPS_Parsing
 
                 //setup the middlemost cam first
                 //anything LOWER index is left, HIGHER is right
-                SetupCapture_CB((int)_SystemCameras_CB.Length / 2);
+                SetupCapture_CB(0/*(int)_SystemCameras_CB.Length / 2*/);
 
             }
             catch (NullReferenceException nr)
@@ -870,6 +870,37 @@ namespace TEST_GPS_Parsing
 
             latBottomLeftTextbox.Text = "-29.868248";
             latBottomRightTextbox.Text = "-29.868130";
+
+            videoFormatCombobox.SelectedIndex = 0;
+
+            drawModeChoiceComboBox.SelectedIndex = 2;
+            vidSourceChoiceComboBox.SelectedIndex = 1;
+            //listOfIps.Items.Add("192.168.0.9");
+            //listOfIps.Items.Add("192.168.0.10");
+            ///listOfIps.Items.Add("192.168.135.104");
+            //checkIpAddrButton.Enabled = true;
+        }
+
+
+        private void gardenDemo_Click_1(object sender, EventArgs e)
+        {
+            //Test Suite for co-ord checks - Howard College Traversal With Google Earth
+            //bounds UpperLeft: Lat -29.866178; Long 30.981370
+            //bounds UpperRight Long 30.983583
+            //bounds BottomLeft Lat -29.866673
+            //goes up, right off, across main, left off, across right and right off, and back up out top
+
+            longUpperLeftTextbox.Text = "30.984135";
+            longBottomLeftTextbox.Text = "30.984010";
+
+            longUpperRightTextbox.Text = "30.984162";
+            longBottomRightTextbox.Text = "30.984040";
+
+            latUpperLeftTextbox.Text = "-29.866585";
+            latUpperRightTextbox.Text = "-29.866613";
+
+            latBottomLeftTextbox.Text = "-29.866591";
+            latBottomRightTextbox.Text = "-29.866623";
 
             videoFormatCombobox.SelectedIndex = 0;
 

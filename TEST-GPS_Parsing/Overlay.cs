@@ -338,166 +338,151 @@ namespace TEST_GPS_Parsing
         #endregion
 
         #region Drawing Onscreen Marker (Polygons)
-        public bool drawPolygons(Mat webcamVidForOverlay, bool onscreenPolyhasChanged = false)
+        public bool drawPolygons(Mat webcamVidForOverlay,  int currentCamNum, bool onscreenPolyhasChanged = false)
         {
             //1. Noise removal
             //Mat processedFrame = new Mat();         //create a new frame to process
+            //we draw the result to OverlayGrid which is accessed by the video output methods
             Mat processedFrame  = webcamVidForOverlay.Clone();
+            
 
             CvInvoke.CvtColor(processedFrame, processedFrame, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);     //convert to grayscale
             Mat downSampled = new Mat();            //create a holding mat for downsampling
             //CvInvoke.PyrDown(/*processedFrame, */ overlayGrid, downSampled);  //use pyramid downsample
             //CvInvoke.PyrUp(downSampled, /*processedFrame*/overlayGrid);     //upsample onto the original again
-
+            overlayGrid = webcamVidForOverlay.Clone();
             //2. Canny Edge detection
             double thresholdLink = 80.0;           //value to force rejection/acceptance if pixel is between upper & lower thresh
-            double thresholdLow = 40.0;               //lower brightness threshold 0-> 255 where 255 = white
-            double thresholdHigh = 120;             //have a 3:1 upper:lower ratio (per Canny's paper)
+            double thresholdLow = 50.0;               //lower brightness threshold 0-> 255 where 255 = white
+            double thresholdHigh = 150;             //have a 3:1 upper:lower ratio (per Canny's paper)
             Mat cannyResult = new Mat();            //create a holding Mat for the canny edge result
             CvInvoke.Canny(processedFrame, cannyResult, thresholdLow, thresholdHigh);
 
             //thresholding
-            CvInvoke.AdaptiveThreshold(cannyResult,cannyResult, 255.0,Emgu.CV.CvEnum.AdaptiveThresholdType.GaussianC,Emgu.CV.CvEnum.ThresholdType.Binary,7,5);
             cannyResult_out = cannyResult;
 
             //3. Hough Probabilistic Transform
             //Uses probabilistic methods to determine all the polygons in the image
             //use (rho, theta) polar coordinate plane
-            LineSegment2D[] polygonSegment = CvInvoke.HoughLinesP(
-                cannyResult,
-                1,                  //rho - distance 'vector'
-                Math.PI / 45.0,     //theta - angle 'vector'
-                20,                 //threshold for definition of 'line'
-                30,                 //minimum line width
-                10);                // gap between lines
+            //LineSegment2D[] polygonSegment = CvInvoke.HoughLinesP(
+            //    cannyResult,
+            //    1,                  //rho - distance 'vector'
+            //    Math.PI / 45.0,     //theta - angle 'vector'
+            //    20,                 //threshold for definition of 'line'
+            //    30,                 //minimum line width
+            //    10);                // gap between lines
 
             //4. Find the contours          
-            //we draw the result to OverlayGrid which is accessed by the video output methods
-            overlayGrid = webcamVidForOverlay.Clone();
+            
 
             /*this object is a (x0,y0,x1,y1) vector where (x0,y0) and (x1,y1) are the respective
             extremities of a line
              */
-            VectorOfPoint approxContour = new VectorOfPoint();
-            using (VectorOfVectorOfPoint polyContours = new VectorOfVectorOfPoint())
-            {
+            VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
+            Mat hierarchy = new Mat();
+
                 CvInvoke.FindContours(
                     cannyResult,        //the output of the Canny detector
-                    polyContours,       //the 2D vector of line-points
-                    null,               //not used since we don't want a hierarchy
-                    Emgu.CV.CvEnum.RetrType.List,    //retrieve ALL contours, no hierarchy
+                    contours,           //the 2D vector of line-points
+                    hierarchy,               //not used since we don't want a hierarchy
+                    Emgu.CV.CvEnum.RetrType.Tree,    //retrieve ALL contours, no hierarchy
                     Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxSimple  //segments are compressed so only endpoints stored
                     );
 
-                int numContours = polyContours.Size;  //add each point to an array to curve approximate
+            VectorOfVectorOfPoint polyContours = new VectorOfVectorOfPoint(contours.Size);
+
+            int numContours = contours.Size;  //add each point to an array to curve approximate
 
 
                 for (int i = 0; i < numContours; i++)
                 {
-                    using (VectorOfPoint currentContour = polyContours[i])    //work on inner vector (i.e. the first set of points on the line)
-                    { 
-                    //Now draw the found rectangles onscreen!
-                    //CvInvoke.DrawContours(overlayGrid, polyContours, -1, new MCvScalar(150, 105, 0), 1, Emgu.CV.CvEnum.LineType.EightConnected, null);
+                //Now draw the found rectangles onscreen!
 
-                    /*use ApproxPoly to find some epsilon to match all points to,
-                    Use the Ramer-Douglas-Peuker algo to simplify the currentContour curve and store it in
-                    approxContour
-                        */
+
+                /*use ApproxPoly to find some epsilon to match all points to,
+                Use the Ramer-Douglas-Peuker algo to simplify the currentContour curve and store it in
+                approxContour
+                    */
+
+                double arcLengthPoly = CvInvoke.ArcLength(contours[i], true); //for this and later calcs
                     CvInvoke.ApproxPolyDP(
-                        currentContour,         //the current polygon
-                        approxContour,          //the resultant smoothe polygon
-                        CvInvoke.ArcLength(currentContour, true) * 0.04, //calculating epsilon by finding the arc length of start -> end
+                        contours[i],                //the current polygon
+                        polyContours[i],          //the resultant smoothe polygon
+                        arcLengthPoly * 0.04, //calculating epsilon by finding the arc length of start -> end
                         true);                  //is the contour closed?
 
-                        if (approxContour.Size > 9)        //there are 4 contours -> rectangle
+                        if (polyContours[i].Size == 10)        //there are 4 contours -> rectangle
                         {
                             //for a rectangle, find internal angles, they must be 80 < angle < 100 to be a rectangle
                             bool validRect = true;
-                            Point[] pts = approxContour.ToArray();  //make the contour into an array -> polyline
-                            LineSegment2D[] polyEdges = PointCollection.PolyLine(pts, true);    //store each polygon edge for testing
-
-                            for (int j = 0; j < polyEdges.Length; j++)  //traverse each edge and check angle
-                            {
-                                //double angle = Math.Abs(
-                                //   polyEdges[(j + 1) % polyEdges.Length].GetExteriorAngleDegree(polyEdges[j]));
-                                //if (angle < 80 || angle > 100)
-                                //{
-                                //    validRect = false;
-                                //    break;
-                                //}
-
-                            }
+                            //Point[] pts = approxContour.ToArray();  //make the contour into an array -> polyline
+                            //LineSegment2D[] polyEdges = PointCollection.PolyLine(pts, true);    //store each polygon edge for testing
 
                             //find the area of the polygon to avoid false positives with very small areas
-                            double polygonArea = CvInvoke.ContourArea(approxContour);
+                            double polygonArea = CvInvoke.ContourArea(contours[i]);
+                            double divMaxSize = 0.175, divMinSize = 0.125;
 
-                            if (validRect && polygonArea > 150.0)
-                            {
-                                //For prediction, store the last 5 points to get an aggregate direction
+                    if (validRect && polygonArea > 200.0)
+                    {
+                        double sqrt_area = Math.Sqrt(polygonArea) / arcLengthPoly;
 
-
-                                //if valid, travers the current array of edges and draw them to the screen
-                                for (int k = 0; k < pts.Length; k++)
-                                {
-                                    CvInvoke.Polylines(overlayGrid, pts, true, new MCvScalar(0, 255, 0));
-                                }
-
-                                //find the centre of this rectangle & draw it onscreen
-                                Point rectCentre = getCentre(approxContour);
-                                CvInvoke.Circle(overlayGrid, rectCentre, 5, new MCvScalar(0, 150, 105), -1, Emgu.CV.CvEnum.LineType.AntiAlias);
-                                string centreString = "(" + rectCentre.X + "," + rectCentre.Y + ")";
-                                CvInvoke.PutText(overlayGrid, centreString, new Point(rectCentre.X + 2,rectCentre.Y + 2), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(0, 150, 105), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
-
-                                //pass the centre of the current rectangle's co-ords to the display & scaling methods
-                                scaleDisplayCoordsToGpsBounds(rectCentre.X, rectCentre.Y);
-                                //this method sets (p,q) as (lat,long) so we allocate these vars to the UI display vars
-
-                                usingCoords = true;             //set this to prevent race conditions
-                                current_pointGPS_lat = p;       //set these to separate coords which will be used to display the lat/long on the left UI
-                                current_pointGPS_long = q;
-
-                                x = rectCentre.X;               //set so that the drawMarker method can display the trail of points onscreen
-                                y = rectCentre.Y;
-
-                                //TEST
-                                if (onscreenPolyhasChanged)
-                                {
-                                    if (current_gps_point.X != prev_gps_point.X)
-                                    {
-                                        current_gps_point = predictPointMotion(x, y, current_gps_point, prev_gps_point);
-                                        //acccount for the first point marker
-                                        if (!(current_gps_point.X == 0 || prev_gps_point.X == 0))
-                                        {
-                                            x = current_gps_point.X;   //these are the new predicted points for the shape
-                                            y = current_gps_point.Y;
-                                        }
-                                    }
-                                    drawMarker(x, y, overlayGrid, true, currentlyActiveCamera);   //draw this point update it 
-                                }
-                                else
-                                {
-                                    drawMarker(x, y, overlayGrid, false, currentlyActiveCamera);   //draw this point but don't update it yet
-                                }
-
-                                //END TEST
-
-                                usingCoords = false;
-                                webcamVid = overlayGrid;
-                            }
-
-
-
-                        }
-                        else
+                        if (sqrt_area < divMaxSize &&sqrt_area > divMinSize)
                         {
-                            drawMarker(x, y, overlayGrid, false, currentlyActiveCamera);   //keep drawing the overlay regardless
-                        }//approxSize == 4
+                            //For prediction, store the last 5 points to get an aggregate direction
+                            //if valid, travers the current array of edges and draw them to the screen
+                            CvInvoke.Polylines(overlayGrid, polyContours, true, new MCvScalar(0, 255, 0));
 
-                    }//vector currentCOntour
+                            //find the centre of this rectangle & draw it onscreen
+                            Point rectCentre = getCentre(polyContours[i]);
+                            CvInvoke.Circle(overlayGrid, rectCentre, 5, new MCvScalar(0, 150, 105), -1, Emgu.CV.CvEnum.LineType.AntiAlias);
+                            string centreString = "(" + rectCentre.X + "," + rectCentre.Y + ")";
+                            CvInvoke.PutText(overlayGrid, centreString, new Point(rectCentre.X + 2, rectCentre.Y + 2), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(0, 150, 105), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
+
+                            //pass the centre of the current rectangle's co-ords to the display & scaling methods
+                            scaleDisplayCoordsToGpsBounds(rectCentre.X, rectCentre.Y);
+                            //this method sets (p,q) as (lat,long) so we allocate these vars to the UI display vars
+
+                            usingCoords = true;             //set this to prevent race conditions
+                            current_pointGPS_lat = p;       //set these to separate coords which will be used to display the lat/long on the left UI
+                            current_pointGPS_long = q;
+
+                            x = rectCentre.X;               //set so that the drawMarker method can display the trail of points onscreen
+                            y = rectCentre.Y;
+
+                            //TEST
+                            if (onscreenPolyhasChanged)
+                            {
+                                if (current_gps_point.X != prev_gps_point.X)
+                                {
+                                    current_gps_point = predictPointMotion(x, y, current_gps_point, prev_gps_point);
+                                    //acccount for the first point marker
+                                    if (!(current_gps_point.X == 0 || prev_gps_point.X == 0))
+                                    {
+                                        x = current_gps_point.X;   //these are the new predicted points for the shape
+                                        y = current_gps_point.Y;
+                                    }
+                                }
+                                drawMarker(x, y, overlayGrid, true, currentCamNum);   //draw this point update it 
+                            }
+                            //END TEST
+
+                            usingCoords = false;
+                        }
+
+
+
+                    }
+
+
+                }
+
+                        
 
                 }   //end numContours
 
-            }
+            drawMarker(x, y, overlayGrid, false, currentCamNum);   //keep drawing the overlay regardless
+
+            webcamVid = overlayGrid;
             return true;
         
 

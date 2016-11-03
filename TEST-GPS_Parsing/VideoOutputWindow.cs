@@ -219,7 +219,7 @@ namespace TEST_GPS_Parsing
                 //---------get capture extents---------
                 // get by default from centre cam (camArray[1])
                 int len;
-                if (WebCams.Length > 1)
+                if (WebCams.Length > 2)
                 { len = 1; }
                 else { len = 0; }
 
@@ -317,7 +317,7 @@ namespace TEST_GPS_Parsing
                                             VideoWriter.Fourcc('M', 'P', '4', '2'), //Video format
                                             20, //FPS
                                             new Size(640, 480), //frame size
-                                            true); //Color
+                                            false); //Color
                 }
             }
             else if (mode == autoFileSave) //the auto file save option
@@ -376,11 +376,11 @@ namespace TEST_GPS_Parsing
                     {
                         if (valHasChanged)                                          //as long as timer tick, update the marker - gives persistence of markers without cluttering screen
                         {
-                            returnVal = ol_mark.drawPolygons(webcamVid, true);
+                            returnVal = ol_mark.drawPolygons(webcamVid, currentlyActiveCamera, true);
                         }
                         else
                         {
-                            returnVal = ol_mark.drawPolygons(webcamVid, false);                                //draw marker from onscreen tracking
+                            returnVal = ol_mark.drawPolygons(webcamVid, currentlyActiveCamera, false);                                //draw marker from onscreen tracking
                         }
                     }
 
@@ -390,7 +390,7 @@ namespace TEST_GPS_Parsing
                         try
                         {
                             overlayVideoFramesBox.Image = ol_mark.overlayGrid;
-                           // rawVideoFramesBox.Image = ol_mark.cannyResult_out;
+                           //rawVideoFramesBox.Image = ol_mark.cannyResult_out;
                             // FOR DEBUGGING MEMORY EXCEPTIONS ThrowMemoryException("Memory");
                         }
                         catch (OutOfMemoryException)
@@ -1068,7 +1068,7 @@ namespace TEST_GPS_Parsing
         }
 
         private void startCaptureButton_Click(object sender, EventArgs e)
-        {
+        {            
             if (isStreaming)
             {  //stop the capture
                 isStreaming = false;
@@ -1102,7 +1102,9 @@ namespace TEST_GPS_Parsing
 
                     if (captureChoice == captureChoiceIP)
                     { camStreamCaptureArray[currentlyActiveCamera].Start(); }
-                    else { camStreamCapture.Start(); }
+                    else {
+                        camStreamCapture.Start();
+                    }
                     isStreaming = true;
 
                 }

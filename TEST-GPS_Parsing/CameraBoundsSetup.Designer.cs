@@ -62,6 +62,7 @@
             this.label6 = new System.Windows.Forms.Label();
             this.vidSourceChoiceComboBox = new System.Windows.Forms.ComboBox();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.eeceDemo = new System.Windows.Forms.Button();
             this.devLanButton = new System.Windows.Forms.Button();
             this.insertTestValues = new System.Windows.Forms.Button();
             this.videoFormatCombobox = new System.Windows.Forms.ComboBox();
@@ -93,7 +94,7 @@
             this.longUpperLeftTextbox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.coordsHelpLink = new System.Windows.Forms.LinkLabel();
-            this.eeceDemo = new System.Windows.Forms.Button();
+            this.gardenDemo = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox8.SuspendLayout();
@@ -311,7 +312,7 @@
             // listOfIps
             // 
             this.listOfIps.Location = new System.Drawing.Point(87, 86);
-            this.listOfIps.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.listOfIps.Margin = new System.Windows.Forms.Padding(2);
             this.listOfIps.Name = "listOfIps";
             this.listOfIps.Size = new System.Drawing.Size(172, 55);
             this.listOfIps.TabIndex = 33;
@@ -331,7 +332,7 @@
             // currentIpEntryBox
             // 
             this.currentIpEntryBox.Location = new System.Drawing.Point(87, 64);
-            this.currentIpEntryBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.currentIpEntryBox.Margin = new System.Windows.Forms.Padding(2);
             this.currentIpEntryBox.Name = "currentIpEntryBox";
             this.currentIpEntryBox.Size = new System.Drawing.Size(172, 21);
             this.currentIpEntryBox.TabIndex = 31;
@@ -476,6 +477,7 @@
             this.groupBox7.BackColor = System.Drawing.Color.LemonChiffon;
             this.groupBox7.BackgroundImage = global::TEST_GPS_Parsing.Properties.Resources.tracking;
             this.groupBox7.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.groupBox7.Controls.Add(this.gardenDemo);
             this.groupBox7.Controls.Add(this.eeceDemo);
             this.groupBox7.Controls.Add(this.devLanButton);
             this.groupBox7.Controls.Add(this.insertTestValues);
@@ -493,10 +495,20 @@
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Step 3: Choose Tracking Method";
             // 
+            // eeceDemo
+            // 
+            this.eeceDemo.Location = new System.Drawing.Point(342, 67);
+            this.eeceDemo.Name = "eeceDemo";
+            this.eeceDemo.Size = new System.Drawing.Size(105, 23);
+            this.eeceDemo.TabIndex = 29;
+            this.eeceDemo.Text = "EECE DEMO";
+            this.eeceDemo.UseVisualStyleBackColor = true;
+            this.eeceDemo.Click += new System.EventHandler(this.eeceDemo_Click);
+            // 
             // devLanButton
             // 
-            this.devLanButton.Location = new System.Drawing.Point(330, 42);
-            this.devLanButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.devLanButton.Location = new System.Drawing.Point(343, 37);
+            this.devLanButton.Margin = new System.Windows.Forms.Padding(2);
             this.devLanButton.Name = "devLanButton";
             this.devLanButton.Size = new System.Drawing.Size(105, 27);
             this.devLanButton.TabIndex = 28;
@@ -506,7 +518,7 @@
             // 
             // insertTestValues
             // 
-            this.insertTestValues.Location = new System.Drawing.Point(330, 13);
+            this.insertTestValues.Location = new System.Drawing.Point(343, 11);
             this.insertTestValues.Name = "insertTestValues";
             this.insertTestValues.Size = new System.Drawing.Size(105, 23);
             this.insertTestValues.TabIndex = 24;
@@ -533,7 +545,7 @@
             // 
             this.label11.AutoSize = true;
             this.label11.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label11.Location = new System.Drawing.Point(58, 72);
+            this.label11.Location = new System.Drawing.Point(9, 72);
             this.label11.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(298, 13);
@@ -555,7 +567,7 @@
             // 
             this.label23.AutoSize = true;
             this.label23.Font = new System.Drawing.Font("Segoe UI", 7.8F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label23.Location = new System.Drawing.Point(113, 18);
+            this.label23.Location = new System.Drawing.Point(12, 22);
             this.label23.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label23.Name = "label23";
             this.label23.Size = new System.Drawing.Size(196, 13);
@@ -841,15 +853,15 @@
             this.coordsHelpLink.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.coordsHelpLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.coordsHelpLink_LinkClicked);
             // 
-            // eeceDemo
+            // gardenDemo
             // 
-            this.eeceDemo.Location = new System.Drawing.Point(330, 88);
-            this.eeceDemo.Name = "eeceDemo";
-            this.eeceDemo.Size = new System.Drawing.Size(105, 23);
-            this.eeceDemo.TabIndex = 29;
-            this.eeceDemo.Text = "EECE DEMO";
-            this.eeceDemo.UseVisualStyleBackColor = true;
-            this.eeceDemo.Click += new System.EventHandler(this.eeceDemo_Click);
+            this.gardenDemo.Location = new System.Drawing.Point(341, 92);
+            this.gardenDemo.Name = "gardenDemo";
+            this.gardenDemo.Size = new System.Drawing.Size(105, 23);
+            this.gardenDemo.TabIndex = 30;
+            this.gardenDemo.Text = "Garden Demo";
+            this.gardenDemo.UseVisualStyleBackColor = true;
+            this.gardenDemo.Click += new System.EventHandler(this.gardenDemo_Click_1);
             // 
             // CameraBoundsSetup
             // 
@@ -961,5 +973,6 @@
         private System.Windows.Forms.Button clearIpsButton;
         private System.Windows.Forms.Button devLanButton;
         private System.Windows.Forms.Button eeceDemo;
+        private System.Windows.Forms.Button gardenDemo;
     }
 }
