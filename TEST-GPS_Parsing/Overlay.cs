@@ -237,6 +237,10 @@ namespace TEST_GPS_Parsing
         {
             try
             {
+                if (webcamVidforOverlay.IsEmpty || webcamVidforOverlay == null)
+                {
+                    return false;   //make sure not to try draw an overlay while cams are switching
+                }
                 if (captureChoice == DRAW_MODE_REVOBJTRACK)
                 {
                     current_xval = x;
@@ -343,6 +347,10 @@ namespace TEST_GPS_Parsing
             //1. Noise removal
             //Mat processedFrame = new Mat();         //create a new frame to process
             //we draw the result to OverlayGrid which is accessed by the video output methods
+            if (webcamVidForOverlay.IsEmpty || webcamVidForOverlay == null )
+            {
+                return false;
+            }
             Mat processedFrame  = webcamVidForOverlay.Clone();
             
 
