@@ -23,11 +23,11 @@
 // These parameters are ignored for LISA-C200 variants and can be left NULL.
 //------------------------------------------------------------------------------------
 //! Set your secret SIM pin here (e.g. "1234"). Check your SIM manual.
-#define SIMPIN      "00000"
+#define SIMPIN      "3964"
 /*! The APN of your network operator SIM, sometimes it is "internet" check your
     contract with the network operator. You can also try to look-up your settings in
     google: https://www.google.de/search?q=APN+list */
-#define APN         "afrihost"
+#define APN         "internet"
 //! Set the user name for your APN, or NULL if not needed
 #define USERNAME    NULL
 //! Set the password for your APN, or NULL if not needed
@@ -35,129 +35,91 @@
 //------------------------------------------------------------------------------------
 
 //#define CELLOCATE
-#define MDM_DEBUG
-
-//-------------Socket parameters-----------
+int main(void)
+{
+    //-------------Socket parameters-----------
 //socket parameter - defines the socket ID for this session
 int socketID = -1;              //current socket ID
 bool socketClosed = false;       //check if the socket is closed
 char hostname[100] = "";
 char devStatusString[100] = "";
 //------------------------------------------
-
-int main(void)
-{
-    int ret;
-
-#ifdef LARGE_DATA
-    char buf[2048] = "";
-#else
-    char buf[512] = "";
-#endif
-
-    // Create the GPS object
+//GPS setup
+    //Setup
+        // Create the GPS object
 #if 1   // use GPSI2C class
     GPSI2C gps;
 #else   // or GPSSerial class 
     GPSSerial gps;
 #endif
-    // Create the modem object
-    MDMSerial mdm; // use mdm(D1,D0) if you connect the cellular shield to a C027
-    // initialize the modem
-    MDMParser::DevStatus devStatus = {};
-    MDMParser::NetStatus netStatus = {};
-    MDMParser::IP ip;
-    bool mdmOk = mdm.init(SIMPIN, &devStatus);
 
-    //print the modem status to the shell
-    mdm.dumpDevStatus(&devStatus);
+//vars init
+int ret;
+char buf[512] = "";
+
+//buffers and strings
+// Send/receive buffers and data counters
+char sbuffer[512];
+char rbuffer[64];
+int rcount = -1;
+int scount = -1;
+int generatedFieldsCount = 0;       //to craft POST only after certain co-ords found   
+int sid = 0;        //session ID for packets
+    
+    //system vars
+unsigned int i = 0xFFFFFFFF;
+const int wait = 100;
+bool abort = false;
+// Create the modem object
+MDMSerial mdm; // use mdm(D1,D0) if you connect the cellular shield to a C027
+// initialize the modem
+MDMParser::DevStatus devStatus = {};
+MDMParser::NetStatus netStatus = {};
+MDMParser::IP ip;
+
+sprintf(hostname,"54.244.63.232");
+
+bool mdmOk = mdm.init(SIMPIN, &devStatus);
+
+//print the modem status to the shell
+mdm.dumpDevStatus(&devStatus);
 
     if (mdmOk) {
         // wait until we are connected
         mdmOk = mdm.registerNet(&netStatus);
         mdm.dumpNetStatus(&netStatus);
     }
+    
     if (mdmOk) {
         // join the internet connection
         ip = mdm.join(APN,USERNAME,PASSWORD);
-        if (ip == NOIP)
+        while (ip == NOIP){
             printf("Not able to join network");
-        else {
-            mdm.dumpIp(ip);
+            ip = mdm.join(APN,USERNAME,PASSWORD);
         }
+            mdm.dumpIp(ip);
+        
 
     }
 
     printf("SMS and GPS Loop\r\n");
+    char host[] = "54.244.63.232";
+    MDMParser::IP ip_host = mdm.gethostbyname(host);
+ 
+    while (!abort) {
     //--------variables for data storage & status--------
-    char *link[128] = "";
+    char link[128] = "";
     char alt[7] = "";
     char spd[5] = "";
     char lat[10] = "";
     char longi[10] = "";
-    unsigned int i = 0xFFFFFFFF;
-    const int wait = 100;
-    bool abort = false;
-
-    //make the socket connection--------------------------
-    //open a socket, TCP port 80  (we're using HTTP requests)
-
-    socketID = mdm.socketSocket(mdm.IPPROTO_TCP,80);
-    if(socketID == SOCKET_ERROR) {
-        printf("Socket creation error.");
-        socketClosed = mdm.socketFree(socketID);
-    } else {
-        //set the hostname of the server to connect the socket to (the AWS instance)
-        sprintf(hostname,"54.244.63.232");        //initial hostname
-
-    }
-
-    mdm.socketConnect(socketID,hostname, 80);
-
-    //---------------Check if server is responsive-----------------
-    // Send/receive buffers and data counters
-    char sbuffer[512];
-    char rbuffer[64];
-    int rcount = -1;
-    int scount = -1;
-    int generatedFieldsCount = 0;       //to craft POST only after certain co-ords found
-
-    //send GET to the server
-    //sprintf(sbuffer,"GET / HTTP/1.1\r\nHost: 54.244.63.232\r\nConnection: close\r\n\r\n");
-    //scount = mdm.socketSend(socketID,sbuffer, sizeof sbuffer);
-    //printf("sent %d %.*s\r\n", scount, strstr(sbuffer, "\r\n")-sbuffer, sbuffer);
-
-    // Recieve a OK from the server
-    //rcount = mdm.socketRecv(socketID, rbuffer, sizeof rbuffer);
-    //printf("recv %d [%.*s]\r\n", rcount, strstr(rbuffer, "\r\n")-rbuffer, rbuffer);
-
-    if (true/*strstr(rbuffer, "200") && rcount != -1*/) {
-        abort = false;
-        printf("Server connection succeeded - sending GPS\n");
-
-        //TEST
-        // sprintf(sbuffer,"POST testdata=1.0 HTTP/1.1\r\n\r\n");
-        // scount = mdm.socketSend(socketID,sbuffer, sizeof sbuffer);
-        printf("\n\nSent test GET");
-    } else {
-        printf("Didn't receive HTTP OK from server...");
-        //keep retrying to contact server
-        while (!strstr(rbuffer, "200")) {
-            scount = mdm.socketSend(socketID, sbuffer, sizeof sbuffer);
-            rcount = mdm.socketRecv(socketID, rbuffer, sizeof rbuffer);
-            printf("Server connection failed. Retrying in 5 seconds");
-            ::wait_ms(5000);
-            sprintf(rbuffer,"");
-            rcount = -1;
-            scount = -1;
-        }
-    }
     
-    int sid = 0;        //session ID for packets
+    if (ip == NOIP){
+            printf("Not able to join network");
+            ip = mdm.join(APN,USERNAME,PASSWORD);
+    }
 
-    while (!abort) {
-        //    led = !led;
-        //----------------GPS character update---------------------------------------
+   //----------------GPS character update---------------------------------------
         while ((ret = gps.getMessage(buf, sizeof(buf))) > 0) {
             int len = LENGTH(ret);
             if ((PROTOCOL(ret) == GPSParser::NMEA) && (len > 6)) {
@@ -172,21 +134,18 @@ int main(void)
                                 gps.getNmeaItem(6,buf,len,ch) && ch == 'A') {
                             sprintf(lat,"%.6f",la);
                             sprintf(longi,"%.6f",lo);
-                            printf("GPS Location: %.5f %.5f\r\n", la, lo);
                             generatedFieldsCount++;
-                            printf(link, "---Location---\n"
+                            sprintf(link, "---Location---\n"
                                     "https://maps.google.com/?q=%.5f,%.5f", la, lo);
                         }
                     } else if (_CHECK_TALKER("GGA") || _CHECK_TALKER("GNS") ) {
                         double a = 0;
                         if (gps.getNmeaItem(9,buf,len,a)) // altitude msl [m]
-                            printf("GPS Altitude: %.1f\r\n", a);
                         sprintf(alt,"%.2f",a);
                         generatedFieldsCount++;
                     } else if (_CHECK_TALKER("VTG")) {
                         double s = 0;
                         if (gps.getNmeaItem(7,buf,len,s)) // speed [km/h]
-                            printf("GPS Speed: %.1f\r\n", s);
                         sprintf(spd,"%.2f", s);
                         generatedFieldsCount++;
                     }
@@ -199,53 +158,43 @@ int main(void)
                         //----------------send on the socket--------------
                         ///receive_gpsData.php?lat=-29.987&long=20.123&numSats=2
                         //TEST
+                        
                         socketID = mdm.socketSocket(mdm.IPPROTO_TCP,80);
-                        mdm.socketConnect(socketID,hostname, 80);
-                        //char sbuffer[] = "GET /receive_gpsData.php?lat=-29.11111&long=25.000001 HTTP/1.1\r\nHost: 54.244.63.232\r\nConnection: close\r\n\r\n";
-                        sprintf(sbuffer, "GET /receive_gpsData.php?sid=%d&lat=%s&long=%s&spd=%s&alt=%s HTTP/1.1\r\nHost: 54.244.63.232\r\n\r\n",sid,lat,longi,spd,alt);
-                        sprintf(testBuffer, sbuffer);
-                        bool result = mdm.socketSetBlocking(socketID,200);
-                        scount = mdm.socketSend(socketID,sbuffer,strlen(sbuffer));
-                        printf("sent [%d] %.*s\r\n", scount, strstr(testBuffer, "\r\n\r\n")-testBuffer, testBuffer);
-
-                        // Recieve a OK from the server
-                        rcount = mdm.socketRecv(socketID, rbuffer, sizeof rbuffer);
-                        printf("recv %d [%.*s]\r\n", rcount, strstr(rbuffer, "\r\n")-rbuffer, rbuffer);
-                        sprintf(testBuffer, "");
-                        sprintf(sbuffer, "");
-                        
-                        
-                        if(result)
-                        {
-                            socketClosed = mdm.socketFree(socketID);
-                            printf("--socket closed--");                            
-                        }else
-                        {
+                        if(socketID >= 0)
+                        {                           
+                            int disconnectCount = 0;
+                            //bool result = mdm.socketSetBlocking(socketID,4000); 
+                            bool connectOK = mdm.socketConnect(socketID,host, 80);
+                            if (connectOK)
+                            {
+                                sprintf(sbuffer, "GET /receive_gpsData.php?sid=%d&lat=%s&long=%s&spd=%s&alt=%s HTTP/1.1\r\nHost: 54.244.63.232\r\n\r\n",sid,lat,longi,spd,alt);
+                                sprintf(testBuffer, sbuffer);                        
+                                scount = mdm.socketSend(socketID,sbuffer,strlen(sbuffer));   
+                                printf("sent [%d] %.*s\r\n", scount, strstr(testBuffer, "\r\n\r\n")-testBuffer, testBuffer);                        
+                                sprintf(testBuffer, "");
+                                sprintf(sbuffer, "");
+                                
+                                // Recieve a OK from the server
+                                rcount = mdm.socketRecv(socketID, rbuffer, sizeof rbuffer);
+                                printf("recv %d [%.*s]\r\n", rcount, strstr(rbuffer, "\r\n")-rbuffer, rbuffer);
+                                sprintf(testBuffer, "");
+                                sprintf(sbuffer, "");
+                                
+                                socketClosed = mdm.socketFree(socketID);
+                                printf("--socket closed--");       
+                            }
+                            else while (!connectOK)
+                            {
+                                disconnectCount++;
+                                bool connectOK = mdm.socketConnect(socketID,host, 80);
+                                if (disconnectCount > 2)
+                                {break;}
+                            }
                             
-                            printf("--socket failed to close--");
-                            ::wait_ms(wait);
-                            socketClosed = mdm.socketFree(socketID);
-                            printf("--socket closed--");    
                         }
-                            
+                                   
                         
-                        //ENDTEST
-                        
-                        //sprintf(sbuffer, "GET /receive_gpsData.php?lat=%s&long=%s HTTP/1.1\r\nHost: 54.244.63.232\r\nAccept: text/html\r\nConnection: keep-alive\r\n\r\n",lat,longi);
-                        //scount = mdm.socketSend(socketID,sbuffer, sizeof sbuffer);
-                        //printf("sent [%d] %.*s\r\n", scount, strstr(sbuffer, "\r\n")-sbuffer, sbuffer);
-
-                        //OTHER DATA
-                        //sprintf(sbuffer, "GET /receive_gpsData.php?spd=%s&alt=%s HTTP/1.1\r\nHost: 54.244.63.232\r\nConnection: keep-alive\r\n\r\n",spd,alt);
-                        //scount = mdm.socketSend(socketID,sbuffer, sizeof sbuffer);
-
-
-
-                        //scount = mdm.socketSend(socketID,post_string, sizeof post_string);
-
                     }
-
-
                 }
             }
 
@@ -259,7 +208,6 @@ int main(void)
                 if (mdm.checkNetStatus(&netStatus)) {
                     mdm.dumpNetStatus(&netStatus, fprintf, stdout);
                 }
-
                 // checking unread sms`
                 int ix[8];
                 int n = mdm.smsList("REC UNREAD", ix, 8);
