@@ -859,26 +859,26 @@ namespace TEST_GPS_Parsing
             //bounds BottomLeft Lat -29.866673
             //goes up, right off, across main, left off, across right and right off, and back up out top
 
-            longUpperLeftTextbox.Text = "30.980520";
-            longBottomLeftTextbox.Text = "30.980655";
+            longUpperLeftTextbox.Text = "30.980740";
+            longBottomLeftTextbox.Text = "30.980580";
 
-            longUpperRightTextbox.Text = "30.980600";
-            longBottomRightTextbox.Text = "30.980740";
+            longUpperRightTextbox.Text = "30.980655";
+            longBottomRightTextbox.Text = "30.980500";
 
-            latUpperLeftTextbox.Text = "-29.868200";
-            latUpperRightTextbox.Text = "-29.868075";
+            latUpperLeftTextbox.Text = "-29.868130";
+            latUpperRightTextbox.Text = "-29.868248";
 
-            latBottomLeftTextbox.Text = "-29.868248";
-            latBottomRightTextbox.Text = "-29.868130";
+            latBottomLeftTextbox.Text = "-29.868045";
+            latBottomRightTextbox.Text = "-29.868180";
 
             videoFormatCombobox.SelectedIndex = 0;
 
             drawModeChoiceComboBox.SelectedIndex = 2;
-            vidSourceChoiceComboBox.SelectedIndex = 1;
-            //listOfIps.Items.Add("192.168.0.9");
-            //listOfIps.Items.Add("192.168.0.10");
-            ///listOfIps.Items.Add("192.168.135.104");
-            //checkIpAddrButton.Enabled = true;
+            vidSourceChoiceComboBox.SelectedIndex = 2;
+            listOfIps.Items.Add("192.168.135.103");
+            listOfIps.Items.Add("192.168.135.104");
+            listOfIps.Items.Add("192.168.135.102");
+            checkIpAddrButton.Enabled = true;
         }
 
 

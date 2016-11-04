@@ -473,7 +473,7 @@ namespace TEST_GPS_Parsing
                 //--if (camStreamCapture != null) camStreamCapture.Stop();
                 if (camStreamCaptureArray[currentlyActiveCamera] != null)
                 {
-                    camStreamCaptureArray[currentlyActiveCamera].Pause();
+                    camStreamCaptureArray[currentlyActiveCamera].Stop();
                 }
                 try
                 {
@@ -1077,7 +1077,7 @@ namespace TEST_GPS_Parsing
                 startCaptureButton.Enabled = false;
                 pausedCaptureLabel.Visible = true;
                 if (captureChoice == captureChoiceIP)
-                {camStreamCaptureArray[currentlyActiveCamera].Pause();}
+                {camStreamCaptureArray[currentlyActiveCamera].Stop();}
                 else{camStreamCapture.Pause();}                                
                 ol_mark.clearScreen();      //remove the marker and lines off the screen.
                 videoSaveTimer.Stop();        //pause the disconnection check timer   

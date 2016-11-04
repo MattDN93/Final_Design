@@ -760,7 +760,7 @@ namespace TEST_GPS_Parsing
                         //FOR SIMULATION ONLY
                         if (debug)
                         {
-                            Thread.Sleep(1000);
+                            Thread.Sleep(300);
                         }
 
                         //---------------

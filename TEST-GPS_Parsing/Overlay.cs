@@ -351,14 +351,18 @@ namespace TEST_GPS_Parsing
             {
                 return false;
             }
-            Mat processedFrame  = webcamVidForOverlay.Clone();
+            Mat processedFrame = webcamVidForOverlay.Clone();
+            CvInvoke.Flip(webcamVidForOverlay, processedFrame, Emgu.CV.CvEnum.FlipType.Horizontal);
+            //Mat processedFrame  = webcamVidForOverlay.Clone();
             
 
             CvInvoke.CvtColor(processedFrame, processedFrame, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);     //convert to grayscale
             Mat downSampled = new Mat();            //create a holding mat for downsampling
-            //CvInvoke.PyrDown(/*processedFrame, */ overlayGrid, downSampled);  //use pyramid downsample
-            //CvInvoke.PyrUp(downSampled, /*processedFrame*/overlayGrid);     //upsample onto the original again
-            overlayGrid = webcamVidForOverlay.Clone();
+                                                    //CvInvoke.PyrDown(/*processedFrame, */ overlayGrid, downSampled);  //use pyramid downsample
+                                                    //CvInvoke.PyrUp(downSampled, /*processedFrame*/overlayGrid);     //upsample onto the original again
+
+            Mat overlayGrid = new Mat(webcamVidForOverlay.Rows, webcamVidForOverlay.Cols, Emgu.CV.CvEnum.DepthType.Default,3);
+            CvInvoke.Flip(webcamVidForOverlay, overlayGrid, Emgu.CV.CvEnum.FlipType.Horizontal);
             //2. Canny Edge detection
             double thresholdLink = 80.0;           //value to force rejection/acceptance if pixel is between upper & lower thresh
             double thresholdLow = 50.0;               //lower brightness threshold 0-> 255 where 255 = white
@@ -428,7 +432,7 @@ namespace TEST_GPS_Parsing
 
                             //find the area of the polygon to avoid false positives with very small areas
                             double polygonArea = CvInvoke.ContourArea(contours[i]);
-                            double divMaxSize = 0.175, divMinSize = 0.125;
+                            double divMaxSize = 0.185, divMinSize = 0.135;
 
                     if (validRect && polygonArea > 200.0)
                     {
@@ -437,8 +441,6 @@ namespace TEST_GPS_Parsing
                         if (sqrt_area < divMaxSize &&sqrt_area > divMinSize)
                         {
                             //For prediction, store the last 5 points to get an aggregate direction
-                            //if valid, travers the current array of edges and draw them to the screen
-                            CvInvoke.Polylines(overlayGrid, polyContours, true, new MCvScalar(0, 255, 0));
 
                             //find the centre of this rectangle & draw it onscreen
                             Point rectCentre = getCentre(polyContours[i]);
@@ -449,6 +451,9 @@ namespace TEST_GPS_Parsing
                             //pass the centre of the current rectangle's co-ords to the display & scaling methods
                             scaleDisplayCoordsToGpsBounds(rectCentre.X, rectCentre.Y);
                             //this method sets (p,q) as (lat,long) so we allocate these vars to the UI display vars
+
+                            //if valid, travers the current array of edges and draw them to the screen
+                            CvInvoke.Polylines(overlayGrid, polyContours, true, new MCvScalar(0, 255, 0));
 
                             usingCoords = true;             //set this to prevent race conditions
                             current_pointGPS_lat = p;       //set these to separate coords which will be used to display the lat/long on the left UI
