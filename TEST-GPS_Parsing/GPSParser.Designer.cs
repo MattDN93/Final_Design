@@ -723,6 +723,7 @@
             this.openInappToolStripMenuItem.Name = "openInappToolStripMenuItem";
             this.openInappToolStripMenuItem.Size = new System.Drawing.Size(227, 22);
             this.openInappToolStripMenuItem.Text = "Open in-app";
+            this.openInappToolStripMenuItem.Click += new System.EventHandler(this.openInappToolStripMenuItem_Click);
             // 
             // openXMLInSeparateViewerToolStripMenuItem
             // 

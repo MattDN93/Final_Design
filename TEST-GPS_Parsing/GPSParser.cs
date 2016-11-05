@@ -1210,6 +1210,20 @@ namespace TEST_GPS_Parsing
 
         #endregion
 
+        #region Database viewing
+        private void openInappToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (parseIsRunning)
+            {
+                MessageBox.Show("It's recommended to cancel capture/parsing first to get latest data. You may open the database now but the latest data may not be displayed", "Concurrency Warning", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            dbViewer dbView = new dbViewer();
+            dbView.ShowDialog();
+             
+
+        }
+        #endregion
+
         private void dbUsernameTextbox_TextChanged(object sender, EventArgs e)
         {
 

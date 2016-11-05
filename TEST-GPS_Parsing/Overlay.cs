@@ -566,7 +566,7 @@ namespace TEST_GPS_Parsing
                         //now decide on moving the point or not - if more than 3 points = 1, move it!
                         if (aggregatedPointDirection.Sum() > 3)
                         {
-                            _currpt.X = _currpt.X - 100;
+                            _currpt.X = _currpt.X - 200;
                             return _currpt;     //return predicted point
                         }
                         else
@@ -589,7 +589,7 @@ namespace TEST_GPS_Parsing
                         //now decide on moving the point or not - if more than 3 points = 1, move it!
                         if (aggregatedPointDirection.Sum() > 3)
                         {
-                            _currpt.X = _currpt.X - 100;
+                            _currpt.X = _currpt.X - 200;
                             return _currpt;     //return predicted point
                         }
                         else
@@ -626,7 +626,7 @@ namespace TEST_GPS_Parsing
                         //now decide on moving the point or not - if more than 3 points = 1, move it!
                         if (aggregatedPointDirection.Sum() > 3)
                         {
-                            _currpt.X = _currpt.X + 180;
+                            _currpt.X = _currpt.X + 200;
                             return _currpt;     //return predicted point
                         }
                         else
@@ -648,7 +648,7 @@ namespace TEST_GPS_Parsing
                         //now decide on moving the point or not - if more than 3 points = 1, move it!
                         if (aggregatedPointDirection.Sum() > 3)
                         {
-                            _currpt.X = _currpt.X + 100;
+                            _currpt.X = _currpt.X + 200;
                             return _currpt;     //return predicted point
                         }
                         else

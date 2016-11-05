@@ -12,9 +12,9 @@ namespace TEST_GPS_Parsing
     class MySQLInterface
     {
         string dbName = "";
-        MySqlConnection conn;
+        public MySqlConnection conn;
         MySqlDataReader rdr;
-        MySqlCommand cmd;
+        public MySqlCommand cmd;
         object result;
         int r;
 
@@ -186,6 +186,11 @@ namespace TEST_GPS_Parsing
             {
                 throw ex;
             }
+        }
+
+        public void makeQuery(string query, string tableName, MySqlConnection conn)
+        {
+            cmd = new MySqlCommand(query, conn);
         }
     }
 

@@ -93,6 +93,12 @@
     <Compile Include="CameraBoundsSetup.Designer.cs">
       <DependentUpon>CameraBoundsSetup.cs</DependentUpon>
     </Compile>
+    <Compile Include="dbViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="dbViewer.Designer.cs">
+      <DependentUpon>dbViewer.cs</DependentUpon>
+    </Compile>
     <Compile Include="GPSParser.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -122,6 +128,9 @@
     <Compile Include="XMLNodes.cs" />
     <EmbeddedResource Include="CameraBoundsSetup.resx">
       <DependentUpon>CameraBoundsSetup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="dbViewer.resx">
+      <DependentUpon>dbViewer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GPSParser.resx">
       <DependentUpon>GPSParser.cs</DependentUpon>
