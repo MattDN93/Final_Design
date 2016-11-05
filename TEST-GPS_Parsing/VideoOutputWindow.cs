@@ -14,6 +14,7 @@ using Emgu.CV.Structure;
 using Emgu.Util;
 using DirectShowLib;
 using System.Timers;
+using System.Net;
 
 namespace TEST_GPS_Parsing
 {
@@ -217,16 +218,12 @@ namespace TEST_GPS_Parsing
                 }
 
                 //---------get capture extents---------
-                // get by default from centre cam (camArray[1])
-                int len;
-                if (WebCams.Length > 2)
-                { len = 1; }
-                else { len = 0; }
+                // get by default from left cam (camArray[0])
 
                 for (int i = 0; i <= 1; i++)
                 {
-                    camBoundArray[len].upperLeftBound[i] = setup.upperLeftCoordsTransformed_CB[i];
-                    camBoundArray[len].outerLimitBound[i] = setup.outerLimitCoordsTransformed_CB[i];
+                    camBoundArray[0].upperLeftBound[i] = setup.upperLeftCoordsTransformed_CB[i];
+                    camBoundArray[0].outerLimitBound[i] = setup.outerLimitCoordsTransformed_CB[i];
                 }
 
                 //Setup all the capture devices and then pause all but the ones we need
@@ -238,6 +235,8 @@ namespace TEST_GPS_Parsing
                     for (int i = 0; i < WebCams.Length; i++)
                     {
                         camStreamCaptureArray[i] = new Capture(WebCams[i].Device_Name);
+                        //camStreamCaptureArray[i].SetCaptureProperty(CapProp.OpenniMaxBufferSize, 10);
+                        //camStreamCaptureArray[i].SetCaptureProperty(CapProp.)
                     }
                     //set the centre (or left, if 1 cam) cam as active
                     //--camStreamCapture = camStreamCaptureArray[len];
@@ -252,12 +251,9 @@ namespace TEST_GPS_Parsing
 
                 if (captureChoice == captureChoiceIP)      //ip cams only
                 {
-                    for (int i = 0; i < WebCams.Length; i++)
-                    {
-                        if (i != len) //pause all the others
-                        {
-                            camStreamCaptureArray[i].Pause();   //this is for IP cams
-                        }
+                    for (int i = 1; i < WebCams.Length; i++)
+                    {                        
+                            camStreamCaptureArray[i].Stop();   //this is for IP cams
                     }
                 }
 
@@ -266,14 +262,14 @@ namespace TEST_GPS_Parsing
                 transformMatrix = setup.transformMatrix_CB;
 
                 //---------update the UI initially with info--
-                //by default first camera is the centre (camBound[1])
-                camBoundUIDisplaySetup(len);
-                currentlyActiveCamera = len;
+                //by default first camera is the left (camBound[1])
+                camBoundUIDisplaySetup(0);
+                currentlyActiveCamera = 0;
 
                 //use the class-local methods now
                 if(captureChoice == captureChoiceIP) //IP cams
                 {
-                    camStreamCaptureArray[len].ImageGrabbed += parseFrames;
+                    camStreamCaptureArray[0].ImageGrabbed += parseFrames;
                 }
                 else
                 {
@@ -317,7 +313,7 @@ namespace TEST_GPS_Parsing
                                             VideoWriter.Fourcc('M', 'P', '4', '2'), //Video format
                                             20, //FPS
                                             new Size(640, 480), //frame size
-                                            false); //Color
+                                            true); //Color
                 }
             }
             else if (mode == autoFileSave) //the auto file save option
@@ -352,8 +348,17 @@ namespace TEST_GPS_Parsing
                     _waitforSwitchCheck.WaitOne();  //wait for the switcher thread to finish its work
                     if (captureChoice == captureChoiceIP)
                     {
+                       
                         grabResult = camStreamCaptureArray[currentlyActiveCamera].Retrieve(tempFrame);
-                        webcamVid = tempFrame;
+                        if (grabResult == true)
+                        {
+                            webcamVid = tempFrame;
+                        }
+                        else
+                        {
+                            return; //if th frame was grabbed as null, don't process anymore
+                        }
+                       
                     }
                     else if (captureChoice == captureChoiceLocal)
                     {
@@ -436,7 +441,7 @@ namespace TEST_GPS_Parsing
         #endregion
 
         #region capture Setup
-        private void SetupCapture(int Camera_Identifier)
+        private void SetupCapture(int Camera_Identifier, bool reconnecting)
         {
 
             //update the selected device
@@ -464,14 +469,14 @@ namespace TEST_GPS_Parsing
                     camStreamCapture = null;
                     status1TextBox.Text = "Error initialising camera...Trying again...";
                     Thread.Sleep(500);
-                    SetupCapture(CameraDevice);
+                    SetupCapture(CameraDevice,true);
                 }
             }
             else if (captureChoice == 1)    //this methd is for the IP cameras
             {
                 // Dispose of Capture if it was created before
                 //--if (camStreamCapture != null) camStreamCapture.Stop();
-                if (camStreamCaptureArray[currentlyActiveCamera] != null)
+                if (camStreamCaptureArray[currentlyActiveCamera] != null && reconnecting == false)
                 {
                     camStreamCaptureArray[currentlyActiveCamera].Stop();
                 }
@@ -480,6 +485,12 @@ namespace TEST_GPS_Parsing
                     //--camStreamCapture = null;
                     //--camStreamCapture = camStreamCaptureArray[CameraDevice];
                     //Set up capture device
+                    if (reconnecting == true)
+                    {
+                        camStreamCaptureArray[CameraDevice].Dispose();
+                        camStreamCaptureArray[CameraDevice] = new Capture(WebCams[CameraDevice].Device_Name);
+                        Thread.Sleep(300);
+                    }
                     //camStreamCapture = new Capture(WebCams[CameraDevice].Device_Name);  //we want to open a capture by URL which is stored with the cam URL
                     //--camStreamCaptureArray[currentlyActiveCamera].Pause();   //pause the "old" stream
                     //--camStreamCapture.Start();
@@ -495,7 +506,7 @@ namespace TEST_GPS_Parsing
                     //try avoid the fast-switch issue
                     status1TextBox.Text = "Error initialising camera...Trying again...";
                     Thread.Sleep(500);
-                    SetupCapture(CameraDevice);
+                    SetupCapture(CameraDevice,true);
                 }
             }
 
@@ -544,7 +555,7 @@ namespace TEST_GPS_Parsing
                         //----------------Capture object switch--------------
                         //halt fast switching threads
                         _waitCameraRightSwitch.WaitOne(2000);
-                        SetupCapture(activeCamLocal - 1);
+                        SetupCapture(activeCamLocal - 1, false);
                         _waitCameraLeftSwitch.Set();
 
                         activeCamLocal--;            //switch camera index one left
@@ -588,7 +599,7 @@ namespace TEST_GPS_Parsing
                         //make the camera one screen to the right the new active camera
 
                         _waitCameraLeftSwitch.WaitOne(2000);
-                        SetupCapture(activeCamLocal + 1);
+                        SetupCapture(activeCamLocal + 1, false);
                         _waitCameraRightSwitch.Set();
 
                         activeCamLocal++;                        //indicate we've switched one camera right                   
@@ -636,10 +647,38 @@ namespace TEST_GPS_Parsing
                 }
                 if (camDisconnectedWarningLabel.Visible == true)
                 {
-                    SetupCapture(currentlyActiveCamera);
+                    bool isUp = reconnectIP(WebCams[currentlyActiveCamera].Device_Name);
+                    if (isUp)
+                    {
+                        SetupCapture(currentlyActiveCamera, true); webcamVid = new Mat();
+                    }
                 }
                 Console.Write("Cam Switcher released lock");
                 _waitforSwitchCheck.Set();
+            }
+
+        }
+
+        public bool reconnectIP(string url)
+        {
+            try
+            {
+                //Creating the HttpWebRequest
+                HttpWebRequest request = WebRequest.Create(url) as System.Net.HttpWebRequest;
+                //Setting the Request method HEAD- we want to check it exists
+                request.Method = "HEAD";
+                request.Proxy = null;
+                //Getting the Web Response.
+                request.Timeout = 3000;
+                HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+                //Returns TRUE if the Status code == 200
+                response.Close();
+                return (response.StatusCode == HttpStatusCode.OK);
+            }
+            catch
+            {
+                //Any exception will returns false.
+                return false;
             }
 
         }

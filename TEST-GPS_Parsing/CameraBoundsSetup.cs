@@ -402,6 +402,7 @@ namespace TEST_GPS_Parsing
                 request.Method = "HEAD";
                 request.Proxy = null;
                 //Getting the Web Response.
+                request.Timeout = 3000;
                 HttpWebResponse response = request.GetResponse() as HttpWebResponse;
                 //Returns TRUE if the Status code == 200
                 response.Close();
@@ -442,12 +443,12 @@ namespace TEST_GPS_Parsing
                 }
             }
 
-            if (haveLoaded >= 2)
+            if (haveLoaded /*>= 2*/ > 0)
             {
                 ipCamReady = true;
                 for (int i = 0; i < listOfIps.Items.Count; i++)
                 {
-                   // SetupCapture_CB(i, webCams_CB[i].Device_Name);       //setup one of the ip cams (middle)
+                  //  SetupCapture_CB(i, webCams_CB[i].Device_Name);       //setup one of the ip cams (middle)
                 }
                 
                 checkIpAddrButton.Text = "Check IP addresses";

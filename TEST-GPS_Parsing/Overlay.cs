@@ -347,9 +347,9 @@ namespace TEST_GPS_Parsing
             //1. Noise removal
             //Mat processedFrame = new Mat();         //create a new frame to process
             //we draw the result to OverlayGrid which is accessed by the video output methods
-            if (webcamVidForOverlay.IsEmpty || webcamVidForOverlay == null )
+            if (webcamVidForOverlay.IsEmpty || webcamVidForOverlay == null)
             {
-                return false;
+                return true;
             }
             Mat processedFrame = webcamVidForOverlay.Clone();
             CvInvoke.Flip(webcamVidForOverlay, processedFrame, Emgu.CV.CvEnum.FlipType.Horizontal);
@@ -463,8 +463,8 @@ namespace TEST_GPS_Parsing
                             y = rectCentre.Y;
 
                             //TEST
-                            if (onscreenPolyhasChanged)
-                            {
+                           // if (onscreenPolyhasChanged)
+                           // {
                                 if (current_gps_point.X != prev_gps_point.X)
                                 {
                                     current_gps_point = predictPointMotion(x, y, current_gps_point, prev_gps_point);
@@ -476,7 +476,7 @@ namespace TEST_GPS_Parsing
                                     }
                                 }
                                 drawMarker(x, y, overlayGrid, true, currentCamNum);   //draw this point update it 
-                            }
+                         //   }
                             //END TEST
 
                             usingCoords = false;
