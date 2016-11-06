@@ -59,8 +59,20 @@ namespace TEST_GPS_Parsing
         string rawBuffer;                             //not used for parsing , but for display only
 
         int duplicatePacketCounter = 1;                     //used to ensure duplicate packets aren't saved into the DB
-        int referencePacketID = 0;                  //used to compare to current packet ID to make sure GPS is alive
+
+        /*PacketID meanings
+         *gpsData.ID = GLOBAL ID; consists of object tracking points + incoming GPS points
+         *             Seen? On the "ID" pane in the UI and the "PacketID" column in the DB
+         *gpsData.packetID = GPS Cumulative ID: a cumulative ID from the GPS logger's remote DB
+         *             Seen? Not shown - used to determine whether GPS is available & for DB duplicate logger
+         *gpsData.sessionID = Current session of power-on by GPS. Mirrored on remote DB and here
+         *             Seen? In the SessionID column in the DB and used to check if the GPS is OK        
+         */
+        int referenceGlobalPacketID = 0;                  //see above
+        int referenceSessionPacketID = 0;                   //see above
         private int localRequestResult;
+
+        bool gpsConnectionOK;                       //flag to show GPS is connected
 
         public bool newLogEveryStart { get; private set; }
 
@@ -361,17 +373,19 @@ namespace TEST_GPS_Parsing
             {
 
                 //compare the packet from 10 seconds ago to the one now - if they match GPS is off
-                if (gpsData.ID != referencePacketID)
+                if (gpsData.ID != referenceGlobalPacketID)
                 {
+                    gpsConnectionOK = true;
                     status2TextBox.BackColor = System.Drawing.Color.LightGreen;
                     status2TextBox.Text = "GPS is available & connected.";
-                    referencePacketID = gpsData.ID;
+                    referenceGlobalPacketID = gpsData.ID;
                 }
                 else
                 {
+                    gpsConnectionOK = false;
                     status2TextBox.BackColor = System.Drawing.Color.Orange;
                     status2TextBox.Text = "GPS feed lost - SMS 'status' to check.";
-                    referencePacketID = gpsData.ID;
+                    referenceGlobalPacketID = gpsData.ID;
                 }
             }
 
@@ -594,12 +608,22 @@ namespace TEST_GPS_Parsing
             {
                 if (localRequestResult == requestCompleteOK)
                 {
+                    if (gpsData.ID > 0 && (referenceGlobalPacketID != gpsData.ID)) //normal operation - server and GPS ok
+                    {
+                        gpsConnectionOK = true;
+                    }
+
+                    //otherwise do a full update
+                    
                     rawBuffer += sentenceBuffer;                         //aggregates the raw buffer to display it
                     
                     //Checks if the resource is available 
                     Console.WriteLine("Parser has data-lock");
-                    gpsData = gpsData.parseSelection(sentenceBuffer, gpsData, true);  //perform the parsing operation
-                    mapData.parseLatLong(gpsData.latitude, gpsData.longitude, true);  //pass the data to the mapping method
+                    if ((referenceGlobalPacketID != gpsData.ID) || gpsData.ID == 0)
+                    {
+                        gpsData = gpsData.parseSelection(sentenceBuffer, gpsData, true);  //perform the parsing operation
+                        mapData.parseLatLong(gpsData.latitude, gpsData.longitude, true);  //pass the data to the mapping method
+                    }
 
                     //send the co-ordinates to the video output UI - keeps calling till its set
                     //pass the new instance of the overlay if it's been disposed before
@@ -611,7 +635,10 @@ namespace TEST_GPS_Parsing
                             {
                                 lock (coordsSendLock)
                                 {
-                                    vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
+                                    if ((referenceGlobalPacketID != gpsData.ID) || gpsData.ID == 0)
+                                    {
+                                        vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
+                                    }
                                 }
 
                             }
@@ -629,8 +656,9 @@ namespace TEST_GPS_Parsing
                 else
                 {
                     countWeb++;
-                    if (countWeb > 10)
+                    if (countWeb > 20)
                     {
+                        gpsConnectionOK = false;
                         countWeb = 0;
                     }
                     if (localRequestResult == serverReturnedFail)    //inform the user of the fail
@@ -809,17 +837,23 @@ namespace TEST_GPS_Parsing
                         if (vo != null)
                         {
                             //query the object tracker - returns null if object tracker is off
-                            double[] tempGetCoords = new double[2];
-                            tempGetCoords = vo.getObjTrackingCoords();
-                            if (tempGetCoords != null)
+                            if (!gpsConnectionOK) //only run if GPS is disconnected!
                             {
-                                //write the onscreen co-ords to a gpsData obj for database storages
-                                //add timestamp and date for database
-                                gpsData.latitude = tempGetCoords[0].ToString();
-                                gpsData.longitude = tempGetCoords[1].ToString();
-                                gpsData.date = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-                                gpsData.time = DateTime.Now.ToString("HH:mm:ss");
+
+                                double[] tempGetCoords = new double[2];
+                                tempGetCoords = vo.getObjTrackingCoords();
+                                if (tempGetCoords != null) //i.e. object tracking is ON
+                                {
+                                    //write the onscreen co-ords to a gpsData obj for database storages
+                                    //add timestamp and date for database
+                                    gpsData.latitude = tempGetCoords[0].ToString();
+                                    gpsData.longitude = tempGetCoords[1].ToString();
+                                    gpsData.date = DateTime.Now.ToString("yyyy-MM-dd");
+                                    gpsData.time = DateTime.Now.ToString("HH:mm:ss");
+                                    gpsData.ID = gpsData.ID + 1;
+                                }
                             }
+                            
                         }
 
                         Console.WriteLine("Waiting for parser to release lock");
@@ -883,8 +917,8 @@ namespace TEST_GPS_Parsing
             {
                 sqlDb.populateDbFieldsVideo(gpsDataForDB, vo, "connection_Fail");
             }
-            //don't write semi-filled packets to the DB
-            if (referencePacketID != gpsDataForDB.ID && referencePacketID >0)
+            //don't write duplicate packets OR (if GPS fail) don't write packets that haven't been located on screen
+            if (referenceGlobalPacketID != gpsDataForDB.ID && referenceGlobalPacketID >0 && gpsData.latitude != "0")
             {
                 try
                 {
