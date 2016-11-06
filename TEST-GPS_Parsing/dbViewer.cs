@@ -44,6 +44,9 @@ namespace TEST_GPS_Parsing
             {
                 //disable some options not applicable to this db
                 eventSearchCombobox.Enabled = false;
+            }else if (videoLogRadioButton.Checked == true)
+            {
+                eventSearchCombobox.Enabled = true;
             }
 
         }
@@ -52,43 +55,41 @@ namespace TEST_GPS_Parsing
         {
             if (showAllRecordsRadio.Checked == true)
             {
-                dateTimeForSearch.Enabled= false;
-                eventSearchCombobox.Enabled = false;
-                specDateSearchRadioButton.Enabled = false;
-                specEventSearchRadioButton.Enabled = false;
-            }else if (showSpecificRecordsRadio.Checked == true)
-            {
-                dateTimeForSearch.Enabled = true;
-                eventSearchCombobox.Enabled = true;
-                specEventSearchRadioButton.Enabled = true;
-                specDateSearchRadioButton.Enabled = true;
+                specDateSearchRadioButton.Checked = false;
+                specEventSearchRadioButton.Checked = false;
             }
         }
 
-        private void showSpecificRecordsRadio_CheckedChanged(object sender, EventArgs e)
+        private void specDateSearchRadioButton_CheckedChanged(object sender, EventArgs e)
         {
-            if (showSpecificRecordsRadio.Checked == true)
+            if (specDateSearchRadioButton.Checked == true || specEventSearchRadioButton.Checked ==true)
             {
                 showAllRecordsRadio.Checked = false;
-                dateTimeForSearch.Enabled = true;
-                eventSearchCombobox.Enabled = true;
-                specEventSearchRadioButton.Enabled = true;
-                specDateSearchRadioButton.Enabled = true;
-            }
-            else if (showAllRecordsRadio.Checked == true)
-            {
-                dateTimeForSearch.Enabled = false;
-                eventSearchCombobox.Enabled = false;
-                specDateSearchRadioButton.Enabled = false;
-                specEventSearchRadioButton.Enabled = false;
             }
         }
+
+        private void eventSearchCombobox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (specDateSearchRadioButton.Checked == true || specEventSearchRadioButton.Checked == true)
+            {
+                showAllRecordsRadio.Checked = false;
+            }
+        }
+
+        private void specEventSearchRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (specDateSearchRadioButton.Checked == true || specEventSearchRadioButton.Checked == true)
+            {
+                showAllRecordsRadio.Checked = false;
+            }
+        }
+
+
+
 
         private void dbViewer_Load(object sender, EventArgs e)
         {
             eventSearchCombobox.Enabled = false;
-            specDateSearchRadioButton.Enabled = false;
-            specEventSearchRadioButton.Enabled = false;
             reviewSql = new MySQLInterface(); //setup a database object to use
         }
 
@@ -102,6 +103,7 @@ namespace TEST_GPS_Parsing
 
             if (gpsDataRadioButton.Checked == true) //connect to the gpsData table
             {
+                specEventSearchRadioButton.Enabled = false;
                 if (showAllRecordsRadio.Checked == true && reviewSql.conn != null)    //show all of GPSDATA
                 {
                     string reviewQuery = "SELECT * FROM `gpsData`;";
@@ -109,14 +111,17 @@ namespace TEST_GPS_Parsing
                 }
 
                 //handle the specific date queries
-                else if (showSpecificRecordsRadio.Checked == true && reviewSql.conn != null)
+                else if (specDateSearchRadioButton.Checked == true && reviewSql.conn != null)
                 {
                     specDateSearchRadioButton.Enabled = true;
-                    specEventSearchRadioButton.Enabled = true;
+                    specEventSearchRadioButton.Enabled = false;
                     //don't consider the events since those are in the other table
-                    if (dateTimeForSearch.Checked)
+                    string reviewQuery = "";
+                    if (specDateSearchRadioButton.Checked == true)
                     {
-                        // = dateTimeForSearch
+                        string theDate = dateTimeForSearch.Value.ToString("yyyy-MM-dd");    //get the selected date
+                        reviewQuery = "SELECT * FROM `gpsData` WHERE `Date` = '" + theDate + "';";
+                        doMySqlQuery(reviewQuery); //execute the mysql query
                     }
                 }
             }
@@ -131,7 +136,7 @@ namespace TEST_GPS_Parsing
                 }
 
                 //handle the specific date queries
-                else if ((showSpecificRecordsRadio.Checked == true || specDateSearchRadioButton.Checked == true || specEventSearchRadioButton.Checked == true) && reviewSql.conn != null)
+                else if ((specDateSearchRadioButton.Checked == true || specEventSearchRadioButton.Checked == true) && reviewSql.conn != null)
                 {
                     //first determine the query since it will be requested from the DB
                     string reviewQuery = "";
@@ -189,11 +194,6 @@ namespace TEST_GPS_Parsing
             eventSearchCombobox.SelectedIndex = -1;
         }
 
-        private void eventSearchCombobox_SelectedIndexChanged(object sender, EventArgs e)
-        {
 
-        }
-
-   
     }
 }

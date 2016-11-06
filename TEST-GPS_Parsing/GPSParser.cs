@@ -806,6 +806,22 @@ namespace TEST_GPS_Parsing
                     packetCount++;          //increment number of packets processed
                     if (!dbLoggingThread.CancellationPending)
                     {
+                        if (vo != null)
+                        {
+                            //query the object tracker - returns null if object tracker is off
+                            double[] tempGetCoords = new double[2];
+                            tempGetCoords = vo.getObjTrackingCoords();
+                            if (tempGetCoords != null)
+                            {
+                                //write the onscreen co-ords to a gpsData obj for database storages
+                                //add timestamp and date for database
+                                gpsData.latitude = tempGetCoords[0].ToString();
+                                gpsData.longitude = tempGetCoords[1].ToString();
+                                gpsData.date = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                                gpsData.time = DateTime.Now.ToString("HH:mm:ss");
+                            }
+                        }
+
                         Console.WriteLine("Waiting for parser to release lock");
                         /*  tells the db logger thread to block until it receives a Set() signal from the parser thread 
                             to indicate that the parser has released the lock */
@@ -815,8 +831,9 @@ namespace TEST_GPS_Parsing
                         Console.WriteLine("DB thread obtained write lock");
                         //bool writeComplete = writeToDatabase(myXmlDb, gpsData);
 
+
                         //New SQL Database call to update the database
-                        bool writeCompleteSQL = writeToDabataseSQL(gpsData);
+                        bool writeCompleteSQL = writeToDabataseSQL(gpsData);                        
 
                         while (!writeCompleteSQL)
                         {
@@ -867,9 +884,8 @@ namespace TEST_GPS_Parsing
                 sqlDb.populateDbFieldsVideo(gpsDataForDB, vo, "connection_Fail");
             }
             //don't write semi-filled packets to the DB
-            if (duplicatePacketCounter != gpsDataForDB.packetID)
+            if (referencePacketID != gpsDataForDB.ID && referencePacketID >0)
             {
-                duplicatePacketCounter++;
                 try
                 {
                     sqlDb.populateDbFieldsGPS(gpsDataForDB);

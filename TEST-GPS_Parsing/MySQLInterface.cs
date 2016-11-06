@@ -125,15 +125,8 @@ namespace TEST_GPS_Parsing
                 + gpsDataForDB.longitude + "','"
                 + gpsDataForDB.grspd_k + "','"
                 + gpsDataForDB.grspd_kph + "','"
-                + gpsDataForDB.altitude + "','"
-                + gpsDataForDB.cardAngle + "','"
-                + gpsDataForDB.trkangle + "','"
-                + gpsDataForDB.accuracy + "','"
-                + gpsDataForDB.fixtype_f + "','"
-                + gpsDataForDB.fixqual_f + "','"
-                + gpsDataForDB.numsats + "','"
-                + gpsDataForDB.checksumResultStatusForDisplay +
-                "');";
+                + gpsDataForDB.altitude
+                + "');";
 
                 cmd = new MySqlCommand(sql, conn);
                 result = cmd.ExecuteScalar();

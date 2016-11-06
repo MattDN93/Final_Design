@@ -72,6 +72,10 @@ namespace TEST_GPS_Parsing
         private static int fromButtonRepress = 1;
         private static int autoFileSave = 2;
 
+        double[] revObj_gpsForDb;        //temp store for real lat/long from object tracker - send to parser for DB
+                                         //[0] = lat; [1] = long
+        
+
         //-----------------User options and parameters---------
         public int captureChoice;              //user's selection of which capture to use
         private static int captureChoiceIP = 1;
@@ -282,6 +286,13 @@ namespace TEST_GPS_Parsing
                 //we're done editing the camera frames, launch the background switcher thread
                 cameraSwitcher.RunWorkerAsync();
 
+                //setup the object tracker co-ordinatee
+                revObj_gpsForDb = new double[2];
+                for (int i = 0; i < 2; i++)
+                {
+                    revObj_gpsForDb[i] = 0.0;
+                }
+
                 return true;
             }
             catch (NullReferenceException excpt)
@@ -334,6 +345,15 @@ namespace TEST_GPS_Parsing
         //Called every 100ms to check if a camera switch is needed
         private void checkCamSwitchNeeded(object source, ElapsedEventArgs e)
         {
+        }
+
+        public double[] getObjTrackingCoords()
+        {
+            if (drawMode_Overlay == DRAW_MODE_REVOBJTRACK)
+            {
+                return revObj_gpsForDb; //this is to allow gpsParser to request the co-ordinates from the on-screen tracker
+            }
+            return null;
         }
 
         //this method is called every time the IsGrabbed event is raised i.e. every time a new frame is captured
@@ -775,6 +795,7 @@ namespace TEST_GPS_Parsing
                     try
                     {
                         varsInUse = ol_mark.setNewCoords(incoming_lat, incoming_long, transformMatrix);      //set coords if not being read from/written to
+
                     }
                     catch (OverflowException)
                     {
@@ -803,16 +824,22 @@ namespace TEST_GPS_Parsing
 
                     //this is just a normaltimer tick from the refreshOverlay_Tick method and it's likely values haven't  changed. Thus just redraw the overlay without recalc
                     bool returnVal = false;
-                    if (drawMode_Overlay != DRAW_MODE_REVOBJTRACK)
+                    if (drawMode_Overlay == DRAW_MODE_REVOBJTRACK)  //write the onscreen co-ords as lat/long back to gpsparser
+                    {
+                        revObj_gpsForDb[0] = ol_mark.current_pointGPS_lat;
+                        revObj_gpsForDb[1] = ol_mark.current_pointGPS_long;
+                    }
+                    if (drawMode_Overlay != DRAW_MODE_REVOBJTRACK) //draw markers for the tracking-based points on-screen
                     {
                         valHasChanged = false;
                         returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, webcamVid, false, currentlyActiveCamera);     //draw marker from external input of coords
                     }
-                    else
+                    else //let polygons redraw themselves
                     {
                         valHasChanged = !valHasChanged;           //let the polygons redraw every 500ms
-                        ////returnVal = ol_mark.drawPolygons(webcamVid, true);                                //draw marker from onscreen tracking
-                        ////returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, ol_mark.overlayGrid, false);
+                                                                  ////returnVal = ol_mark.drawPolygons(webcamVid, true);                                //draw marker from onscreen tracking
+                                                                  ////returnVal = ol_mark.drawMarker(ol_mark.x, ol_mark.y, ol_mark.overlayGrid, false);
+                        
                     }
 
                     if (returnVal == true && isStreaming)              //if the marker routine returned OK, draw the result in the video window
