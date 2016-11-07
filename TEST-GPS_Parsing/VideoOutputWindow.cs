@@ -284,7 +284,21 @@ namespace TEST_GPS_Parsing
                 webcamVid = new Mat();                          //create the webcam mat object
 
                 //we're done editing the camera frames, launch the background switcher thread
-                cameraSwitcher.RunWorkerAsync();
+                if (!cameraSwitcher.IsBusy)
+                {
+                    cameraSwitcher.RunWorkerAsync();
+                }
+                else
+                {
+                    cameraSwitcher.CancelAsync();
+                    if (cameraSwitcher.IsBusy)
+                    {
+                        Thread.Sleep(500);
+                    }
+                    
+                    cameraSwitcher.RunWorkerAsync();
+                }
+                
 
                 //setup the object tracker co-ordinatee
                 revObj_gpsForDb = new double[2];
@@ -349,7 +363,7 @@ namespace TEST_GPS_Parsing
 
         public double[] getObjTrackingCoords()
         {
-            if (drawMode_Overlay == DRAW_MODE_REVOBJTRACK)
+            if (drawMode_Overlay == DRAW_MODE_REVOBJTRACK && valHasChanged)
             {
                 return revObj_gpsForDb; //this is to allow gpsParser to request the co-ordinates from the on-screen tracker
             }

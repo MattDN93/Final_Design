@@ -67,7 +67,7 @@
             this.label21 = new System.Windows.Forms.Label();
             this.timeElapsedTextBox = new System.Windows.Forms.TextBox();
             this.label17 = new System.Windows.Forms.Label();
-            this.packetIDTextBox = new System.Windows.Forms.TextBox();
+            this.globalIDTextBox = new System.Windows.Forms.TextBox();
             this.openFileButton = new System.Windows.Forms.Button();
             this.openLogDialog = new System.Windows.Forms.OpenFileDialog();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
@@ -494,7 +494,7 @@
             this.groupBox4.Controls.Add(this.label21);
             this.groupBox4.Controls.Add(this.timeElapsedTextBox);
             this.groupBox4.Controls.Add(this.label17);
-            this.groupBox4.Controls.Add(this.packetIDTextBox);
+            this.groupBox4.Controls.Add(this.globalIDTextBox);
             this.groupBox4.Location = new System.Drawing.Point(10, 206);
             this.groupBox4.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox4.Name = "groupBox4";
@@ -543,14 +543,14 @@
             this.label17.TabIndex = 10;
             this.label17.Text = "ID";
             // 
-            // packetIDTextBox
+            // globalIDTextBox
             // 
-            this.packetIDTextBox.Location = new System.Drawing.Point(29, 17);
-            this.packetIDTextBox.Margin = new System.Windows.Forms.Padding(2);
-            this.packetIDTextBox.Name = "packetIDTextBox";
-            this.packetIDTextBox.ReadOnly = true;
-            this.packetIDTextBox.Size = new System.Drawing.Size(53, 20);
-            this.packetIDTextBox.TabIndex = 9;
+            this.globalIDTextBox.Location = new System.Drawing.Point(29, 17);
+            this.globalIDTextBox.Margin = new System.Windows.Forms.Padding(2);
+            this.globalIDTextBox.Name = "globalIDTextBox";
+            this.globalIDTextBox.ReadOnly = true;
+            this.globalIDTextBox.Size = new System.Drawing.Size(53, 20);
+            this.globalIDTextBox.TabIndex = 9;
             // 
             // openFileButton
             // 
@@ -1342,7 +1342,7 @@
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Label label17;
-        private System.Windows.Forms.TextBox packetIDTextBox;
+        private System.Windows.Forms.TextBox globalIDTextBox;
         private System.Windows.Forms.Button openFileButton;
         private System.Windows.Forms.OpenFileDialog openLogDialog;
         private System.Windows.Forms.GroupBox groupBox5;

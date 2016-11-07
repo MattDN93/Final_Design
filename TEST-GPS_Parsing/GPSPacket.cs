@@ -12,9 +12,9 @@ namespace TEST_GPS_Parsing
         //--these are all strings for UI display---
         public int timeElapsed;
         //vars for GPS data
-        public int ID;                          //global ID from the web database
+        public int globalID;                          //global ID from & to database
         public int gpsSessionID;                //session ID from the GPS (packets since the last shutdown
-        public int packetID = 0;               //session-based packet ID from this software, one packet is equivalent to a set of NMEA strings starting with GPRMC
+        public int packetID = 0;               //global GPS-remote server side ID - only used ehre to check connectivity
         public int deltaCount = 0;             //checks the delta of packet ID so we can update only when ID has changed
         //incoming GPS data
         //from GPRMC
@@ -54,7 +54,7 @@ namespace TEST_GPS_Parsing
         //Default constructor
         public GPSPacket()
         {
-            ID = 0;
+            globalID = 0;
             //incoming GPS data
             //from GPRMC
             latitude = "";
@@ -149,7 +149,7 @@ namespace TEST_GPS_Parsing
                             if (item.ToString() != ";")  //make sure the comma isn't included
                             {
                                 subField += item;
-                                gpsData.ID = Convert.ToInt32(subField); //parse string to a string for display
+                                gpsData.packetID = Convert.ToInt32(subField); //parse string to a string for display
                             }break;
                         //Section 2 is the GPS session packet ID
                         case 1:
@@ -159,7 +159,7 @@ namespace TEST_GPS_Parsing
                                 gpsData.gpsSessionID = Convert.ToInt32(subField); //parse string to a string for display
                             }
                             break;
-                        //Section 3 is the global packet ID
+                        //Section 3 is the date
                         case 2:
                             if (item.ToString() != ";")  //make sure the comma isn't included
                             {
@@ -167,7 +167,7 @@ namespace TEST_GPS_Parsing
                                 gpsData.date = subField; //parse string to a string for display
                             }
                             break;
-                        //Section 1 is the global packet ID
+                        //Section 4 is the time
                         case 3:
                             if (item.ToString() != ";")  //make sure the comma isn't included
                             {
@@ -175,7 +175,7 @@ namespace TEST_GPS_Parsing
                                 gpsData.time = subField; //parse string to a string for display
                             }
                             break;
-                        //Section 1 is the global packet ID
+                        //Section 5 is the lat
                         case 4:
                             if (item.ToString() != ";")  //make sure the comma isn't included
                             {
@@ -183,6 +183,7 @@ namespace TEST_GPS_Parsing
                                 gpsData.latitude = subField; //parse string to a string for display
                             }
                             break;
+                        //Section 6 is the long
                         case 5:
                             if (item.ToString() != ";")  //make sure the comma isn't included
                             {
@@ -270,7 +271,7 @@ namespace TEST_GPS_Parsing
 
         //-------------------------PARSING MEMBER METHODS----------------------------
 
-        public GPSPacket parseSelection(string sentenceBuffer, GPSPacket gpsData, bool usingWebLogging)
+        public GPSPacket parseSelection(string sentenceBuffer, GPSPacket gpsDataForParsing, bool usingWebLogging, int refPackID)
         {
             GPSPacket updatedGpsData = new GPSPacket(); //sets up a new object which methods return with updated values
             if (usingWebLogging == true)  //we've got the webserver response OR a failed packet
@@ -281,17 +282,14 @@ namespace TEST_GPS_Parsing
                 }
                 else
                 {
-                    updatedGpsData = newParsingMethod(sentenceBuffer, gpsData);     //parse the incoming string
-                    if (updatedGpsData.ID > gpsData.ID)
-                    {
-                        packetID++;
+                    updatedGpsData = newParsingMethod(sentenceBuffer, gpsDataForParsing);     //parse the incoming string
+                    if (updatedGpsData.packetID > refPackID || gpsDataForParsing.packetID == 0)
+                    {                        
+                        updatedGpsData.globalID = updatedGpsData.globalID + 1;
                         return updatedGpsData;
                     }
-                    else
-                    {
-                        return updatedGpsData;
-                    }
-                    
+
+                    return updatedGpsData;
                 }
                 
             }
@@ -306,8 +304,8 @@ namespace TEST_GPS_Parsing
                     if (sentenceBuffer.Contains("GNRMC")) //We assume that each "packet" of sentences begins with a GPRMC hence update the packet ID each time a GPRMC is found!
                 {
                     packetID++;
-                    updatedGpsData.ID = packetID;
-                    updatedGpsData = parseGNRMC(sentenceBuffer, gpsData);
+                    updatedGpsData.packetID = packetID;
+                    updatedGpsData = parseGNRMC(sentenceBuffer, gpsDataForParsing);
                     updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 0);    //checksum compute with GPRMC
 
                     //do some last-minute formatting to the fields based on known issues
@@ -332,13 +330,13 @@ namespace TEST_GPS_Parsing
                 }
                 else if (sentenceBuffer.Contains("GPGGA"))
                 {
-                    updatedGpsData = parseGNGGA(sentenceBuffer, gpsData);
+                    updatedGpsData = parseGNGGA(sentenceBuffer, gpsDataForParsing);
                     updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 1);    //checksum compute with GPGGA
                     return updatedGpsData;
                 }
                 else if (sentenceBuffer.Contains("GPVTG"))
                 {
-                    updatedGpsData = parseGNVTG(sentenceBuffer, gpsData);
+                    updatedGpsData = parseGNVTG(sentenceBuffer, gpsDataForParsing);
                     updatedGpsData = getChecksum(sentenceBuffer, updatedGpsData, 2);    //checksum compute with GPVTG
                                                                                         //trim off leading zeroes from the speed
                     if (updatedGpsData.grspd_kph.StartsWith("0"))

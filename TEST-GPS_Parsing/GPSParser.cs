@@ -69,7 +69,8 @@ namespace TEST_GPS_Parsing
          *             Seen? In the SessionID column in the DB and used to check if the GPS is OK        
          */
         int referenceGlobalPacketID = 0;                  //see above
-        int referenceSessionPacketID = 0;                   //see above
+        int referenceSessionPacketID = -1;                   //see above
+        int referencePacketID = -1;                         //see above
         private int localRequestResult;
 
         bool gpsConnectionOK;                       //flag to show GPS is connected
@@ -88,7 +89,7 @@ namespace TEST_GPS_Parsing
             GPSPacket gpsData = new GPSPacket();
 
             //Monitoring
-            packetIDTextBox.Text = gpsData.ID.ToString();
+            globalIDTextBox.Text = gpsData.globalID.ToString();
             //GPS Core Data
             latitudeTextBox.Text = gpsData.latitude.ToString();
             longitudeTextBox.Text = gpsData.longitude.ToString();
@@ -234,6 +235,8 @@ namespace TEST_GPS_Parsing
                 parseIsRunning = true;
                 trayIconParsing.Text = "GPS logging active...";
                 trayIconParsing.ShowBalloonTip(5, "Logging running...", "Logger will continue running here if main window closed.",ToolTipIcon.Info);
+                gpsData.globalID = sqlDb.getGlobalID() + 1;     //request the global ID from the DB
+                referenceGlobalPacketID = gpsData.globalID - 1; //initially set the two to different things
 
                 if (usingWebLogging == true)
                 {
@@ -373,19 +376,19 @@ namespace TEST_GPS_Parsing
             {
 
                 //compare the packet from 10 seconds ago to the one now - if they match GPS is off
-                if (gpsData.ID != referenceGlobalPacketID)
+                if (gpsData.gpsSessionID != referenceSessionPacketID)
                 {
                     gpsConnectionOK = true;
                     status2TextBox.BackColor = System.Drawing.Color.LightGreen;
                     status2TextBox.Text = "GPS is available & connected.";
-                    referenceGlobalPacketID = gpsData.ID;
+                    referenceSessionPacketID = gpsData.gpsSessionID;
                 }
                 else
                 {
                     gpsConnectionOK = false;
                     status2TextBox.BackColor = System.Drawing.Color.Orange;
                     status2TextBox.Text = "GPS feed lost - SMS 'status' to check.";
-                    referenceGlobalPacketID = gpsData.ID;
+                    referenceSessionPacketID = gpsData.gpsSessionID;
                 }
             }
 
@@ -459,7 +462,7 @@ namespace TEST_GPS_Parsing
             rawLogFileTextBox.AppendText(rawBuffer);
             sentenceBufferForUI = "";
             //Monitoring
-            packetIDTextBox.Text = gpsDataForUI.ID.ToString();
+            globalIDTextBox.Text = gpsDataForUI.globalID.ToString();
             timeElapsedTextBox.Text = gpsDataForUI.timeElapsed.ToString();
             //GPS Core Data
             latitudeTextBox.Clear();
@@ -608,10 +611,17 @@ namespace TEST_GPS_Parsing
             {
                 if (localRequestResult == requestCompleteOK)
                 {
-                    if (gpsData.ID > 0 && (referenceGlobalPacketID != gpsData.ID)) //normal operation - server and GPS ok
+                    if (referencePacketID == -1)
+                    {
+                        referencePacketID = gpsData.packetID;   //set the reference packet ID first time
+                    }
+                    //compares session ID which is ONLY updated by incoming GPS coordinates, if they don't change, GPS is stuck
+                    if ((referencePacketID < gpsData.packetID) || gpsData.gpsSessionID == 0) //normal operation - server and GPS ok
                     {
                         gpsConnectionOK = true;
                     }
+
+
 
                     //otherwise do a full update
                     
@@ -619,11 +629,10 @@ namespace TEST_GPS_Parsing
                     
                     //Checks if the resource is available 
                     Console.WriteLine("Parser has data-lock");
-                    if ((referenceGlobalPacketID != gpsData.ID) || gpsData.ID == 0)
-                    {
-                        gpsData = gpsData.parseSelection(sentenceBuffer, gpsData, true);  //perform the parsing operation
-                        mapData.parseLatLong(gpsData.latitude, gpsData.longitude, true);  //pass the data to the mapping method
-                    }
+                    gpsData = gpsData.parseSelection(sentenceBuffer, gpsData, true, referencePacketID);  //perform the parsing operation
+                    referencePacketID = gpsData.packetID;
+                    mapData.parseLatLong(gpsData.latitude, gpsData.longitude, true);  //pass the data to the mapping method                        
+
 
                     //send the co-ordinates to the video output UI - keeps calling till its set
                     //pass the new instance of the overlay if it's been disposed before
@@ -635,9 +644,9 @@ namespace TEST_GPS_Parsing
                             {
                                 lock (coordsSendLock)
                                 {
-                                    if ((referenceGlobalPacketID != gpsData.ID) || gpsData.ID == 0)
+                                    if (referencePacketID < gpsData.packetID || gpsConnectionOK)
                                     {
-                                        vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                  //send to the vid output class - force a "tick" to update coords
+                                        vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                //send to the vid output class - force a "tick" to update coords
                                     }
                                 }
 
@@ -658,7 +667,6 @@ namespace TEST_GPS_Parsing
                     countWeb++;
                     if (countWeb > 20)
                     {
-                        gpsConnectionOK = false;
                         countWeb = 0;
                     }
                     if (localRequestResult == serverReturnedFail)    //inform the user of the fail
@@ -723,8 +731,8 @@ namespace TEST_GPS_Parsing
 
                         //Checks if the resource is available 
                         Console.WriteLine("Parser has data-lock");
-                        gpsData = gpsData.parseSelection(sentenceBuffer, gpsData,false);  //perform the parsing operation
-                                                                                    //doChecksumCheck();                                          //check on the checksums of the current method
+                        gpsData = gpsData.parseSelection(sentenceBuffer, gpsData,false, referencePacketID);  //perform the parsing operation
+                           //shift the packetID forwards                                                        //doChecksumCheck();                                          //check on the checksums of the current method
                         mapData.parseLatLong(gpsData.latitude, gpsData.longitude,false);  //pass the data to the mapping method
 
                         count++;
@@ -839,18 +847,21 @@ namespace TEST_GPS_Parsing
                             //query the object tracker - returns null if object tracker is off
                             if (!gpsConnectionOK) //only run if GPS is disconnected!
                             {
-
                                 double[] tempGetCoords = new double[2];
                                 tempGetCoords = vo.getObjTrackingCoords();
-                                if (tempGetCoords != null) //i.e. object tracking is ON
+                                if (tempGetCoords != null && tempGetCoords[0] != 0 ) //i.e. object tracking is ON
                                 {
                                     //write the onscreen co-ords to a gpsData obj for database storages
                                     //add timestamp and date for database
-                                    gpsData.latitude = tempGetCoords[0].ToString();
-                                    gpsData.longitude = tempGetCoords[1].ToString();
-                                    gpsData.date = DateTime.Now.ToString("yyyy-MM-dd");
-                                    gpsData.time = DateTime.Now.ToString("HH:mm:ss");
-                                    gpsData.ID = gpsData.ID + 1;
+                                    if (gpsData.latitude != tempGetCoords[0].ToString()) //avoid duplicates
+                                    {
+                                        gpsData.latitude = tempGetCoords[0].ToString();
+                                        gpsData.longitude = tempGetCoords[1].ToString();
+                                        gpsData.date = DateTime.Now.ToString("yyyy-MM-dd");
+                                        gpsData.time = DateTime.Now.ToString("HH:mm:ss");
+                                        gpsData.globalID = gpsData.globalID + 1;
+                                    }
+ 
                                 }
                             }
                             
@@ -918,11 +929,12 @@ namespace TEST_GPS_Parsing
                 sqlDb.populateDbFieldsVideo(gpsDataForDB, vo, "connection_Fail");
             }
             //don't write duplicate packets OR (if GPS fail) don't write packets that haven't been located on screen
-            if (referenceGlobalPacketID != gpsDataForDB.ID && referenceGlobalPacketID >0 && gpsData.latitude != "0")
+            if (referenceGlobalPacketID < gpsDataForDB.globalID && referenceGlobalPacketID >0 && gpsData.latitude != "0")
             {
                 try
                 {
                     sqlDb.populateDbFieldsGPS(gpsDataForDB);
+                    referenceGlobalPacketID++;
                 }
                 catch (Exception)
                 {
@@ -972,11 +984,11 @@ namespace TEST_GPS_Parsing
                     statusTextBox.BackColor = System.Drawing.Color.LightGoldenrodYellow;
                     statusTextBox.AppendText("Parsing in progress with warning...");
                 }
-                
 
-                //function called to get all the incoming data and refresh the UI
-                updateUI(gpsData, sentenceBuffer);
-                rawBuffer = "";             //since earlier call is asynchronous, only clear the raw buffer once 100% sure that its data has reached the UI - which is now.
+                    //function called to get all the incoming data and refresh the UI
+                    updateUI(gpsData, sentenceBuffer);
+                    rawBuffer = "";             //since earlier call is asynchronous, only clear the raw buffer once 100% sure that its data has reached the UI - which is now.
+
             }
             
         }

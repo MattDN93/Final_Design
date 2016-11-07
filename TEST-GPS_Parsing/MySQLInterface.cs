@@ -99,7 +99,7 @@ namespace TEST_GPS_Parsing
             try
             {
                 //check where to append from - if table data already exists
-                sql = "SELECT COUNT(*) FROM gpsData";
+                sql = "SELECT MAX(packetID) FROM gpsData";
                 cmd = new MySqlCommand(sql, conn);
                 result = cmd.ExecuteScalar();
                 if (result != null)
@@ -117,8 +117,8 @@ namespace TEST_GPS_Parsing
                 //test writing new tables
 
                 sql = @"insert into gpsData values("
-                + (r++) + ","                               //this is the overall DB ID
-                + gpsDataForDB.ID + ",'"                 //note this ID is the packet per session
+                + (r+1) + ","                               //this is the overall DB ID
+                + gpsDataForDB.gpsSessionID + ",'"                 //note this ID is the packet per session
                 + gpsDataForDB.date + "','"
                 + gpsDataForDB.time + "','"
                 + gpsDataForDB.latitude + "','"
@@ -138,12 +138,30 @@ namespace TEST_GPS_Parsing
 
         }
 
+        //get global ID
+        public int getGlobalID()
+        {
+            sql = "SELECT MAX(PacketID) FROM gpsData";
+            cmd = new MySqlCommand(sql, conn);
+            result = cmd.ExecuteScalar();
+            if (result != null)
+            {
+                r = Convert.ToInt32(result);
+            }
+            else
+            {
+                r = 1;
+            }
+
+            return r;
+        }
+
         public void populateDbFieldsVideo(GPSPacket gpsDataDb, VideoOutputWindow voForDb, string logReason)
         {
             try
             {
                 //check where to append from - if table data already exists
-                sql = "SELECT COUNT(*) FROM videoLog";
+                sql = "SELECT MAX(eventID) FROM videoLog";
                 cmd = new MySqlCommand(sql, conn);
                 result = cmd.ExecuteScalar();
                 if (result != null)
