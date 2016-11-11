@@ -235,7 +235,10 @@ namespace TEST_GPS_Parsing
                 parseIsRunning = true;
                 trayIconParsing.Text = "GPS logging active...";
                 trayIconParsing.ShowBalloonTip(5, "Logging running...", "Logger will continue running here if main window closed.",ToolTipIcon.Info);
-                gpsData.globalID = sqlDb.getGlobalID() + 1;     //request the global ID from the DB
+                if (sqlDb != null)
+                {
+                    gpsData.globalID = sqlDb.getGlobalID() + 1;     //request the global ID from the DB
+                }              
                 referenceGlobalPacketID = gpsData.globalID - 1; //initially set the two to different things
 
                 if (usingWebLogging == true)
