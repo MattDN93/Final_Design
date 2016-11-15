@@ -89,6 +89,9 @@ namespace TEST_GPS_Parsing
         protected bool randomSim;                 //using random simulation mode or ordered
         protected bool valHasChanged;             //for updating the marker
         protected bool stillSwitchingCams = false;        //to ensure no crashing when switching camera
+        protected bool usingRPT = false;            //flag for using rev persp. transform (pixel to camera perspective scale)
+        public int rptCounter = 0;               //counts how many points entered
+
         public bool grabResult;                  //result of grabbing a frame, for disconnection detection
         int disconnectCounter = 0;                  //check if disconnected and if so do a full reset
         public bool logCamSwitchToDb = false;       //for signalling a write required to the DB
@@ -133,7 +136,12 @@ namespace TEST_GPS_Parsing
         }
 
         public Mat transformMatrix;                 //the matrix to transform the points from the world to image planes
+        public Mat reverseTransformMatrix;          //matrix to transform pixel to 3D scaled pixel onscreen
 
+        //--------Reverse Transform points------
+        private PointF[] rptPixelBounds = new PointF[4];  //bounds for scaled pixel grid onto 3D camera plane
+
+        //---------Current Camera Variable--------
         public int currentlyActiveCamera = -1;
 
         /*array to hold all camera structs, add new ones for expansion later
@@ -208,12 +216,20 @@ namespace TEST_GPS_Parsing
 
                 //---------get capture objects---------
                 //get as many capture objects as cameras active
+                rptCounter = 0;     //reset reverse proj transform settings
+                usingRPT = false;
 
                 //----------------TEST CODE--------------------
                 WebCams = setup.webCams_CB;
                 _SystemCameras = setup._SystemCameras_CB; //DirectShow object - for local cams
                 CameraDevice = setup.CameraDevice_CB;
                 _capture = setup._capture_CB;
+
+                if (WebCams.Length == 0)
+                {
+                    MessageBox.Show("No cameras detected. Please plug in a camera now.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    throw new NullReferenceException();
+                }
 
                 camBoundArray = new camBound[WebCams.Length];
                 for (int i = 0; i < camBoundArray.Length; i++)
@@ -232,6 +248,7 @@ namespace TEST_GPS_Parsing
 
                 //Setup all the capture devices and then pause all but the ones we need
                 camStreamCaptureArray = new Capture[WebCams.Length];
+
 
 
                 if (captureChoice == captureChoiceIP) //means we're dealing with IP cams so set them all up now
@@ -264,6 +281,9 @@ namespace TEST_GPS_Parsing
 
                 //bring across the transformation matrix to do the point plane conversion (gps real world to image plane)
                 transformMatrix = setup.transformMatrix_CB;
+
+                //calculate the pixel-to-3D space reverse transform matrix
+                //reverseTransformMatrix = doRevPerspectiveTransform
 
                 //---------update the UI initially with info--
                 //by default first camera is the left (camBound[1])
@@ -473,6 +493,59 @@ namespace TEST_GPS_Parsing
 
         }
         #endregion
+
+        #region Rev. Perspective Transform
+
+        //let the user click in the space to set the perspective transform
+        private void overlayVideoFramesBox_MouseClick(object sender, MouseEventArgs e)
+        {
+            //first left click is left upper pixel bound
+            if (rptCounter == 0 && e.Button == MouseButtons.Left)    //first point (top left) for scaling
+            {
+                rptCounter++;
+                rptPixelBounds[0].X = e.X;      //get mouse X co-ordinate
+                rptPixelBounds[0].Y = e.Y;      //get mouse Y co-ordinate
+            }
+            //next right click is right upper bound
+            //NO MORE clicks so store the bottom bounds automatically since they're fixed
+            else if (rptCounter == 1 && e.Button == MouseButtons.Right)
+            {
+                rptCounter++;
+                rptPixelBounds[1].X = e.X;      //get mouse X co-ordinate
+                rptPixelBounds[1].Y = e.Y;      //get mouse Y co-ordinate
+                //now fill in the rest cause they're fixed
+                rptPixelBounds[2].X = 0;                    //get mouse X co-ordinate
+                rptPixelBounds[2].Y = vidPixelHeight;      //get mouse Y co-ordinate
+                rptPixelBounds[3].X = vidPixelWidth;       //get mouse Y co-ordinate
+                rptPixelBounds[3].Y = vidPixelHeight;      //get mouse X co-ordinate
+            }
+            else
+            {
+                rptCounter++;    //set it beyond 0,1 to not trigger bounds
+                //ignore any more clicks
+                return;
+            }
+            
+        }
+
+        public void getRevPerspectiveTransformMatrix()
+        {
+            //gets the reverse perspective transform matrix to prevent floating points when putting pixel onscreen
+            PointF[] srcPixelBounds = new PointF[4];
+            //fill in the normal screen pixel bounds (0,0) (640,0) (0,480) (640,480)
+            srcPixelBounds[0].X = srcPixelBounds[0].Y = srcPixelBounds[1].Y = 0;
+            srcPixelBounds[1].X = srcPixelBounds[3].X = vidPixelWidth;
+            srcPixelBounds[2].Y = srcPixelBounds[3].Y = vidPixelHeight;
+            //we want to scale the top 2 points to something else to account for perspective shift
+            reverseTransformMatrix = CvInvoke.GetPerspectiveTransform(srcPixelBounds, rptPixelBounds);
+        }
+
+
+        public void doRevPerspectiveTransform()
+        {
+            
+        }
+        #endregion 
 
         #region capture Setup
         private void SetupCapture(int Camera_Identifier, bool reconnecting)
@@ -1305,8 +1378,8 @@ namespace TEST_GPS_Parsing
 
 
 
-        #endregion
 
+        #endregion
 
     }
 

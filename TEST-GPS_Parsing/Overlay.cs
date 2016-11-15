@@ -199,7 +199,11 @@ namespace TEST_GPS_Parsing
             y = Convert.ToInt32(Math.Round((Math.Abs(imagePlaneLat - ulBound[0]) / dy) * gridHeight));
             x = Convert.ToInt32(Math.Round((((imagePlaneLong - ulBound[1]) / dx) * gridWidth)));
 
-
+            //now apply the reverse transform to account for 3D distortion in camera horizon plane
+            //if (usingRPT == true)
+            //{
+            //    conversionPointDest = CvInvoke.PerspectiveTransform(conversionPointSrc, transformMatrix);
+            //}
         }
 
         /*this method takes the onscreen location of the object in question and translates it to a lat/long 
