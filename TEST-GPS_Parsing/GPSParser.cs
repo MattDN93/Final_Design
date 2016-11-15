@@ -72,6 +72,9 @@ namespace TEST_GPS_Parsing
         int referencePacketID = -1;                         //see above
         private int localRequestResult;
 
+        //check time of last method call for disconnect timer or cam switch
+        DateTime? lastCallTime = null;
+
         bool gpsConnectionOK;                       //flag to show GPS is connected
 
         public bool newLogEveryStart { get; private set; }
@@ -158,7 +161,10 @@ namespace TEST_GPS_Parsing
 
             //TEST - init the networking session for the GPS
             servStatusTextbox.Text = "Connect to server...";
-         
+
+            //setup the cam disconnect time with now
+            lastCallTime = DateTime.Now;
+
         }
         #endregion
 
@@ -925,9 +931,10 @@ namespace TEST_GPS_Parsing
                 vo.logCamSwitchToDb = false;
                 sqlDb.populateDbFieldsVideo(gpsDataForDB, vo, "camera_Switch");
             }
-            //log a camera disconnection event
-            if (vo != null && vo.grabResult == false && sqlDb != null)
+            //log a camera disconnection event - check Pc time since GPS time will be stuck
+            if (vo != null && vo.grabResult == false && sqlDb != null && DateTime.Now > lastCallTime)
             {
+                lastCallTime = DateTime.Now;        //update the last call time
                 sqlDb.populateDbFieldsVideo(gpsDataForDB, vo, "connection_Fail");
             }
             //don't write duplicate packets OR (if GPS fail) don't write packets that haven't been located on screen

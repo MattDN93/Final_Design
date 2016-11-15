@@ -178,9 +178,9 @@ namespace TEST_GPS_Parsing
                 //test writing new tables
 
                 sql = @"insert into videoLog values("
-                + (r++) + ",'"                                    //this is the overall DB ID
+                + (r+1) + ",'"                                    //this is the overall DB ID
                 + gpsDataDb.date + "','"
-                + gpsDataDb.time + "','"
+                + DateTime.Now.ToString("HH:mm:ss") + "','"     //use the PC time since if GPS is stuck it'll report the same time!
                 + gpsDataDb.latitude + "','"
                 + gpsDataDb.longitude + "','"
                 + voForDb.currentlyActiveCamera + "','"
