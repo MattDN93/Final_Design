@@ -118,7 +118,7 @@ namespace TEST_GPS_Parsing
 
         #region Setting and Scaling Co-ords
         //a method to allow the parser class to access the coords vars without race conditions
-        public bool setNewCoords(double lat_forDisplay, double long_forDisplay, Mat transformMatrixForCalc)
+        public bool setNewCoords(double lat_forDisplay, double long_forDisplay, Mat transformMatrixForCalc,Mat reverseTransformMatrixForCalc, bool usingRPTForCalc)
         {
             if (usingCoords == true) //make thread wait until we're done using the data
             {
@@ -131,7 +131,7 @@ namespace TEST_GPS_Parsing
 
                 try
                 {
-                    scaleGpsCoordsToDisplayBounds(lat_forDisplay, long_forDisplay, transformMatrixForCalc);
+                    scaleGpsCoordsToDisplayBounds(lat_forDisplay, long_forDisplay, transformMatrixForCalc, reverseTransformMatrixForCalc, usingRPTForCalc);
                 }
                 catch (OverflowException e)
                 {
@@ -157,7 +157,7 @@ namespace TEST_GPS_Parsing
 
         //This method takes the lat/long limits of the camera frame, calculates an offset based on
         //where the given GPS coords are, and then scales it to a pixel value to be overlayed onscreen
-        public void scaleGpsCoordsToDisplayBounds(double incoming_lat,double incoming_long, Mat transformMatrix)
+        public void scaleGpsCoordsToDisplayBounds(double incoming_lat,double incoming_long, Mat transformMatrix,Mat reverseTransformMatrix_vo, bool usingRPT_vo)
         {
             /* DEFINITIONS:
              * UpperLeftBound[0] = latitude top left; [1] = longitude top left
@@ -200,11 +200,15 @@ namespace TEST_GPS_Parsing
             x = Convert.ToInt32(Math.Round((((conversionPointDest[0].Y - ulBound[1]) / dx) * gridWidth)));
 
             //now apply the reverse transform to account for 3D distortion in camera horizon plane
-            if (usingRPT == true)
+            if (usingRPT_vo == true)
             {
-                conversionPointDest = CvInvoke.PerspectiveTransform(conversionPointDest, reverseTransformMatrix);
-                x = Convert.ToInt32(conversionPointDest[0].Y);
-                y = Convert.ToInt32(conversionPointDest[0].Y);
+                PointF[] conversionIntSrc = new PointF[1];
+                conversionIntSrc[0].X = x;
+                conversionIntSrc[0].Y = y;
+                PointF[] conversionIntDest = new PointF[1];
+                conversionIntDest = CvInvoke.PerspectiveTransform(conversionIntSrc, reverseTransformMatrix_vo);
+                x = Convert.ToInt32(conversionIntDest[0].X);
+                y = Convert.ToInt32(conversionIntDest[0].Y);
             }
         }
 

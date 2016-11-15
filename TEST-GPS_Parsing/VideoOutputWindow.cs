@@ -90,7 +90,8 @@ namespace TEST_GPS_Parsing
         protected bool valHasChanged;             //for updating the marker
         protected bool stillSwitchingCams = false;        //to ensure no crashing when switching camera
         protected bool usingRPT = false;            //flag for using rev persp. transform (pixel to camera perspective scale)
-        public int rptCounter = 0;               //counts how many points entered
+        public int rptClickCounter = 0;               //counts how many points entered
+        public int rptCounter = 0;                  //for initial 10 second counting
 
         public bool grabResult;                  //result of grabbing a frame, for disconnection detection
         int disconnectCounter = 0;                  //check if disconnected and if so do a full reset
@@ -216,7 +217,8 @@ namespace TEST_GPS_Parsing
 
                 //---------get capture objects---------
                 //get as many capture objects as cameras active
-                rptCounter = 0;     //reset reverse proj transform settings
+                rptClickCounter = 0;     //reset reverse proj transform settings
+                rptCounter = 0;         //reset initial counter for rpt setup
                 usingRPT = false;
 
                 //----------------TEST CODE--------------------
@@ -499,32 +501,38 @@ namespace TEST_GPS_Parsing
         //let the user click in the space to set the perspective transform
         private void overlayVideoFramesBox_MouseClick(object sender, MouseEventArgs e)
         {
-            //first left click is left upper pixel bound
-            if (rptCounter == 0 && e.Button == MouseButtons.Left)    //first point (top left) for scaling
+            if (isStreaming)
             {
-                rptCounter++;
-                rptPixelBounds[0].X = e.X;      //get mouse X co-ordinate
-                rptPixelBounds[0].Y = e.Y;      //get mouse Y co-ordinate
+                //first left click is left upper pixel bound
+                if (rptClickCounter == 0 && e.Button == MouseButtons.Left)    //first point (top left) for scaling
+                {
+                    rptClickCounter++;
+                    rptPixelBounds[0].X = e.X;      //get mouse X co-ordinate
+                    rptPixelBounds[0].Y = e.Y;      //get mouse Y co-ordinate
+                }
+                //next right click is right upper bound
+                //NO MORE clicks so store the bottom bounds automatically since they're fixed
+                else if (rptClickCounter == 1 && e.Button == MouseButtons.Left)
+                {
+                    rptClickCounter = -1;
+                    rptPixelBounds[1].X = e.X;      //get mouse X co-ordinate
+                    rptPixelBounds[1].Y = e.Y;      //get mouse Y co-ordinate
+                                                    //now fill in the rest cause they're fixed
+                    rptPixelBounds[2].X = 0;                    
+                    rptPixelBounds[2].Y = vidPixelHeight;      
+                    rptPixelBounds[3].X = vidPixelWidth;       
+                    rptPixelBounds[3].Y = vidPixelHeight;      
+                    getRevPerspectiveTransformMatrix();
+                    usingRPT = true;
+                }
+                else
+                {
+                    rptClickCounter = -1;    //set it beyond 0,1 to not trigger bounds
+                                     //ignore any more clicks
+                    return;
+                }
             }
-            //next right click is right upper bound
-            //NO MORE clicks so store the bottom bounds automatically since they're fixed
-            else if (rptCounter == 1 && e.Button == MouseButtons.Right)
-            {
-                rptCounter++;
-                rptPixelBounds[1].X = e.X;      //get mouse X co-ordinate
-                rptPixelBounds[1].Y = e.Y;      //get mouse Y co-ordinate
-                //now fill in the rest cause they're fixed
-                rptPixelBounds[2].X = 0;                    //get mouse X co-ordinate
-                rptPixelBounds[2].Y = vidPixelHeight;      //get mouse Y co-ordinate
-                rptPixelBounds[3].X = vidPixelWidth;       //get mouse Y co-ordinate
-                rptPixelBounds[3].Y = vidPixelHeight;      //get mouse X co-ordinate
-            }
-            else
-            {
-                rptCounter++;    //set it beyond 0,1 to not trigger bounds
-                //ignore any more clicks
-                return;
-            }
+
             
         }
 
@@ -532,7 +540,12 @@ namespace TEST_GPS_Parsing
         {
             //gets the reverse perspective transform matrix to prevent floating points when putting pixel onscreen
             PointF[] srcPixelBounds = new PointF[4];
-            //fill in the normal screen pixel bounds (0,0) (640,0) (0,480) (640,480)
+            //fill in the normal screen pixel bounds width = 640, height = 480 (common)
+            /*Remember pixel vs "geometry" i.e. if 640x480
+            * (0,480)   [0]         [1] (640,480)
+            * 
+            * (0,0)     [2]         [3] (640,0)
+            * */
             srcPixelBounds[0].X = srcPixelBounds[0].Y = srcPixelBounds[1].Y = 0;
             srcPixelBounds[1].X = srcPixelBounds[3].X = vidPixelWidth;
             srcPixelBounds[2].Y = srcPixelBounds[3].Y = vidPixelHeight;
@@ -881,7 +894,7 @@ namespace TEST_GPS_Parsing
                     //{
                     try
                     {
-                        varsInUse = ol_mark.setNewCoords(incoming_lat, incoming_long, transformMatrix);      //set coords if not being read from/written to
+                        varsInUse = ol_mark.setNewCoords(incoming_lat, incoming_long, transformMatrix, reverseTransformMatrix,usingRPT);      //set coords if not being read from/written to
 
                     }
                     catch (OverflowException)

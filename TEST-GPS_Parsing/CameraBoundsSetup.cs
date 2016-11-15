@@ -522,9 +522,12 @@ namespace TEST_GPS_Parsing
             if (haveLoaded <3)
             {
                 MessageBox.Show("Error - at least 3 cameras must be operational for this program to work optimally. If you choose to continue, you might encounter unexpected problems. Continue without 3 cameras?", "Camera Load error!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
             }
-           
+            //Preps user to set perspective bounds
+            MessageBox.Show("To account for perspective change on camera, click 'Start Capture' and set horizon bounds within 10 seconds.\n" +
+                "To do this, LEFT click on the video, the upper left horizon and RIGHT click for upper right.\n" + 
+                "If you don't click within 10 seconds this feature will be disabled. Click OK to continue.", "Use Reverse Perspective Transform", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
         }
 
         private void checkOverallReadiness()
