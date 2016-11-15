@@ -185,7 +185,7 @@ namespace TEST_GPS_Parsing
             Output point is returned to 2 doubles to use in the program             
              */
 
-            double imagePlaneLat, imagePlaneLong;
+            //double imagePlaneLat, imagePlaneLong;
             PointF[] conversionPointSrc = new PointF[1];   
             PointF[] conversionPointDest = new PointF[1];
             conversionPointSrc[0].X = (float)incoming_lat; conversionPointSrc[0].Y = (float)incoming_long;
@@ -193,17 +193,19 @@ namespace TEST_GPS_Parsing
             conversionPointDest = CvInvoke.PerspectiveTransform(conversionPointSrc, transformMatrix);
 
             //now send them back from point to doubles
-            imagePlaneLat = conversionPointDest[0].X;
-            imagePlaneLong = conversionPointDest[0].Y;
+            //imagePlaneLat = conversionPointDest[0].X;
+            //imagePlaneLong = conversionPointDest[0].Y;
 
-            y = Convert.ToInt32(Math.Round((Math.Abs(imagePlaneLat - ulBound[0]) / dy) * gridHeight));
-            x = Convert.ToInt32(Math.Round((((imagePlaneLong - ulBound[1]) / dx) * gridWidth)));
+            y = Convert.ToInt32(Math.Round((Math.Abs(conversionPointDest[0].X - ulBound[0]) / dy) * gridHeight));
+            x = Convert.ToInt32(Math.Round((((conversionPointDest[0].Y - ulBound[1]) / dx) * gridWidth)));
 
             //now apply the reverse transform to account for 3D distortion in camera horizon plane
-            //if (usingRPT == true)
-            //{
-            //    conversionPointDest = CvInvoke.PerspectiveTransform(conversionPointSrc, transformMatrix);
-            //}
+            if (usingRPT == true)
+            {
+                conversionPointDest = CvInvoke.PerspectiveTransform(conversionPointDest, reverseTransformMatrix);
+                x = Convert.ToInt32(conversionPointDest[0].Y);
+                y = Convert.ToInt32(conversionPointDest[0].Y);
+            }
         }
 
         /*this method takes the onscreen location of the object in question and translates it to a lat/long 
