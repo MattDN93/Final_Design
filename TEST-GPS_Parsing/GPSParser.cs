@@ -25,7 +25,6 @@ namespace TEST_GPS_Parsing
         bool dbLoggingActive = true;
         bool parseIsRunning = false;                  //bool to denote whether the parser is in progress or not.
         bool videoOutputRunning = false;                //bool to check if the vo object has been created or not
-        private static int resourceInUse= 0;          //Flag to manage threads and resource locks  
         bool usingWebLogging;                       //flag to mention whether file or webserver parsing is used
 
         //web request status flag returns

@@ -103,7 +103,7 @@ namespace TEST_GPS_Parsing
 
         private System.Threading.Semaphore uiUpdateSemaphone = new Semaphore(1, 3); //mutex lock to prevent UI update race conditions
         private Object uiWriteLock = new object();
-        bool writingToUi = false;
+       
 
         //-----------------Settings parameters------------------
         protected int vidPixelWidth;              //video dimensions
@@ -496,7 +496,7 @@ namespace TEST_GPS_Parsing
                 {
                     MessageBox.Show(excpt.Message);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     //try avoid the fast-switch issue
                     camStreamCapture.Stop(); camStreamCapture.Dispose();
@@ -535,7 +535,7 @@ namespace TEST_GPS_Parsing
                 {
                     MessageBox.Show(excpt.Message);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     //try avoid the fast-switch issue
                     status1TextBox.Text = "Error initialising camera...Trying again...";
@@ -660,7 +660,7 @@ namespace TEST_GPS_Parsing
             {
                 if (!rawVideoFramesBox.IsDisposed && isStreaming)      //make sure not to grab a frame if the window is closig
                 {
-                    Console.Write("Cam Switcher has lock");
+                    //Console.Write("Cam Switcher has lock");
                     //set camStreamCapture (the central selected camera) to the correct cam (switch if needed) based on co-ord bound checks
                     //only switch capture objects if a GPS value has been updated!
                     if (valHasChanged)
@@ -687,7 +687,7 @@ namespace TEST_GPS_Parsing
                         SetupCapture(currentlyActiveCamera, true); webcamVid = new Mat();
                     }
                 }
-                Console.Write("Cam Switcher released lock");
+                //Console.Write("Cam Switcher released lock");
                 _waitforSwitchCheck.Set();
             }
 

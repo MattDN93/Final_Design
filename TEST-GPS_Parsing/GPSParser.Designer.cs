@@ -58,9 +58,7 @@
             this.accuracyTextBox = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.satsViewTextBox = new System.Windows.Forms.TextBox();
-            this.label10 = new System.Windows.Forms.Label();
             this.fixqualTextBox = new System.Windows.Forms.TextBox();
-            this.label8 = new System.Windows.Forms.Label();
             this.fixvalTextBox = new System.Windows.Forms.TextBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.label22 = new System.Windows.Forms.Label();
@@ -242,7 +240,9 @@
             // 
             this.groupBox2.Controls.Add(this.label7);
             this.groupBox2.Controls.Add(this.speedKnotsTextBox);
+            this.groupBox2.Controls.Add(this.fixvalTextBox);
             this.groupBox2.Controls.Add(this.headCardTextBox);
+            this.groupBox2.Controls.Add(this.fixqualTextBox);
             this.groupBox2.Controls.Add(this.label6);
             this.groupBox2.Controls.Add(this.label5);
             this.groupBox2.Controls.Add(this.label3);
@@ -450,42 +450,22 @@
             this.satsViewTextBox.Size = new System.Drawing.Size(42, 20);
             this.satsViewTextBox.TabIndex = 0;
             // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(262, 0);
-            this.label10.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(64, 13);
-            this.label10.TabIndex = 7;
-            this.label10.Text = "Quality of fix";
-            // 
             // fixqualTextBox
             // 
-            this.fixqualTextBox.Location = new System.Drawing.Point(345, -3);
+            this.fixqualTextBox.Location = new System.Drawing.Point(245, 50);
             this.fixqualTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.fixqualTextBox.Name = "fixqualTextBox";
             this.fixqualTextBox.ReadOnly = true;
-            this.fixqualTextBox.Size = new System.Drawing.Size(98, 20);
+            this.fixqualTextBox.Size = new System.Drawing.Size(50, 20);
             this.fixqualTextBox.TabIndex = 5;
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(104, 0);
-            this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(65, 13);
-            this.label8.TabIndex = 3;
-            this.label8.Text = "Validity of fix";
             // 
             // fixvalTextBox
             // 
-            this.fixvalTextBox.Location = new System.Drawing.Point(200, 0);
+            this.fixvalTextBox.Location = new System.Drawing.Point(275, 22);
             this.fixvalTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.fixvalTextBox.Name = "fixvalTextBox";
             this.fixvalTextBox.ReadOnly = true;
-            this.fixvalTextBox.Size = new System.Drawing.Size(42, 20);
+            this.fixvalTextBox.Size = new System.Drawing.Size(20, 20);
             this.fixvalTextBox.TabIndex = 1;
             // 
             // groupBox4
@@ -867,10 +847,6 @@
             // 
             this.groupBox7.Controls.Add(this.label24);
             this.groupBox7.Controls.Add(this.mapPane);
-            this.groupBox7.Controls.Add(this.label10);
-            this.groupBox7.Controls.Add(this.fixvalTextBox);
-            this.groupBox7.Controls.Add(this.fixqualTextBox);
-            this.groupBox7.Controls.Add(this.label8);
             this.groupBox7.Location = new System.Drawing.Point(544, 10);
             this.groupBox7.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox7.Name = "groupBox7";
@@ -1324,11 +1300,9 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox speedKnotsTextBox;
         private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.TextBox fixqualTextBox;
         private System.Windows.Forms.TextBox accuracyTextBox;
-        private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox fixvalTextBox;
         private System.Windows.Forms.TextBox satsViewTextBox;

@@ -13,7 +13,6 @@ namespace TEST_GPS_Parsing
     {
         string dbName = "";
         public MySqlConnection conn;
-        MySqlDataReader rdr;
         public MySqlCommand cmd;
         object result;
         int r;

@@ -364,7 +364,7 @@ namespace TEST_GPS_Parsing
             Mat overlayGrid = new Mat(webcamVidForOverlay.Rows, webcamVidForOverlay.Cols, Emgu.CV.CvEnum.DepthType.Default,3);
             CvInvoke.Flip(webcamVidForOverlay, overlayGrid, Emgu.CV.CvEnum.FlipType.Horizontal);
             //2. Canny Edge detection
-            double thresholdLink = 80.0;           //value to force rejection/acceptance if pixel is between upper & lower thresh
+            //double thresholdLink = 80.0;           //value to force rejection/acceptance if pixel is between upper & lower thresh
             double thresholdLow = 50.0;               //lower brightness threshold 0-> 255 where 255 = white
             double thresholdHigh = 150;             //have a 3:1 upper:lower ratio (per Canny's paper)
             Mat cannyResult = new Mat();            //create a holding Mat for the canny edge result
