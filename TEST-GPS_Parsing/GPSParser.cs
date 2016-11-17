@@ -384,7 +384,7 @@ namespace TEST_GPS_Parsing
             {
 
                 //compare the packet from 10 seconds ago to the one now - if they match GPS is off
-                if (gpsData.gpsSessionID != referenceSessionPacketID)
+                if ((gpsData.gpsSessionID != referenceSessionPacketID))
                 {
                     gpsConnectionOK = true;
                     status2TextBox.BackColor = System.Drawing.Color.LightGreen;
@@ -631,6 +631,7 @@ namespace TEST_GPS_Parsing
 
 
 
+
                     //otherwise do a full update
                     
                     rawBuffer += sentenceBuffer;                         //aggregates the raw buffer to display it
@@ -652,7 +653,7 @@ namespace TEST_GPS_Parsing
                             {
                                 lock (coordsSendLock)
                                 {
-                                    if (referencePacketID < gpsData.packetID || gpsConnectionOK)
+                                    if ((referencePacketID < gpsData.packetID) || gpsConnectionOK)
                                     {
                                         vo.overlayTick(mapData.latitudeD, mapData.longitudeD);                //send to the vid output class - force a "tick" to update coords
                                     }

@@ -742,18 +742,22 @@ namespace TEST_GPS_Parsing
         #region Background worker - cameraswitcher
         private void cameraSwitcher_DoWork(object sender, DoWorkEventArgs e)
         {
+            Thread.CurrentThread.Priority = ThreadPriority.BelowNormal;
             while (!cameraSwitcher.CancellationPending)
             {
-                if (!rawVideoFramesBox.IsDisposed && isStreaming)      //make sure not to grab a frame if the window is closig
+                //change the below && to || and valHasChanged to true for object tracker issues
+                if (!rawVideoFramesBox.IsDisposed || isStreaming)      //make sure not to grab a frame if the window is closig
                 {
                     //Console.Write("Cam Switcher has lock");
                     //set camStreamCapture (the central selected camera) to the correct cam (switch if needed) based on co-ord bound checks
                     //only switch capture objects if a GPS value has been updated!
-                    if (valHasChanged)
+                    if (/*valHasChanged*/true)
                     {
+                        Thread.BeginCriticalRegion();
                         //_waitforSwitchCheck.Reset();
                         switch (ol_mark.camSwitchStatus)
                         {
+                            
                             case -1: break;     //the feed need not be changed from the current one (since an error has occurred / value wasn't changed from default)
                             case 0: _waitforSwitchCheck.Reset(); logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(0, currentlyActiveCamera); webcamVid = new Mat(); break;  //switch the current camera to the left
                             case 1: _waitforSwitchCheck.Reset(); logCamSwitchToDb = true; currentlyActiveCamera = screenStateSwitch(1, currentlyActiveCamera); webcamVid = new Mat(); break; //switch the current camera to the right
@@ -761,6 +765,7 @@ namespace TEST_GPS_Parsing
                             default:
                                 break;
                         }
+                        Thread.EndCriticalRegion();
                         //_waitforSwitchCheck.Set();
                         ol_mark.camSwitchStatus = 2;        //reset to stay on current cam
                     }
@@ -947,7 +952,7 @@ namespace TEST_GPS_Parsing
                         overlayVideoFramesBox.Image = ol_mark.overlayGrid;
                     }
                 }
-
+                Thread.BeginCriticalRegion();
                 //prevents the double lat/long variables from being modified
                 type = 0;
                 double realLat = ol_mark.current_pointGPS_lat;  //gets the actual lat/long as opposed to the scaled versions of pixels for screen
@@ -963,6 +968,7 @@ namespace TEST_GPS_Parsing
                 type = 3;
                 setTextonVideoUI(ol_mark.longitudeOutOfRangeOverlayMessage);
                 type = -1;
+                Thread.EndCriticalRegion();
 
             }
         }
