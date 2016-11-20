@@ -271,6 +271,8 @@ namespace TEST_GPS_Parsing
                 CvInvoke.PutText(overlayGrid, camNumber, new Point(gridWidth - 70, 10), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(0, 0, 255), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
 
                 usingCoords = true;         //setting this to ensure the x & y values aren't touched by other thread. Bool setting is atomic
+                CvInvoke.PutText(overlayGrid, "Co-ords: (" + current_pointGPS_lat + ";" + current_pointGPS_long + ")", new Point(gridWidth - 300, 30), Emgu.CV.CvEnum.FontFace.HersheyComplexSmall, 0.5, new MCvScalar(100, 150, 105), 1, Emgu.CV.CvEnum.LineType.EightConnected, false);
+
 
                 //analyse the results and set the variable to allow the video output window to switch the camera feed if needed
                 camSwitchStatus = checkBounds(current_xval, current_yval, overlayGrid);       //make sure these points aren't out of bounds             
@@ -467,7 +469,7 @@ namespace TEST_GPS_Parsing
 
                             usingCoords = true;             //set this to prevent race conditions
                             current_pointGPS_lat = p;       //set these to separate coords which will be used to display the lat/long on the left UI
-                            current_pointGPS_long = q;
+                            current_pointGPS_long = q;                           
 
                             x = rectCentre.X;               //set so that the drawMarker method can display the trail of points onscreen
                             y = rectCentre.Y;
@@ -503,8 +505,7 @@ namespace TEST_GPS_Parsing
 
                 }   //end numContours
 
-            drawMarker(x, y, overlayGrid, false, currentCamNum);   //keep drawing the overlay regardless
-
+            drawMarker(x, y, overlayGrid, false, currentCamNum);   //keep drawing the overlay regardless            
             webcamVid = overlayGrid;
             return true;
         
