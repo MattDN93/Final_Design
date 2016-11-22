@@ -26,6 +26,8 @@ namespace TEST_GPS_Parsing
         bool parseIsRunning = false;                  //bool to denote whether the parser is in progress or not.
         bool videoOutputRunning = false;                //bool to check if the vo object has been created or not
         bool usingWebLogging;                       //flag to mention whether file or webserver parsing is used
+        TimeSpan gpsConnectedTimeSpan = new TimeSpan(0, 0, 10); //10s timespan
+        DateTime sinceStartPressed;                 //date/time since start of log
 
         //web request status flag returns
         private static int requestCompleteOK = 0;
@@ -230,7 +232,7 @@ namespace TEST_GPS_Parsing
         /// <param name="e"></param>
         private void startButton_Click(object sender, EventArgs e)
         {
-
+            //sinceStartPressed = DateTime.Now; //used for time elapsed box since start pressed
             //threading start!
             if (!recvRawDataWorker.CancellationPending)
             {
@@ -304,14 +306,15 @@ namespace TEST_GPS_Parsing
         //------------------Open the Video Streaming Component------------------
         private void openPortButton_Click(object sender, EventArgs e)
         {
+            //updateUITimer.Start();
             //if (!vo.IsDisposed)
             //{
-                //CameraBoundsSetup cmBound = new CameraBoundsSetup(vo);
-                vo = new VideoOutputWindow();
+            //CameraBoundsSetup cmBound = new CameraBoundsSetup(vo);
+            vo = new VideoOutputWindow();
                 videoOutputRunning = true; //used to inform the parser it can send co-ords to the video method now
                 vo.Show();
-                //DialogResult cmResult = cmBound.ShowDialog();
-                updateUITimer.Start();
+            //DialogResult cmResult = cmBound.ShowDialog();
+            updateUITimer.Start();
             openVideoButton.Enabled = false;
             //}
         }
@@ -324,38 +327,49 @@ namespace TEST_GPS_Parsing
             //Web service options for the GPS webservice
             WebRequest request;
             WebResponse response;
-            request = WebRequest.Create(
-"http://ec2-54-244-63-232.us-west-2.compute.amazonaws.com");
-            // Get the response.
-            request.Proxy = null;
-            response = request.GetResponse();
-            // Display the status.
-            string servResponse = ((HttpWebResponse)response).StatusDescription;
-            if (servResponse != "OK")
+            try
             {
-                servStatusTextbox.Text = "Server request failed.";
-                response.Close();
+                request = WebRequest.Create(
+"http://ec2-54-244-63-232.us-west-2.compute.amazonaws.com");
+                // Get the response.
+                request.Proxy = null;
+                response = request.GetResponse();
+                // Display the status.
+                string servResponse = ((HttpWebResponse)response).StatusDescription;
+                if (servResponse != "OK")
+                {
+                    servStatusTextbox.Text = "Server request failed.";
+                    response.Close();
+                    return;
+                }
+                else
+                {
+                    servStatusTextbox.BackColor = System.Drawing.Color.LightGreen;
+                    //results success so server is online, go ahead with setting up
+                    testGpsGetButton.Text = "Server online";
+                    serverUri = ((HttpWebResponse)response).ResponseUri.ToString();
+                    serverUri = serverUri.Substring(0, serverUri.LastIndexOf('/')) + "/phpmyadmin";
+                    testGpsGetButton.Enabled = false;
+                    usingWebLogging = true;
+                    openFileButton.Enabled = false;
+                    servStatusTextbox.Text = servResponse;
+
+                    dbSetupButton.Enabled = true;
+                    dbUsernameTextbox.Enabled = true;
+                    dbPwdTextbox.Enabled = true;
+                    startButton.Enabled = true;
+                    statusTextBox.Clear();
+                    statusTextBox.AppendText("Server opened OK. Click start above.");
+                    response.Close();
+                }
+            }
+            catch (Exception excpt)
+            {
+                servStatusTextbox.BackColor = System.Drawing.Color.PaleVioletRed;
+                servStatusTextbox.Text = "Error: Check connection: " + excpt.Message.ToString();
                 return;
             }
-            else
-            {
-                //results success so server is online, go ahead with setting up
-                testGpsGetButton.Text = "Server online";
-                serverUri = ((HttpWebResponse)response).ResponseUri.ToString();
-                serverUri = serverUri.Substring(0, serverUri.LastIndexOf('/')) + "/phpmyadmin";
-                testGpsGetButton.Enabled = false;
-                usingWebLogging = true;
-                openFileButton.Enabled = false;
-                servStatusTextbox.Text = servResponse;
-
-                dbSetupButton.Enabled = true;
-                dbUsernameTextbox.Enabled = true;
-                dbPwdTextbox.Enabled = true;            
-                startButton.Enabled = true;
-                statusTextBox.Clear();
-                statusTextBox.AppendText("Server opened OK. Click start above.");
-                response.Close();
-            }
+            
 
 
         }
@@ -471,6 +485,7 @@ namespace TEST_GPS_Parsing
             sentenceBufferForUI = "";
             //Monitoring
             globalIDTextBox.Text = gpsDataForUI.globalID.ToString();
+            //timeElapsedTextBox.Text = DateTime.Now.Subtract(sinceStartPressed).Seconds.ToString();
             timeElapsedTextBox.Text = gpsDataForUI.timeElapsed.ToString();
             //GPS Core Data
             latitudeTextBox.Clear();
@@ -628,10 +643,7 @@ namespace TEST_GPS_Parsing
                     {
                         gpsConnectionOK = true;
                     }
-
-
-
-
+          
                     //otherwise do a full update
                     
                     rawBuffer += sentenceBuffer;                         //aggregates the raw buffer to display it
