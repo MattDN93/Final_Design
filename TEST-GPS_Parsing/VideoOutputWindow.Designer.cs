@@ -74,6 +74,11 @@
             this.label20 = new System.Windows.Forms.Label();
             this.setupInstructLabel = new System.Windows.Forms.Label();
             this.pausedCaptureLabel = new System.Windows.Forms.Label();
+            this.videoSaveTimer = new System.Windows.Forms.Timer(this.components);
+            this.cameraDisconnectCheck = new System.Windows.Forms.Timer(this.components);
+            this.camDisconnectedWarningLabel = new System.Windows.Forms.Label();
+            this.camInitLabel = new System.Windows.Forms.Label();
+            this.cameraSwitcher = new System.ComponentModel.BackgroundWorker();
             ((System.ComponentModel.ISupportInitialize)(this.rawVideoFramesBox)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.overlayVideoFramesBox)).BeginInit();
@@ -95,7 +100,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(1007, 4);
+            this.label2.Location = new System.Drawing.Point(1008, 4);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(141, 17);
@@ -108,7 +113,7 @@
             this.rawVideoFramesBox.Location = new System.Drawing.Point(16, 729);
             this.rawVideoFramesBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rawVideoFramesBox.Name = "rawVideoFramesBox";
-            this.rawVideoFramesBox.Size = new System.Drawing.Size(271, 181);
+            this.rawVideoFramesBox.Size = new System.Drawing.Size(272, 182);
             this.rawVideoFramesBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.rawVideoFramesBox.TabIndex = 2;
             this.rawVideoFramesBox.TabStop = false;
@@ -134,7 +139,7 @@
             this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Location = new System.Drawing.Point(17, 75);
+            this.groupBox1.Location = new System.Drawing.Point(18, 75);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
@@ -180,7 +185,7 @@
             // 
             this.videoModeLabel.AutoSize = true;
             this.videoModeLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.videoModeLabel.Location = new System.Drawing.Point(161, 23);
+            this.videoModeLabel.Location = new System.Drawing.Point(161, 22);
             this.videoModeLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.videoModeLabel.Name = "videoModeLabel";
             this.videoModeLabel.Size = new System.Drawing.Size(26, 17);
@@ -230,22 +235,24 @@
             // overlayVideoFramesBox
             // 
             this.overlayVideoFramesBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.overlayVideoFramesBox.Cursor = System.Windows.Forms.Cursors.Cross;
             this.overlayVideoFramesBox.Location = new System.Drawing.Point(331, 20);
-            this.overlayVideoFramesBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.overlayVideoFramesBox.Margin = new System.Windows.Forms.Padding(2);
             this.overlayVideoFramesBox.Name = "overlayVideoFramesBox";
             this.overlayVideoFramesBox.Size = new System.Drawing.Size(1425, 862);
             this.overlayVideoFramesBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.overlayVideoFramesBox.TabIndex = 2;
             this.overlayVideoFramesBox.TabStop = false;
+            this.overlayVideoFramesBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.overlayVideoFramesBox_MouseClick);
             // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.setupCaptureButton);
             this.groupBox2.Controls.Add(this.startCaptureButton);
             this.groupBox2.Location = new System.Drawing.Point(12, 12);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox2.Size = new System.Drawing.Size(276, 62);
             this.groupBox2.TabIndex = 6;
             this.groupBox2.TabStop = false;
@@ -277,10 +284,10 @@
             this.groupBox3.Controls.Add(this.latitudeLabel);
             this.groupBox3.Controls.Add(this.label7);
             this.groupBox3.Controls.Add(this.label6);
-            this.groupBox3.Location = new System.Drawing.Point(17, 233);
-            this.groupBox3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.groupBox3.Location = new System.Drawing.Point(18, 232);
+            this.groupBox3.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox3.Size = new System.Drawing.Size(271, 346);
             this.groupBox3.TabIndex = 7;
             this.groupBox3.TabStop = false;
@@ -290,7 +297,7 @@
             // 
             this.longTopRightLabel.AutoSize = true;
             this.longTopRightLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.longTopRightLabel.Location = new System.Drawing.Point(97, 261);
+            this.longTopRightLabel.Location = new System.Drawing.Point(98, 261);
             this.longTopRightLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.longTopRightLabel.Name = "longTopRightLabel";
             this.longTopRightLabel.Size = new System.Drawing.Size(26, 17);
@@ -312,7 +319,7 @@
             // 
             this.longTopLeftLabel.AutoSize = true;
             this.longTopLeftLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.longTopLeftLabel.Location = new System.Drawing.Point(97, 153);
+            this.longTopLeftLabel.Location = new System.Drawing.Point(98, 152);
             this.longTopLeftLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.longTopLeftLabel.Name = "longTopLeftLabel";
             this.longTopLeftLabel.Size = new System.Drawing.Size(26, 17);
@@ -323,7 +330,7 @@
             // 
             this.latTopLeftLabel.AutoSize = true;
             this.latTopLeftLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.latTopLeftLabel.Location = new System.Drawing.Point(97, 207);
+            this.latTopLeftLabel.Location = new System.Drawing.Point(98, 208);
             this.latTopLeftLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.latTopLeftLabel.Name = "latTopLeftLabel";
             this.latTopLeftLabel.Size = new System.Drawing.Size(26, 17);
@@ -333,7 +340,8 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(35, 233);
+            this.label11.Location = new System.Drawing.Point(35, 232);
+            this.label11.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(174, 17);
             this.label11.TabIndex = 14;
@@ -343,6 +351,7 @@
             // 
             this.label12.AutoSize = true;
             this.label12.Location = new System.Drawing.Point(41, 289);
+            this.label12.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(159, 17);
             this.label12.TabIndex = 13;
@@ -352,6 +361,7 @@
             // 
             this.label10.AutoSize = true;
             this.label10.Location = new System.Drawing.Point(39, 128);
+            this.label10.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(169, 17);
             this.label10.TabIndex = 12;
@@ -360,7 +370,8 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(43, 181);
+            this.label9.Location = new System.Drawing.Point(42, 181);
+            this.label9.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(153, 17);
             this.label9.TabIndex = 11;
@@ -370,7 +381,8 @@
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(19, 97);
+            this.label8.Location = new System.Drawing.Point(19, 98);
+            this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(217, 17);
             this.label8.TabIndex = 10;
@@ -391,7 +403,7 @@
             // 
             this.latitudeLabel.AutoSize = true;
             this.latitudeLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.latitudeLabel.Location = new System.Drawing.Point(96, 33);
+            this.latitudeLabel.Location = new System.Drawing.Point(96, 32);
             this.latitudeLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.latitudeLabel.Name = "latitudeLabel";
             this.latitudeLabel.Size = new System.Drawing.Size(26, 17);
@@ -402,6 +414,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Location = new System.Drawing.Point(5, 66);
+            this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(75, 17);
             this.label7.TabIndex = 1;
@@ -410,7 +423,8 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(5, 33);
+            this.label6.Location = new System.Drawing.Point(5, 32);
+            this.label6.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(63, 17);
             this.label6.TabIndex = 0;
@@ -421,10 +435,10 @@
             this.groupBox4.Controls.Add(this.longOORTextBox);
             this.groupBox4.Controls.Add(this.latOORStatusBox);
             this.groupBox4.Controls.Add(this.status1TextBox);
-            this.groupBox4.Location = new System.Drawing.Point(17, 583);
-            this.groupBox4.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.groupBox4.Location = new System.Drawing.Point(18, 582);
+            this.groupBox4.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.groupBox4.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox4.Size = new System.Drawing.Size(271, 118);
             this.groupBox4.TabIndex = 8;
             this.groupBox4.TabStop = false;
@@ -433,7 +447,7 @@
             // longOORTextBox
             // 
             this.longOORTextBox.Location = new System.Drawing.Point(5, 80);
-            this.longOORTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.longOORTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.longOORTextBox.Name = "longOORTextBox";
             this.longOORTextBox.Size = new System.Drawing.Size(259, 22);
             this.longOORTextBox.TabIndex = 2;
@@ -441,17 +455,17 @@
             // latOORStatusBox
             // 
             this.latOORStatusBox.Location = new System.Drawing.Point(5, 50);
-            this.latOORStatusBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.latOORStatusBox.Margin = new System.Windows.Forms.Padding(2);
             this.latOORStatusBox.Name = "latOORStatusBox";
             this.latOORStatusBox.Size = new System.Drawing.Size(259, 22);
             this.latOORStatusBox.TabIndex = 1;
             // 
             // status1TextBox
             // 
-            this.status1TextBox.Location = new System.Drawing.Point(7, 22);
-            this.status1TextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.status1TextBox.Location = new System.Drawing.Point(8, 22);
+            this.status1TextBox.Margin = new System.Windows.Forms.Padding(2);
             this.status1TextBox.Name = "status1TextBox";
-            this.status1TextBox.Size = new System.Drawing.Size(257, 22);
+            this.status1TextBox.Size = new System.Drawing.Size(256, 22);
             this.status1TextBox.TabIndex = 0;
             // 
             // refreshOverlay
@@ -464,6 +478,7 @@
             // 
             this.label13.AutoSize = true;
             this.label13.Location = new System.Drawing.Point(291, 0);
+            this.label13.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(40, 17);
             this.label13.TabIndex = 15;
@@ -473,6 +488,7 @@
             // 
             this.label14.AutoSize = true;
             this.label14.Location = new System.Drawing.Point(1751, 0);
+            this.label14.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(40, 17);
             this.label14.TabIndex = 16;
@@ -482,6 +498,7 @@
             // 
             this.label15.AutoSize = true;
             this.label15.Location = new System.Drawing.Point(295, 895);
+            this.label15.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(41, 17);
             this.label15.TabIndex = 17;
@@ -490,7 +507,8 @@
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(1747, 885);
+            this.label16.Location = new System.Drawing.Point(1748, 885);
+            this.label16.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(41, 17);
             this.label16.TabIndex = 18;
@@ -500,6 +518,7 @@
             // 
             this.label17.AutoSize = true;
             this.label17.Location = new System.Drawing.Point(291, 21);
+            this.label17.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(38, 17);
             this.label17.TabIndex = 19;
@@ -509,6 +528,7 @@
             // 
             this.label18.AutoSize = true;
             this.label18.Location = new System.Drawing.Point(1749, 20);
+            this.label18.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(36, 17);
             this.label18.TabIndex = 20;
@@ -517,7 +537,8 @@
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(1751, 907);
+            this.label19.Location = new System.Drawing.Point(1751, 908);
+            this.label19.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(35, 17);
             this.label19.TabIndex = 21;
@@ -527,6 +548,7 @@
             // 
             this.label20.AutoSize = true;
             this.label20.Location = new System.Drawing.Point(295, 912);
+            this.label20.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(37, 17);
             this.label20.TabIndex = 22;
@@ -553,11 +575,61 @@
             this.pausedCaptureLabel.TabIndex = 24;
             this.pausedCaptureLabel.Text = "Capture is paused. Choose \'start capture\' to continue.";
             // 
+            // videoSaveTimer
+            // 
+            this.videoSaveTimer.Enabled = true;
+            this.videoSaveTimer.Interval = 600000;
+            this.videoSaveTimer.Tick += new System.EventHandler(this.videoSaveTimer_Tick);
+            // 
+            // cameraDisconnectCheck
+            // 
+            this.cameraDisconnectCheck.Enabled = true;
+            this.cameraDisconnectCheck.Interval = 2000;
+            this.cameraDisconnectCheck.Tick += new System.EventHandler(this.cameraDisconnectCheck_Tick);
+            // 
+            // camDisconnectedWarningLabel
+            // 
+            this.camDisconnectedWarningLabel.AutoSize = true;
+            this.camDisconnectedWarningLabel.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.camDisconnectedWarningLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.camDisconnectedWarningLabel.ForeColor = System.Drawing.Color.Red;
+            this.camDisconnectedWarningLabel.Location = new System.Drawing.Point(801, 494);
+            this.camDisconnectedWarningLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.camDisconnectedWarningLabel.Name = "camDisconnectedWarningLabel";
+            this.camDisconnectedWarningLabel.Size = new System.Drawing.Size(615, 31);
+            this.camDisconnectedWarningLabel.TabIndex = 25;
+            this.camDisconnectedWarningLabel.Text = "Warning: Current camera disconnected, retrying...";
+            this.camDisconnectedWarningLabel.Visible = false;
+            // 
+            // camInitLabel
+            // 
+            this.camInitLabel.AutoSize = true;
+            this.camInitLabel.BackColor = System.Drawing.SystemColors.MenuHighlight;
+            this.camInitLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.camInitLabel.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.camInitLabel.Location = new System.Drawing.Point(788, 406);
+            this.camInitLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.camInitLabel.Name = "camInitLabel";
+            this.camInitLabel.Size = new System.Drawing.Size(622, 24);
+            this.camInitLabel.TabIndex = 26;
+            this.camInitLabel.Text = "Please wait while connecting to network cameras, this might take awhile...";
+            this.camInitLabel.Visible = false;
+            // 
+            // cameraSwitcher
+            // 
+            this.cameraSwitcher.WorkerReportsProgress = true;
+            this.cameraSwitcher.WorkerSupportsCancellation = true;
+            this.cameraSwitcher.DoWork += new System.ComponentModel.DoWorkEventHandler(this.cameraSwitcher_DoWork);
+            this.cameraSwitcher.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.cameraSwitcher_ProgressChanged);
+            this.cameraSwitcher.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.cameraSwitcher_RunWorkerCompleted);
+            // 
             // VideoOutputWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(120F, 120F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(1791, 928);
+            this.Controls.Add(this.camInitLabel);
+            this.Controls.Add(this.camDisconnectedWarningLabel);
             this.Controls.Add(this.pausedCaptureLabel);
             this.Controls.Add(this.setupInstructLabel);
             this.Controls.Add(this.label20);
@@ -576,7 +648,7 @@
             this.Controls.Add(this.rawVideoFramesBox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "VideoOutputWindow";
             this.Text = "Video Capture Window";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.VideoOutputWindow_FormClosing);
@@ -641,5 +713,10 @@
         private System.Windows.Forms.Button setupCaptureButton;
         private System.Windows.Forms.Label setupInstructLabel;
         private System.Windows.Forms.Label pausedCaptureLabel;
+        private System.Windows.Forms.Timer videoSaveTimer;
+        private System.Windows.Forms.Timer cameraDisconnectCheck;
+        private System.Windows.Forms.Label camDisconnectedWarningLabel;
+        private System.Windows.Forms.Label camInitLabel;
+        private System.ComponentModel.BackgroundWorker cameraSwitcher;
     }
 }
